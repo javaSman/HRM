@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>岗位列表管理 - 强瑞技术</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================
+   CSS Variables — Blue Theme
+   ============================================ */
+:root {
+  --radius: 0.5rem;
+  --background: #f8fafd;
+  --foreground: #1a2a3d;
+  --card: #ffffff;
+  --card-foreground: #1a2a3d;
+  --primary: #1890ff;
+  --primary-rgb: 24, 144, 255;
+  --primary-dark: #096dd9;
+  --primary-light: #e6f7ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f2f5;
+  --secondary-foreground: #1e3a5f;
+  --muted: #f1f5f9;
+  --muted-foreground: #8c8c8c;
+  --accent: #fff7e6;
+  --accent-foreground: #d46b08;
+  --destructive: #ff4d4f;
+  --success: #52c41a;
+  --warning: #faad14;
+  --border: #e8e8e8;
+  --input: #d9d9d9;
+  --ring: #1890ff;
+  --font-sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  --header-h: 56px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.15); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), 0.3); }
+
+/* Animations */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes slide-in-right { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-in-left { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes wave-in {
+  0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-fade-in { animation: fade-in 0.25s ease-out both; }
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-scale-in { animation: scale-in 0.25s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.35s ease-out both; }
+.animate-slide-in-left { animation: slide-in-left 0.3s ease-out both; }
+
+.stagger-children > * { animation: wave-in 0.4s ease-out both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 35ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 70ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 105ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 140ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 175ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 245ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 280ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 315ms; }
+.stagger-children > *:nth-child(n+11) { animation-delay: 350ms; }
+
+/* ============================================
+   Layout
+   ============================================ */
+#app {
+  height: 100vh;
+  display: flex;
+  background: var(--background);
+  overflow: hidden;
+}
+
+/* ============================================
+   Left Panel: Org Tree
+   ============================================ */
+#left-panel {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  animation: slide-in-left 0.3s ease-out both;
+}
+
+#left-panel .panel-header {
+  padding: 20px 20px 4px;
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 200ms;
+}
+
+#left-panel .panel-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(var(--primary-rgb), 0.6);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#left-panel .search-wrap {
+  padding: 0 16px 12px;
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 250ms;
+}
+
+#left-panel .search-wrap .search-box {
+  position: relative;
+}
+
+#left-panel .search-wrap .search-box svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+#left-panel .search-wrap .search-box:focus-within svg {
+  color: rgba(var(--primary-rgb), 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+#left-panel .search-wrap input {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 32px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.03);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#left-panel .search-wrap input::placeholder { color: rgba(var(--primary-rgb), 0.25); }
+#left-panel .search-wrap input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15), 0 0 0 4px rgba(var(--primary-rgb), 0.08);
+}
+
+#left-panel .tree-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+#left-panel .tree-list {
+  padding-bottom: 16px;
+}
+
+/* Org Tree Node */
+.tree-node-item {
+  animation: wave-in 0.4s ease-out both;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tree-node-row:hover { background: rgba(var(--primary-rgb), 0.04); }
+.tree-node-row.selected {
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+
+.tree-node-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--primary-rgb), 0);
+  transition: background 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.tree-node-row:active::after { background: rgba(var(--primary-rgb), 0.06); }
+
+/* Context Menu */
+.context-menu {
+  position: fixed;
+  z-index: 300;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(var(--primary-rgb),0.06);
+  padding: 6px;
+  min-width: 160px;
+  animation: scale-in 0.15s ease-out both;
+  font-size: 13px;
+}
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--foreground);
+}
+.context-menu-item:hover { background: rgba(var(--primary-rgb), 0.06); color: var(--primary); }
+.context-menu-item svg { width: 14px; height: 14px; }
+.context-menu-sep { height: 1px; background: rgba(var(--primary-rgb), 0.08); margin: 4px 6px; }
+
+.tree-node-toggle {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+.tree-node-toggle:hover { background: rgba(var(--primary-rgb), 0.1); }
+.tree-node-toggle:active { transform: scale(0.9); }
+
+.tree-node-toggle svg {
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.5);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tree-node-toggle.expanded svg { transform: rotate(0deg); }
+.tree-node-toggle.collapsed svg { transform: rotate(-90deg); }
+
+.tree-node-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.2);
+  flex-shrink: 0;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+.tree-node-row.selected .tree-node-dot {
+  background: rgba(var(--primary-rgb), 0.6);
+  transform: scale(1.25);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.tree-node-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), rgba(var(--primary-rgb), 0.04));
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  transition: all 0.25s ease;
+}
+.tree-node-icon svg {
+  width: 10px !important;
+  height: 10px !important;
+  stroke-width: 2px;
+}
+.tree-node-row:hover .tree-node-icon {
+  transform: scale(1.08);
+  border-color: rgba(var(--primary-rgb), 0.22);
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(var(--primary-rgb), 0.06));
+}
+.tree-node-row.selected .tree-node-icon {
+  transform: scale(1.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.15);
+  background: var(--primary);
+  color: #fff;
+}
+
+.tree-node-name {
+  flex: 1;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.tree-node-count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: rgba(var(--primary-rgb), 0.35);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.tree-node-row:hover .tree-node-count { color: rgba(var(--primary-rgb), 0.5); background: rgba(var(--primary-rgb), 0.05); }
+.tree-node-row.selected .tree-node-count { color: var(--primary); background: rgba(var(--primary-rgb), 0.12); animation: count-up 0.3s ease-out both; }
+
+.tree-node-children {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  position: relative;
+}
+.tree-node-children.expanded { max-height: 2000px; opacity: 1; }
+.tree-node-children.collapsed { max-height: 0; opacity: 0; }
+
+.tree-line-wrap {
+  position: relative;
+}
+.tree-line-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(var(--primary-rgb), 0.15), rgba(var(--primary-rgb), 0.1), transparent);
+  transition: opacity 0.3s ease;
+}
+
+/* ============================================
+   Right Panel: Content Area
+   ============================================ */
+#right-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--background);
+  animation: slide-in-right 0.3s ease-out both;
+}
+
+/* Page Header */
+.page-header {
+  padding: 16px 28px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+.page-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--foreground);
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-bottom: 12px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 60ms;
+}
+.breadcrumb svg { width: 12px; height: 12px; color: rgba(var(--primary-rgb), 0.3); }
+.breadcrumb span:last-child { color: var(--primary); font-weight: 500; }
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 80ms;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  height: 34px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn svg { width: 14px; height: 14px; }
+
+.btn-primary {
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.25);
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-primary:active { transform: scale(0.96); }
+
+.btn-default {
+  color: var(--foreground);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.btn-default:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-link {
+  color: var(--primary);
+  background: none;
+  padding: 7px 10px;
+  height: auto;
+}
+.btn-link:hover { background: rgba(var(--primary-rgb), 0.05); }
+
+.btn-danger {
+  color: var(--destructive);
+  background: none;
+  padding: 7px 10px;
+  height: auto;
+}
+.btn-danger:hover { background: rgba(255,77,79,0.06); }
+
+/* ============================================
+   Filter Bar
+   ============================================ */
+/* Sequence Tabs */
+.sequence-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 16px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 100ms;
+  flex-wrap: wrap;
+}
+
+.sequence-tab {
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sequence-tab:hover {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.04);
+  border-color: rgba(var(--primary-rgb), 0.15);
+}
+
+.sequence-tab.active {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.filter-bar {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 20px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 120ms;
+}
+
+.filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item.filter-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.filter-select,
+.filter-input {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.filter-select {
+  min-width: 110px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrap svg {
+  position: absolute;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.3);
+  pointer-events: none;
+}
+
+.search-input-wrap .filter-input {
+  padding-left: 32px;
+  width: 100%;
+}
+
+/* Stats Section */
+.stats-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 16px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 120ms;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 20px;
+  transition: all 0.25s ease;
+}
+.stat-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.stat-card.chart-card {
+  padding: 14px 20px 12px;
+}
+
+.stat-card.summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.stat-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.stat-icon-circle svg { width: 22px; height: 22px; }
+
+/* Chart mini — horizontal bars */
+.chart-mini-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-mini-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart-mini-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chart-mini-bar-label {
+  width: 48px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.chart-mini-bar-inner {
+  flex: 1;
+  height: 22px;
+  background: #f0f5ff;
+  border-radius: 11px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-mini-bar {
+  height: 100%;
+  border-radius: 11px;
+  transition: width 0.7s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+  min-width: 4px;
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.chart-mini-bar:hover {
+  filter: brightness(1.12);
+  transition: all 0.2s ease;
+}
+
+.chart-mini-bar-val {
+  width: 40px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+/* Blue-gradient bars — horizontal, left-to-right */
+.chart-bar-doctor {
+  background: linear-gradient(90deg, #003eb3 0%, #096dd9 50%, #1890ff 100%);
+}
+.chart-bar-master {
+  background: linear-gradient(90deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%);
+}
+.chart-bar-bachelor {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%);
+}
+.chart-bar-college {
+  background: linear-gradient(90deg, #40a9ff 0%, #69c0ff 50%, #91d5ff 100%);
+}
+
+/* Table Area */
+.table-area {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 28px;
+}
+
+.data-table-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  animation: fade-in-up 0.4s ease-out both;
+  animation-delay: 160ms;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fafbfc;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 13px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.06);
+  vertical-align: middle;
+  text-align: center;
+}
+
+.data-table tbody tr {
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.data-table tbody tr:hover {
+  background: rgba(var(--primary-rgb), 0.02);
+}
+
+.table-index { 
+  color: var(--muted-foreground); 
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.position-name {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.dept-path {
+  font-size: 13px;
+  color: rgba(var(--primary-rgb), 0.55);
+}
+
+.recruit-type {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.recruit-type.monthly { background: #fff7e6; color: #faad14; }
+.recruit-type.timely { background: #fff1f0; color: #ff4d4f; }
+
+.salary-range {
+  color: var(--primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.edu-req {
+  color: var(--foreground);
+  font-size: 13px;
+}
+
+.headcount-num {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+
+.sequence-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--primary-light);
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.action-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-link {
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+.action-link:hover { background: rgba(var(--primary-rgb), 0.08); }
+.action-link.danger { color: var(--destructive); }
+.action-link.danger:hover { background: rgba(255,77,79,0.06); }
+.action-link + .action-link::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+  vertical-align: middle;
+}
+
+/* Footer */
+.footer {
+  padding: 12px 28px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  background: #fff;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Right Sidebar Drawer (职级配置)
+   ============================================ */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 400;
+  animation: fade-in 0.2s ease-out both;
+  display: none;
+}
+.drawer-overlay.show { display: block; }
+
+.drawer-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 400px;
+  background: #fff;
+  box-shadow: -8px 0 30px rgba(0,0,0,0.12);
+  z-index: 401;
+  display: none;
+  flex-direction: column;
+  animation: slide-in-right 0.3s ease-out both;
+}
+.drawer-panel.show { display: flex; }
+
+.drawer-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.drawer-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.drawer-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.drawer-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  transition: all 0.2s ease;
+}
+.drawer-close:hover { background: rgba(0,0,0,0.05); color: var(--foreground); }
+.drawer-close svg { width: 18px; height: 18px; }
+
+.drawer-subtitle {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.drawer-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.level-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  background: #fafbfc;
+}
+.level-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.level-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.level-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.level-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.level-meta {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ============================================
+   Dialog / Modal
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show {
+  display: flex !important;
+  animation: fade-in 0.2s ease-out both;
+}
+
+.modal-dialog {
+  background: #fff;
+  border-radius: 10px;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  padding: 28px 32px;
+}
+.modal-overlay.show .modal-dialog {
+  animation: scale-in 0.25s ease-out both;
+}
+
+.modal-dialog.detail-modal {
+  width: 720px;
+  max-width: 92vw;
+}
+
+.modal-title-simple {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.plus-circle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--foreground);
+  border-radius: 50%;
+  font-size: 16px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+
+
+
+.modal-footer-simple {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-body-full {
+  overflow-y: auto;
+  max-height: 85vh;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: 8px;
+}
+.form-label .required { color: var(--destructive); margin-right: 2px; }
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+.form-input::placeholder { color: var(--muted-foreground); }
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.form-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-inline .form-input {
+  width: 80px;
+  text-align: center;
+}
+
+.range-separator {
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
+.form-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--foreground);
+}
+.form-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ============================================
+   Toggle Switch (iOS-style)
+   ============================================ */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d9d9d9;
+  border-radius: 24px;
+  transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+
+.toggle-label {
+  font-size: 13px;
+  color: var(--foreground);
+  white-space: nowrap;
+}
+
+/* ============================================
+   Position Modal — Three-Column Layout
+   ============================================ */
+.modal-dialog.position-modal-lg {
+  width: 1100px;
+  max-width: 97vw;
+  max-height: 88vh;
+  padding: 24px 28px 20px;
+}
+
+.modal-dialog.position-modal-lg .modal-title-simple {
+  margin-bottom: 16px;
+}
+
+.pos-modal-body {
+  display: flex;
+  gap: 18px;
+  min-height: 340px;
+}
+
+.pos-modal-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pos-modal-col + .pos-modal-col {
+  border-left: 1px solid var(--border);
+  padding-left: 16px;
+}
+
+.pos-modal-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 2px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+/* Form row: two short fields side by side */
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+.form-row > .form-group {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* Compact form-group for the modal columns */
+.pos-modal-col .form-group {
+  margin-bottom: 0;
+}
+.pos-modal-col .form-label {
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+/* Level inline list in modal */
+.level-inline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.form-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  resize: vertical;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+
+
+.level-inline-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fafbfc;
+  transition: all 0.2s ease;
+}
+.level-inline-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.level-inline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.level-inline-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.level-inline-meta {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.level-inline-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.level-add-btn-wrap {
+  margin-top: 12px;
+}
+
+/* Detail Modal Specific Styles */
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+  display: inline-block;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detail-field {
+  margin-bottom: 4px;
+}
+
+.detail-field-label {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.detail-field-value {
+  font-size: 14px;
+  color: var(--foreground);
+  background: #fafbfc;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-height: 38px;
+}
+
+.detail-full {
+  grid-column: 1 / -1;
+}
+
+.level-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.level-info-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.level-info-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.1);
+}
+
+.level-info-card.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.12);
+}
+
+.level-info-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 6px;
+}
+
+.level-info-meta {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.detail-req-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Detail modal tab switch animation */
+@keyframes detail-fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-req-grid.animate-switch .detail-field {
+  animation: detail-fade-in-up 0.3s ease-out both;
+}
+.detail-req-grid.animate-switch .detail-field:nth-child(1) { animation-delay: 0ms; }
+.detail-req-grid.animate-switch .detail-field:nth-child(2) { animation-delay: 40ms; }
+.detail-req-grid.animate-switch .detail-field:nth-child(3) { animation-delay: 80ms; }
+.detail-req-grid.animate-switch .detail-field:nth-child(4) { animation-delay: 120ms; }
+.detail-req-grid.animate-switch .detail-field:nth-child(5) { animation-delay: 160ms; }
+
+.detail-field-value {
+  transition: color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.level-info-card {
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Left Panel: Org Tree -->
+  <div id="left-panel">
+    <div class="panel-header"><h3>组织架构</h3></div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" id="tree-search" placeholder="搜索部门..." />
+      </div>
+    </div>
+    <div class="tree-scroll">
+      <div class="tree-list stagger-children" id="tree-container"></div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div id="right-panel">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-top">
+        <h1 class="page-title" id="page-title">岗位列表</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="btn-add-position">
+            <i data-lucide="plus"></i> 新增岗位
+          </button>
+          <button class="btn btn-default" id="btn-export">
+            <i data-lucide="download"></i> 导出
+          </button>
+        </div>
+      </div>
+      <!-- Breadcrumb -->
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <!-- Sequence Tabs -->
+      <div class="sequence-tabs" id="sequence-tabs" style="display:none;"></div>
+      <!-- Filter Bar -->
+      <div class="filter-bar" id="filter-bar">
+        <div class="filter-row">
+          <div class="filter-item">
+            <label class="filter-label">学历</label>
+            <select class="filter-select" id="filter-edu">
+              <option value="">全部</option>
+              <option value="博士">博士</option>
+              <option value="研究生">研究生</option>
+              <option value="本科">本科</option>
+              <option value="大专">大专</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label class="filter-label">薪资类型</label>
+            <select class="filter-select" id="filter-salary-type">
+              <option value="">全部</option>
+              <option value="monthly">月薪</option>
+              <option value="timely">时薪</option>
+            </select>
+          </div>
+          <div class="filter-item filter-search">
+            <label class="filter-label">岗位名称</label>
+            <div class="search-input-wrap">
+              <i data-lucide="search"></i>
+              <input type="text" class="filter-input" id="filter-name" placeholder="搜索岗位名称..." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-area">
+      <div class="data-table-wrap">
+        <table class="data-table" id="position-table">
+          <thead>
+            <tr>
+              <th style="width:50px">#</th>
+              <th style="width:160px">岗位名称</th>
+              <th style="width:90px">岗位序列</th>
+              <th style="width:100px">学历要求</th>
+              <th style="width:90px">薪资类型</th>
+              <th style="width:160px">岗位参考薪资标准(K)</th>
+              <th style="width:100px">在职人数</th>
+              <th style="width:160px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      Copyright ©2025 强瑞科技 出品
+    </footer>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div id="context-menu" class="context-menu" style="display:none;">
+  <div class="context-menu-item" data-action="add-position">
+    <i data-lucide="plus"></i> 新增岗位
+  </div>
+</div>
+
+<!-- Drawer Overlay for 职级配置 -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+
+<!-- Right Drawer Panel (职级配置) -->
+<aside class="drawer-panel" id="level-drawer">
+  <div class="drawer-header">
+    <div class="drawer-header-top">
+      <h2 class="drawer-title" id="drawer-pos-title">研发工程师</h2>
+      <button class="drawer-close" id="drawer-close">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="drawer-subtitle" id="drawer-pos-count">当前职位总人数：8</div>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section-title">职级类别</div>
+    <div class="level-list" id="level-list"></div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-default btn-block" id="btn-new-level">
+      <i data-lucide="plus"></i> 新增职级
+    </button>
+  </div>
+</aside>
+
+<!-- Modal Overlay + New Level Dialog -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-dialog" id="new-level-modal" style="width:620px;padding:24px 28px 20px;">
+    <h3 class="modal-title-simple" style="margin-bottom:18px;">新建 <span class="plus-circle-icon">&#8857;</span></h3>
+    <div class="pos-modal-section-title">基本信息</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">职级名称</label>
+        <input type="text" class="form-input" placeholder="请输入职级名称" id="new-level-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">开发序列</label>
+        <select class="form-select" id="new-level-sequence">
+          <option value="">请选择</option>
+          <option value="开发序列">开发序列</option>
+          <option value="研发序列">研发序列</option>
+          <option value="职能序列">职能序列</option>
+          <option value="销售序列">销售序列</option>
+          <option value="生产技术序列">生产技术序列</option>
+          <option value="管理序列">管理序列</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">薪资范围(k)</label>
+      <div class="form-inline" style="gap:6px;">
+        <input type="text" class="form-input" placeholder="最低" id="new-level-min" style="flex:1;">
+        <span class="range-separator">—</span>
+        <input type="text" class="form-input" placeholder="中间" id="new-level-mid" style="flex:1;">
+        <span class="range-separator">—</span>
+        <input type="text" class="form-input" placeholder="最高" id="new-level-max" style="flex:1;">
+      </div>
+    </div>
+    <div class="modal-footer-simple">
+      <button class="btn btn-default" id="new-level-cancel">取消</button>
+      <button class="btn btn-primary" id="new-level-confirm">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Position Detail Modal -->
+<div class="modal-overlay" id="detail-modal-overlay">
+  <div class="modal-dialog detail-modal" id="detail-modal">
+    <div id="detail-body" class="detail-body-full"></div>
+  </div>
+</div>
+
+<!-- Add/Edit Position Modal (Two-Column: Position + Levels) -->
+<div class="modal-overlay" id="position-modal-overlay">
+  <div class="modal-dialog position-modal-lg" id="position-modal">
+    <h3 class="modal-title-simple" id="pos-modal-title">新增岗位</h3>
+    <div class="pos-modal-body">
+      <!-- Column 1: 基本信息 -->
+      <div class="pos-modal-col" id="pos-col-basic">
+        <div class="pos-modal-section-title">基本信息</div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>岗位名称</label>
+          <input type="text" class="form-input" placeholder="请输入岗位名称" id="pos-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>所属部门</label>
+          <input type="text" class="form-input" placeholder="例如：集团总部 / 技术研发中心" id="pos-dept" readonly style="background:var(--muted);cursor:default;">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span>所属序列</label>
+            <select class="form-select" id="pos-sequence">
+              <option value="">请选择</option>
+              <option value="开发序列">开发序列</option>
+              <option value="研发序列">研发序列</option>
+              <option value="职能序列">职能序列</option>
+              <option value="销售序列">销售序列</option>
+              <option value="生产技术序列">生产技术序列</option>
+              <option value="管理序列">管理序列</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="required">*</span>薪资类型</label>
+            <select class="form-select" id="pos-type">
+              <option value="monthly">月薪</option>
+              <option value="timely">时薪</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>薪资范围(k)</label>
+          <div class="form-inline" style="gap:6px;">
+            <input type="number" class="form-input" placeholder="最低" id="pos-salary-min" style="flex:1;">
+            <span class="range-separator">—</span>
+            <input type="number" class="form-input" placeholder="最高" id="pos-salary-max" style="flex:1;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>学历要求</label>
+          <select class="form-select" id="pos-edu">
+            <option value="博士">博士</option>
+            <option value="研究生">研究生</option>
+            <option value="本科">本科</option>
+            <option value="大专">大专</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">是否重点职业健康监测对象</label>
+          <select class="form-select" id="pos-health-monitor">
+            <option value="">否</option>
+            <option value="yes">是</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Column 2: 任职要求 -->
+      <div class="pos-modal-col" id="pos-col-req">
+        <div class="pos-modal-section-title">任职要求</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">起始年龄</label>
+            <input type="text" class="form-input" placeholder="请输入" id="pos-req-age-min">
+          </div>
+          <div class="form-group">
+            <label class="form-label">截止年龄</label>
+            <input type="text" class="form-input" placeholder="请输入" id="pos-req-age-max">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">性别</label>
+            <select class="form-select" id="pos-req-gender">
+              <option value="">不限</option>
+              <option value="male">男</option>
+              <option value="female">女</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">学历</label>
+            <select class="form-select" id="pos-req-edu">
+              <option value="">不限</option>
+              <option value="博士">博士</option>
+              <option value="研究生">研究生</option>
+              <option value="本科">本科</option>
+              <option value="大专">大专</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">专业</label>
+            <input type="text" class="form-input" placeholder="请输入专业" id="pos-req-major">
+          </div>
+          <div class="form-group">
+            <label class="form-label">工作经验</label>
+            <select class="form-select" id="pos-req-exp">
+              <option value="">经验不限</option>
+              <option value="1年以下">1年以下</option>
+              <option value="1-3年">1-3年</option>
+              <option value="3-5年">3-5年</option>
+              <option value="5-10年">5-10年</option>
+              <option value="10年以上">10年以上</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+          <label class="form-label">任职要求</label>
+          <textarea class="form-textarea" rows="4" placeholder="请输入任职要求" id="pos-req-desc" style="flex:1;min-height:60px;"></textarea>
+        </div>
+        <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+          <label class="form-label">岗位职责</label>
+          <textarea class="form-textarea" rows="4" placeholder="请输入岗位职责" id="pos-req-duty" style="flex:1;min-height:60px;"></textarea>
+        </div>
+      </div>
+
+      <!-- Column 3: 职级基本信息 -->
+      <div class="pos-modal-col" id="pos-col-level">
+        <div class="pos-modal-section-title">职级基本信息</div>
+        <div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
+          <div class="level-inline-list" id="modal-level-list">
+            <p style="color:var(--muted-foreground);font-size:12px;text-align:center;padding:20px 0;">暂无职级，点击下方添加</p>
+          </div>
+        </div>
+        <div class="level-add-btn-wrap">
+          <button class="btn btn-default btn-block" id="btn-add-inline-level">
+            <i data-lucide="plus"></i> 新增职级
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer-simple">
+      <button class="btn btn-default" id="pos-modal-cancel">取消</button>
+      <button class="btn btn-primary" id="pos-modal-confirm">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal-overlay">
+  <div class="modal-dialog" id="delete-modal" style="width:400px;text-align:center;">
+    <div style="margin-bottom:16px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:#fff1f0;display:inline-flex;align-items:center;justify-content:center;color:var(--destructive);margin-bottom:12px;">
+        <i data-lucide="alert-triangle" style="width:24px;height:24px;"></i>
+      </div>
+      <h3 style="font-size:16px;font-weight:600;color:var(--foreground);margin-bottom:8px;">确认删除</h3>
+      <p style="font-size:13px;color:var(--muted-foreground);" id="delete-msg">确定要删除该岗位吗？此操作不可撤销。</p>
+    </div>
+    <div class="modal-footer-simple" style="justify-content:center;">
+      <button class="btn btn-default" id="delete-cancel">取消</button>
+      <button class="btn btn-primary" id="delete-confirm" style="background:var(--destructive);">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inline Level Modal (for position modal) -->
+<div class="modal-overlay" id="inline-level-modal-overlay">
+  <div class="modal-dialog" id="inline-level-modal" style="width:780px;max-height:88vh;padding:24px 28px 20px;">
+    <h3 class="modal-title-simple" style="margin-bottom:18px;">新建职级</h3>
+    <div class="pos-modal-body">
+      <!-- Column 1: 基本信息 -->
+      <div class="pos-modal-col" id="inline-lv-col-basic">
+        <div class="pos-modal-section-title">基本信息</div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>职级名称</label>
+          <input type="text" class="form-input" placeholder="请输入职级名称" id="inline-lv-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">开发序列</label>
+            <select class="form-select" id="inline-lv-sequence">
+              <option value="">请选择</option>
+              <option value="开发序列">开发序列</option>
+              <option value="研发序列">研发序列</option>
+              <option value="职能序列">职能序列</option>
+              <option value="销售序列">销售序列</option>
+              <option value="生产技术序列">生产技术序列</option>
+              <option value="管理序列">管理序列</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">在职人数</label>
+            <input type="number" class="form-input" placeholder="0" id="inline-lv-headcount" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="required">*</span>薪资范围(k)</label>
+          <div class="form-inline" style="gap:6px;">
+            <input type="number" class="form-input" placeholder="最低" id="inline-lv-salary-min" style="flex:1;">
+            <span class="range-separator">—</span>
+            <input type="number" class="form-input" placeholder="最高" id="inline-lv-salary-max" style="flex:1;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: 职位晋升标准 -->
+      <div class="pos-modal-col" id="inline-lv-col-promo">
+        <div class="pos-modal-section-title">职位晋升标准</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">学历</label>
+            <select class="form-select" id="inline-lv-promo-edu">
+              <option value="">不限</option>
+              <option value="博士">博士</option>
+              <option value="研究生">研究生</option>
+              <option value="本科">本科</option>
+              <option value="大专">大专</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">工作经验</label>
+            <select class="form-select" id="inline-lv-promo-exp">
+              <option value="">经验不限</option>
+              <option value="1年以下">1年以下</option>
+              <option value="1-3年">1-3年</option>
+              <option value="3-5年">3-5年</option>
+              <option value="5-10年">5-10年</option>
+              <option value="10年以上">10年以上</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">知识传递与积累</label>
+          <textarea class="form-textarea" rows="2" placeholder="" id="inline-lv-promo-knowledge" style="flex:1;min-height:60px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">任职要求（问题解决 和 工作成果）</label>
+          <textarea class="form-textarea" rows="2" placeholder="" id="inline-lv-promo-duty" style="flex:1;min-height:60px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">岗位职责</label>
+          <textarea class="form-textarea" rows="2" placeholder="" id="inline-lv-promo-resp" style="flex:1;min-height:60px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer-simple">
+      <button class="btn btn-default" id="inline-lv-cancel">取消</button>
+      <button class="btn btn-primary" id="inline-lv-confirm">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Initialize Lucide icons
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  initApp();
+});
+
+// ==================== Org Tree Data ====================
+const departments = [
+  { id: "qy", name: "强瑞集团", parentId: null, children: [
+    { id: "park-yx", name: "(银星科技园)深圳市强瑞精密技术股份有限公司", parentId: "qy" },
+    { id: "park-qa", name: "(侨安科技工业园)深圳强瑞精密装备有限公司", parentId: "qy", children: [
+      { id: "dept-zjb", name: "总经办", parentId: "park-qa", children: [
+        { id: "dept-zjb-bs", name: "博士工作站", parentId: "dept-zjb" }
+      ]},
+      { id: "dept-sy1", name: "事业一部", parentId: "park-qa", children: [
+        { id: "dept-sy1-hr", name: "人力资源部", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-hr-ag", name: "安管部", parentId: "dept-sy1-hr" },
+          { id: "dept-sy1-hr-hq", name: "后勤部", parentId: "dept-sy1-hr", children: [
+            { id: "dept-sy1-hr-hq-cf", name: "厨房组", parentId: "dept-sy1-hr-hq" },
+            { id: "dept-sy1-hr-hq-xz", name: "行政组", parentId: "dept-sy1-hr-hq" },
+            { id: "dept-sy1-hr-hq-sj", name: "司机组", parentId: "dept-sy1-hr-hq" }
+          ]},
+          { id: "dept-sy1-hr-rs", name: "人事部", parentId: "dept-sy1-hr" }
+        ]},
+        { id: "dept-sy1-cw", name: "财务部", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-cw-ck", name: "仓库组", parentId: "dept-sy1-cw" }
+        ]},
+        { id: "dept-sy1-zl", name: "质量运营部", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-zl-pz", name: "品质部", parentId: "dept-sy1-zl" },
+          { id: "dept-sy1-zl-kf1", name: "客服一部", parentId: "dept-sy1-zl" }
+        ]},
+        { id: "dept-sy1-yf", name: "研发部", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-yf-gc", name: "工程部", parentId: "dept-sy1-yf", children: [
+            { id: "dept-sy1-yf-gc-sb", name: "设备结构部", parentId: "dept-sy1-yf-gc" },
+            { id: "dept-sy1-yf-gc-dk", name: "电控设计部", parentId: "dept-sy1-yf-gc", children: [
+              { id: "dept-sy1-yf-gc-dk-dk", name: "电控部", parentId: "dept-sy1-yf-gc-dk" },
+              { id: "dept-sy1-yf-gc-dk-rj", name: "软件组", parentId: "dept-sy1-yf-gc-dk" }
+            ]},
+            { id: "dept-sy1-yf-gc-jg1", name: "结构设计一部", parentId: "dept-sy1-yf-gc", children: [
+              { id: "dept-sy1-yf-gc-jg1-ry", name: "RY组", parentId: "dept-sy1-yf-gc-jg1" },
+              { id: "dept-sy1-yf-gc-jg1-hw", name: "HW组", parentId: "dept-sy1-yf-gc-jg1" }
+            ]},
+            { id: "dept-sy1-yf-gc-jg2", name: "结构设计二部", parentId: "dept-sy1-yf-gc" },
+            { id: "dept-sy1-yf-gc-jg3", name: "结构设计三部", parentId: "dept-sy1-yf-gc" }
+          ]}
+        ]},
+        { id: "dept-sy1-gy", name: "供应链管理部", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-gy-sc", name: "市场部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-xm", name: "项目部", parentId: "dept-sy1-gy", children: [
+            { id: "dept-sy1-gy-xm-sb", name: "设备", parentId: "dept-sy1-gy-xm" },
+            { id: "dept-sy1-gy-xm-hj", name: "华技", parentId: "dept-sy1-gy-xm" },
+            { id: "dept-sy1-gy-xm-zd", name: "终端", parentId: "dept-sy1-gy-xm" }
+          ]},
+          { id: "dept-sy1-gy-cg", name: "采购部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-jh", name: "计划部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-bj", name: "钣金部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-zp", name: "装配部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-gy", name: "工艺工程部", parentId: "dept-sy1-gy" },
+          { id: "dept-sy1-gy-jj", name: "机加部", parentId: "dept-sy1-gy", children: [
+            { id: "dept-sy1-gy-jj-bc", name: "编程组", parentId: "dept-sy1-gy-jj" },
+            { id: "dept-sy1-gy-jj-cc", name: "车床组", parentId: "dept-sy1-gy-jj" },
+            { id: "dept-sy1-gy-jj-xz", name: "铣钻组", parentId: "dept-sy1-gy-jj", children: [
+              { id: "dept-sy1-gy-jj-xz-zc", name: "钻床", parentId: "dept-sy1-gy-jj-xz" },
+              { id: "dept-sy1-gy-jj-xz-xc", name: "铣床", parentId: "dept-sy1-gy-jj-xz" }
+            ]},
+            { id: "dept-sy1-gy-jj-jd", name: "精雕组", parentId: "dept-sy1-gy-jj" },
+            { id: "dept-sy1-gy-jj-cnc", name: "CNC组", parentId: "dept-sy1-gy-jj", children: [
+              { id: "dept-sy1-gy-jj-cnc-zdh", name: "CNC自动化组", parentId: "dept-sy1-gy-jj-cnc" },
+              { id: "dept-sy1-gy-jj-cnc-jm", name: "CNC精密组", parentId: "dept-sy1-gy-jj-cnc" },
+              { id: "dept-sy1-gy-jj-cnc-1", name: "CNC一组", parentId: "dept-sy1-gy-jj-cnc" },
+              { id: "dept-sy1-gy-jj-cnc-2", name: "CNC二组", parentId: "dept-sy1-gy-jj-cnc" },
+              { id: "dept-sy1-gy-jj-cnc-3", name: "CNC三组", parentId: "dept-sy1-gy-jj-cnc" },
+              { id: "dept-sy1-gy-jj-cnc-4", name: "CNC四组", parentId: "dept-sy1-gy-jj-cnc" }
+            ]},
+            { id: "dept-sy1-gy-jj-fz", name: "辅助组", parentId: "dept-sy1-gy-jj", children: [
+              { id: "dept-sy1-gy-jj-fz-xg", name: "线割组", parentId: "dept-sy1-gy-jj-fz" },
+              { id: "dept-sy1-gy-jj-fz-mc", name: "磨床组", parentId: "dept-sy1-gy-jj-fz" },
+              { id: "dept-sy1-gy-jj-fz-fzry", name: "辅助人员", parentId: "dept-sy1-gy-jj-fz" }
+            ]}
+          ]}
+        ]},
+        { id: "dept-sy1-gyyjy", name: "工艺研究院", parentId: "dept-sy1", children: [
+          { id: "dept-sy1-gyyjy-cc", name: "仓储部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-xm", name: "项目部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-sc", name: "市场部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-pz", name: "品质部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-sj", name: "设计部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-zp", name: "装配部", parentId: "dept-sy1-gyyjy" },
+          { id: "dept-sy1-gyyjy-jj", name: "机加部", parentId: "dept-sy1-gyyjy" }
+        ]}
+      ]},
+      { id: "dept-sy2", name: "事业二部", parentId: "park-qa", children: [
+        { id: "dept-sy2-pt", name: "平台部门", parentId: "dept-sy2", children: [
+          { id: "dept-sy2-pt-pz", name: "品质部", parentId: "dept-sy2-pt" },
+          { id: "dept-sy2-pt-cc", name: "仓储部", parentId: "dept-sy2-pt" },
+          { id: "dept-sy2-pt-jh", name: "计划部", parentId: "dept-sy2-pt" },
+          { id: "dept-sy2-pt-jgcb", name: "架构成本部", parentId: "dept-sy2-pt" },
+          { id: "dept-sy2-pt-zp", name: "装配部", parentId: "dept-sy2-pt" },
+          { id: "dept-sy2-pt-zh", name: "综合管理部", parentId: "dept-sy2-pt" }
+        ]},
+        { id: "dept-sy2-lr2", name: "利润中心二", parentId: "dept-sy2", children: [
+          { id: "dept-sy2-lr2-cg", name: "采购部", parentId: "dept-sy2-lr2" },
+          { id: "dept-sy2-lr2-sh", name: "售后部", parentId: "dept-sy2-lr2" },
+          { id: "dept-sy2-lr2-yw", name: "业务部", parentId: "dept-sy2-lr2" },
+          { id: "dept-sy2-lr2-sw", name: "商务部", parentId: "dept-sy2-lr2" },
+          { id: "dept-sy2-lr2-xm", name: "项目部", parentId: "dept-sy2-lr2" },
+          { id: "dept-sy2-lr2-sj", name: "设计部", parentId: "dept-sy2-lr2", children: [
+            { id: "dept-sy2-lr2-sj-sb", name: "设备组", parentId: "dept-sy2-lr2-sj" },
+            { id: "dept-sy2-lr2-sj-jj", name: "夹具组", parentId: "dept-sy2-lr2-sj" },
+            { id: "dept-sy2-lr2-sj-rj", name: "软件组", parentId: "dept-sy2-lr2-sj" },
+            { id: "dept-sy2-lr2-sj-dk", name: "电控组", parentId: "dept-sy2-lr2-sj" }
+          ]}
+        ]},
+        { id: "dept-sy2-lr3", name: "利润中心三", parentId: "dept-sy2", children: [
+          { id: "dept-sy2-lr3-yw", name: "业务部", parentId: "dept-sy2-lr3" },
+          { id: "dept-sy2-lr3-cg", name: "采购部", parentId: "dept-sy2-lr3" },
+          { id: "dept-sy2-lr3-gc", name: "工程部", parentId: "dept-sy2-lr3", children: [
+            { id: "dept-sy2-lr3-gc-kf", name: "客服组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-dq", name: "电气组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-dk", name: "电控组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-ts", name: "调试组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-xm", name: "项目组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-rj", name: "软件组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-sj1", name: "设计一组", parentId: "dept-sy2-lr3-gc" },
+            { id: "dept-sy2-lr3-gc-sj2", name: "设计二组", parentId: "dept-sy2-lr3-gc" }
+          ]}
+        ]}
+      ]},
+      { id: "dept-yw", name: "运维支持中心", parentId: "park-qa", children: [
+        { id: "dept-yw-zh", name: "综合保障部", parentId: "dept-yw" },
+        { id: "dept-yw-xx", name: "信息部", parentId: "dept-yw", children: [
+          { id: "dept-yw-xx-gw", name: "顾问组", parentId: "dept-yw-xx" },
+          { id: "dept-yw-xx-kf", name: "开发组", parentId: "dept-yw-xx" },
+          { id: "dept-yw-xx-yw", name: "运维组", parentId: "dept-yw-xx" }
+        ]},
+        { id: "dept-yw-ns", name: "内审部", parentId: "dept-yw" },
+        { id: "dept-yw-js", name: "技术应用中心", parentId: "dept-yw" },
+        { id: "dept-yw-cw", name: "财务部", parentId: "dept-yw" }
+      ]}
+    ]},
+    { id: "park-hj", name: "(皇基御景)深圳市国科智图科技有限公司", parentId: "qy" }
+  ]}
+];
+
+// ==================== Position Data ====================
+const positionData = [
+  { id: 1, name: '研发工程师', dept: '侨安科技工业园 / 事业一部 / 研发部 / 工程部', deptId: 'dept-sy1-yf-gc', sequence: '研发序列', type: 'monthly', salaryMin: 15, salaryMax: 25, education: '本科', headcount: 8, enabled: true, healthMonitor: false,
+    levels: [
+      { id: 'L1', name: '初级工程师', salaryMin: 12, salaryMax: 16, headcount: 3 },
+      { id: 'L2', name: '中级工程师', salaryMin: 14, salaryMax: 20, headcount: 3 },
+      { id: 'L3', name: '高级工程师', salaryMin: 20, salaryMax: 28, headcount: 2 },
+    ]
+  },
+  { id: 2, name: '算法研究员', dept: '侨安科技工业园 / 事业一部 / 研发部', deptId: 'dept-sy1-yf', sequence: '研发序列', type: 'monthly', salaryMin: 30, salaryMax: 60, education: '博士', headcount: 5, enabled: true, healthMonitor: false,
+    levels: [
+      { id: 'L4', name: '研究员', salaryMin: 30, salaryMax: 45, headcount: 3 },
+      { id: 'L5', name: '高级研究员', salaryMin: 45, salaryMax: 60, headcount: 2 },
+    ]
+  },
+  { id: 3, name: '产品经理', dept: '侨安科技工业园 / 事业一部', deptId: 'dept-sy1', sequence: '职能序列', type: 'monthly', salaryMin: 18, salaryMax: 35, education: '研究生', headcount: 6, enabled: true, healthMonitor: false,
+    levels: [
+      { id: 'L6', name: '产品经理', salaryMin: 18, salaryMax: 28, headcount: 4 },
+      { id: 'L7', name: '高级产品经理', salaryMin: 28, salaryMax: 35, headcount: 2 },
+    ]
+  },
+  { id: 4, name: '招聘专员', dept: '侨安科技工业园 / 事业一部 / 人力资源部 / 人事部', deptId: 'dept-sy1-hr-rs', sequence: '职能序列', type: 'timely', salaryMin: 8, salaryMax: 12, education: '大专', headcount: 3, enabled: true, healthMonitor: false,
+    levels: [] },
+  { id: 5, name: 'UI设计师', dept: '侨安科技工业园 / 运维支持中心 / 信息部 / 开发组', deptId: 'dept-yw-xx-kf', sequence: '开发序列', type: 'monthly', salaryMin: 12, salaryMax: 22, education: '本科', headcount: 4, enabled: true, healthMonitor: false,
+    levels: [] },
+  { id: 6, name: '测试工程师', dept: '侨安科技工业园 / 事业一部 / 质量运营部 / 品质部', deptId: 'dept-sy1-zl-pz', sequence: '研发序列', type: 'monthly', salaryMin: 10, salaryMax: 20, education: '本科', headcount: 5, enabled: true, healthMonitor: false,
+    levels: [] },
+  { id: 7, name: '运维工程师', dept: '侨安科技工业园 / 运维支持中心 / 信息部 / 运维组', deptId: 'dept-yw-xx-yw', sequence: '研发序列', type: 'monthly', salaryMin: 12, salaryMax: 22, education: '大专', headcount: 3, enabled: true, healthMonitor: false,
+    levels: [] },
+  { id: 8, name: '数据分析师', dept: '侨安科技工业园 / 运维支持中心', deptId: 'dept-yw', sequence: '研发序列', type: 'monthly', salaryMin: 15, salaryMax: 30, education: '研究生', headcount: 4, enabled: true, healthMonitor: false,
+    levels: [] },
+  // Management-level positions at company level
+  { id: 9, name: '总经理', dept: '侨安科技工业园', deptId: 'park-qa', sequence: '管理序列', type: 'monthly', salaryMin: 50, salaryMax: 100, education: '研究生', headcount: 1, enabled: true, healthMonitor: false, levels: [] },
+  { id: 10, name: '副总经理', dept: '侨安科技工业园', deptId: 'park-qa', sequence: '管理序列', type: 'monthly', salaryMin: 40, salaryMax: 80, education: '研究生', headcount: 2, enabled: true, healthMonitor: false, levels: [] },
+  { id: 11, name: '董事长', dept: '银星科技园', deptId: 'park-yx', sequence: '管理序列', type: 'monthly', salaryMin: 80, salaryMax: 150, education: '研究生', headcount: 1, enabled: true, healthMonitor: false, levels: [] },
+  { id: 12, name: '总经理', dept: '银星科技园', deptId: 'park-yx', sequence: '管理序列', type: 'monthly', salaryMin: 50, salaryMax: 100, education: '研究生', headcount: 1, enabled: true, healthMonitor: false, levels: [] },
+];
+
+let currentPos = null;
+let deleteTargetId = null;
+let levelEditTargetName = null;
+
+// ==================== Org Tree State ====================
+let selectedDeptId = "qy"; // Default: show all
+let expandedDeptIds = new Set();
+let treeSearchQuery = "";
+let contextMenuDept = null;
+
+// Init expanded - expand top levels
+(function() {
+  function expandUpToDepth(depts, maxDepth, currentDepth) {
+    for (const d of depts) {
+      if (currentDepth < maxDepth) expandedDeptIds.add(d.id);
+      if (d.children && currentDepth < maxDepth) expandUpToDepth(d.children, maxDepth, currentDepth + 1);
+    }
+  }
+  expandUpToDepth(departments, 2, 0);
+})();
+
+// ==================== Tree Helpers ====================
+function findDepartment(list, id) {
+  for (const d of list) {
+    if (d.id === id) return d;
+    if (d.children) { const f = findDepartment(d.children, id); if (f) return f; }
+  }
+  return null;
+}
+
+function getDeptPath(depts, id) {
+  const path = [];
+  function walk(list, target) {
+    for (const d of list) {
+      path.push(d);
+      if (d.id === target) return true;
+      if (d.children && walk(d.children, target)) return true;
+      path.pop();
+    }
+    return false;
+  }
+  walk(depts, id);
+  return path;
+}
+
+function getDeptPathString(deptId) {
+  const path = getDeptPath(departments, deptId);
+  return path.map(d => d.name).join(' / ');
+}
+
+// Collect all descendant dept IDs
+function collectDescendantIds(dept) {
+  const ids = [dept.id];
+  if (dept.children) {
+    dept.children.forEach(c => {
+      ids.push(...collectDescendantIds(c));
+    });
+  }
+  return ids;
+}
+
+function getVisibleDeptIds(selectedId) {
+  const dept = findDepartment(departments, selectedId);
+  if (!dept) return [selectedId];
+  return collectDescendantIds(dept);
+}
+
+// ==================== Render: Org Tree ====================
+function matchesSearchRecursive(dept, query) {
+  if (!query) return true;
+  if (dept.name.toLowerCase().includes(query.toLowerCase())) return true;
+  if (dept.children) return dept.children.some(c => matchesSearchRecursive(c, query));
+  return false;
+}
+
+function renderTree() {
+  const container = document.getElementById('tree-container');
+  container.innerHTML = '';
+  const filtered = treeSearchQuery ? departments.filter(d => matchesSearchRecursive(d, treeSearchQuery)) : departments;
+  filtered.forEach((dept, i) => renderTreeNode(dept, 0, container, i));
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function renderTreeNode(dept, depth, parent, index) {
+  const hasChildren = dept.children && dept.children.length > 0;
+  const isExpanded = expandedDeptIds.has(dept.id);
+  const isSelected = selectedDeptId === dept.id;
+  const posCount = getPositionCountForDept(dept.id);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tree-node-item';
+  wrapper.style.animationDelay = `${index * 35}ms`;
+
+  const row = document.createElement('div');
+  row.className = 'tree-node-row' + (isSelected ? ' selected' : '');
+  row.style.paddingLeft = `${depth * 18 + 10}px`;
+  row.addEventListener('click', () => { selectTreeNode(dept); });
+  row.addEventListener('contextmenu', e => showContextMenu(e, dept));
+
+  if (hasChildren) {
+    const toggle = document.createElement('button');
+    toggle.className = 'tree-node-toggle ' + (isExpanded ? 'expanded' : 'collapsed');
+    toggle.innerHTML = '<i data-lucide="chevron-down"></i>';
+    toggle.addEventListener('click', e => { e.stopPropagation(); if (expandedDeptIds.has(dept.id)) expandedDeptIds.delete(dept.id); else expandedDeptIds.add(dept.id); renderTree(); });
+    row.appendChild(toggle);
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'tree-node-dot';
+    row.appendChild(dot);
+  }
+
+  const icon = document.createElement('span');
+  icon.className = 'tree-node-icon';
+  icon.innerHTML = '<i data-lucide="building"></i>';
+  row.appendChild(icon);
+
+  const name = document.createElement('span');
+  name.className = 'tree-node-name';
+  name.textContent = dept.name;
+  row.appendChild(name);
+
+  const count = document.createElement('span');
+  count.className = 'tree-node-count';
+  count.textContent = posCount;
+  row.appendChild(count);
+
+  wrapper.appendChild(row);
+
+  if (hasChildren) {
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-node-children ' + (isExpanded ? 'expanded' : 'collapsed');
+    const lineWrap = document.createElement('div');
+    lineWrap.className = 'tree-line-wrap';
+    lineWrap.style.setProperty('--left', `${depth * 18 + 20}px`);
+    dept.children.forEach((c, ci) => renderTreeNodeIn(c, depth + 1, lineWrap, ci));
+    childWrap.appendChild(lineWrap);
+    wrapper.appendChild(childWrap);
+  }
+
+  parent.appendChild(wrapper);
+}
+
+function renderTreeNodeIn(dept, depth, parent, index) {
+  const hasChildren = dept.children && dept.children.length > 0;
+  const isExpanded = expandedDeptIds.has(dept.id);
+  const isSelected = selectedDeptId === dept.id;
+  const posCount = getPositionCountForDept(dept.id);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tree-node-item';
+  wrapper.style.animationDelay = `${index * 35}ms`;
+
+  const row = document.createElement('div');
+  row.className = 'tree-node-row' + (isSelected ? ' selected' : '');
+  row.style.paddingLeft = `${depth * 18 + 10}px`;
+  row.addEventListener('click', () => { selectTreeNode(dept); });
+  row.addEventListener('contextmenu', e => showContextMenu(e, dept));
+
+  if (hasChildren) {
+    const toggle = document.createElement('button');
+    toggle.className = 'tree-node-toggle ' + (isExpanded ? 'expanded' : 'collapsed');
+    toggle.innerHTML = '<i data-lucide="chevron-down"></i>';
+    toggle.addEventListener('click', e => { e.stopPropagation(); if (expandedDeptIds.has(dept.id)) expandedDeptIds.delete(dept.id); else expandedDeptIds.add(dept.id); renderTree(); });
+    row.appendChild(toggle);
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'tree-node-dot';
+    row.appendChild(dot);
+  }
+
+  const icon = document.createElement('span');
+  icon.className = 'tree-node-icon';
+  icon.innerHTML = '<i data-lucide="building"></i>';
+  row.appendChild(icon);
+
+  const name = document.createElement('span');
+  name.className = 'tree-node-name';
+  name.textContent = dept.name;
+  row.appendChild(name);
+
+  const count = document.createElement('span');
+  count.className = 'tree-node-count';
+  count.textContent = posCount;
+  row.appendChild(count);
+
+  wrapper.appendChild(row);
+
+  if (hasChildren) {
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-node-children ' + (isExpanded ? 'expanded' : 'collapsed');
+    dept.children.forEach((c, ci) => renderTreeNodeIn(c, depth + 1, childWrap, ci));
+    wrapper.appendChild(childWrap);
+  }
+
+  parent.appendChild(wrapper);
+}
+
+// ==================== Position Count for Dept ====================
+function getPositionCountForDept(deptId) {
+  const visibleIds = new Set(getVisibleDeptIds(deptId));
+  let count = 0;
+  positionData.forEach(p => {
+    if (visibleIds.has(p.deptId)) count++;
+  });
+  return count;
+}
+
+// ==================== Select TreeNode ====================
+function selectTreeNode(dept) {
+  selectedDeptId = dept.id;
+  refreshAll();
+}
+
+// ==================== Context Menu ====================
+function showContextMenu(e, dept) {
+  e.preventDefault();
+  hideContextMenu();
+  contextMenuDept = dept;
+  const menu = document.getElementById('context-menu');
+  menu.style.display = 'block';
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 170) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 100) + 'px';
+
+  document.addEventListener('click', hideContextMenu, { once: true });
+}
+
+function hideContextMenu() {
+  const menu = document.getElementById('context-menu');
+  menu.style.display = 'none';
+  contextMenuDept = null;
+}
+
+// ==================== Filter State ====================
+let filterEdu = '';
+let filterSalaryType = '';
+let filterNameQuery = '';
+let filterSequence = ''; // current active sequence filter
+
+// ==================== Filtered Positions ====================
+function getFilteredPositions() {
+  let result;
+  if (selectedDeptId === "qy") {
+    result = [...positionData];
+  } else {
+    const visibleIds = new Set(getVisibleDeptIds(selectedDeptId));
+    result = positionData.filter(p => visibleIds.has(p.deptId));
+  }
+
+  // Apply filters
+  if (filterEdu) {
+    result = result.filter(p => p.education === filterEdu);
+  }
+  if (filterSalaryType) {
+    result = result.filter(p => p.type === filterSalaryType);
+  }
+  if (filterNameQuery) {
+    const q = filterNameQuery.toLowerCase();
+    result = result.filter(p => p.name.toLowerCase().includes(q));
+  }
+  if (filterSequence) {
+    result = result.filter(p => p.sequence === filterSequence);
+  }
+
+  return result;
+}
+
+// ==================== openPositionModalWithDefaults ====================
+function openPositionModalWithDefaults(name, deptPath, deptId) {
+  editPosId = null;
+  document.getElementById('pos-modal-title').textContent = '新增岗位';
+  document.getElementById('pos-name').value = name;
+  document.getElementById('pos-dept').value = deptPath;
+  document.getElementById('pos-sequence').value = '';
+  document.getElementById('pos-type').value = 'monthly';
+  document.getElementById('pos-salary-min').value = '';
+  document.getElementById('pos-salary-max').value = '';
+  document.getElementById('pos-edu').value = '本科';
+  document.getElementById('pos-health-monitor').value = '';
+
+  // Store the deptId for submission
+  document.getElementById('pos-dept').dataset.deptId = deptId;
+
+  // Reset modal level state
+  modalLevels = [];
+  renderModalLevelList();
+
+  document.getElementById('position-modal-overlay').classList.add('show');
+}
+
+// ==================== Stats ====================
+function updateStats() {
+  const filtered = getFilteredPositions();
+  let total = 0;
+  filtered.forEach(p => { total += p.headcount; });
+}
+
+// ==================== Sequence Tabs ====================
+const SEQUENCE_LIST = ['开发序列', '研发序列', '职能序列', '销售序列', '生产技术序列', '管理序列'];
+
+function shouldShowSequenceTabs() {
+  // Show when selected dept is NOT a leaf-level (i.e. it's 集团, 二级公司, or has children)
+  if (selectedDeptId === 'qy') return true;
+  const dept = findDepartment(departments, selectedDeptId);
+  if (!dept) return false;
+  return dept.children && dept.children.length > 0;
+}
+
+function getDeptDepth(deptId) {
+  const path = getDeptPath(departments, deptId);
+  return path.length; // depth from root
+}
+
+function renderSequenceTabs() {
+  const container = document.getElementById('sequence-tabs');
+  if (!shouldShowSequenceTabs()) {
+    container.style.display = 'none';
+    filterSequence = '';
+    return;
+  }
+
+  container.style.display = 'flex';
+  container.innerHTML = `
+    <button class="sequence-tab ${filterSequence === '' ? 'active' : ''}" data-seq="">全部</button>
+    ${SEQUENCE_LIST.map(seq => `
+      <button class="sequence-tab ${filterSequence === seq ? 'active' : ''}" data-seq="${seq}">${seq}</button>
+    `).join('')}
+  `;
+
+  container.querySelectorAll('.sequence-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterSequence = tab.dataset.seq;
+      renderSequenceTabs();
+      renderTable();
+    });
+  });
+}
+
+// ==================== Render Table ====================
+function renderTable() {
+  const filtered = getFilteredPositions();
+  const tbody = document.getElementById('table-body');
+
+  // Update breadcrumb
+  const deptPath = getDeptPath(departments, selectedDeptId);
+  const breadcrumbHTML = deptPath.map((d, i) => {
+    const sep = i > 0 ? '<i data-lucide="chevron-right"></i>' : '';
+    return `<span>${sep}${d.name}</span>`;
+  }).join('');
+  document.getElementById('breadcrumb').innerHTML = breadcrumbHTML;
+
+  // Update page title
+  const lastDept = deptPath[deptPath.length - 1];
+  document.getElementById('page-title').textContent = selectedDeptId === 'qy' ? '岗位列表' : `${lastDept.name} — 岗位列表`;
+
+  tbody.innerHTML = filtered.map((pos, idx) => `
+    <tr data-id="${pos.id}" class="animate-fade-in" style="animation-delay:${idx * 0.03}s;">
+      <td><span class="table-index">${idx + 1}</span></td>
+      <td><span class="position-name">${pos.name}</span></td>
+      <td><span class="sequence-tag">${pos.sequence || '-'}</span></td>
+      <td><span class="edu-req">${pos.education}</span></td>
+      <td>
+        <span class="recruit-type ${pos.type === 'monthly' ? 'monthly' : 'timely'}">
+          ${pos.type === 'monthly' ? '月薪' : '时薪'}
+        </span>
+      </td>
+      <td><span class="salary-range">${pos.salaryMin}-${pos.salaryMax}</span></td>
+      <td><span class="headcount-num">${pos.headcount}</span></td>
+      <td>
+        <div class="action-links">
+          <button class="action-link btn-edit" data-id="${pos.id}">编辑</button>
+          <button class="action-link btn-detail" data-id="${pos.id}">详情</button>
+          <button class="action-link danger btn-delete" data-id="${pos.id}">删除</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // Bind events
+  tbody.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openPositionModal(parseInt(btn.dataset.id));
+    });
+  });
+  tbody.querySelectorAll('.btn-detail').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDetailModal(parseInt(btn.dataset.id));
+    });
+  });
+  tbody.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDeleteConfirm(parseInt(btn.dataset.id));
+    });
+  });
+
+  updateStats();
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+// ==================== Position Add/Edit Modal ====================
+let editPosId = null;
+let modalLevels = []; // Temporary levels for the modal
+
+function openPositionModal(posId) {
+  editPosId = posId;
+  const pos = posId ? positionData.find(p => p.id === posId) : null;
+
+  document.getElementById('pos-modal-title').textContent = pos ? '编辑岗位' : '新增岗位';
+  document.getElementById('pos-name').value = pos ? pos.name : '';
+  document.getElementById('pos-dept').value = pos ? pos.dept : '';
+  document.getElementById('pos-dept').dataset.deptId = pos ? (pos.deptId || '') : (selectedDeptId !== 'qy' ? selectedDeptId : '');
+  document.getElementById('pos-sequence').value = pos && pos.sequence ? pos.sequence : '';
+  document.getElementById('pos-type').value = pos ? pos.type : 'monthly';
+  document.getElementById('pos-salary-min').value = pos ? pos.salaryMin : '';
+  document.getElementById('pos-salary-max').value = pos ? pos.salaryMax : '';
+  document.getElementById('pos-edu').value = pos ? pos.education : '本科';
+  document.getElementById('pos-health-monitor').value = pos && pos.healthMonitor === true ? 'yes' : '';
+
+  // Load levels into modal
+  modalLevels = pos && pos.levels ? JSON.parse(JSON.stringify(pos.levels)) : [];
+  renderModalLevelList();
+
+  document.getElementById('position-modal-overlay').classList.add('show');
+}
+
+function closePositionModal() {
+  document.getElementById('position-modal-overlay').classList.remove('show');
+  editPosId = null;
+  modalLevels = [];
+}
+
+// ==================== Modal Inline Level Management ====================
+function renderModalLevelList() {
+  const container = document.getElementById('modal-level-list');
+  if (modalLevels.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted-foreground);font-size:12px;text-align:center;padding:20px 0;">暂无职级，点击下方添加</p>';
+    return;
+  }
+  container.innerHTML = modalLevels.map((l, idx) => `
+    <div class="level-inline-card" data-idx="${idx}">
+      <div class="level-inline-header">
+        <span class="level-inline-name">${l.name}</span>
+        <div class="level-inline-actions">
+          <button class="action-link btn-edit-modal-lv" data-idx="${idx}">编辑</button>
+          <button class="action-link danger btn-del-modal-lv" data-idx="${idx}">删除</button>
+        </div>
+      </div>
+      <div class="level-inline-meta">${l.sequence ? '序列：' + l.sequence + ' | ' : ''}薪资范围：${l.salaryMin}-${l.salaryMax}k | 在职：${l.headcount || 0}人</div>
+    </div>
+  `).join('');
+
+  // Bind edit
+  container.querySelectorAll('.btn-edit-modal-lv').forEach(btn => {
+    btn.addEventListener('click', () => openInlineLevelEditModal(parseInt(btn.dataset.idx)));
+  });
+  // Bind delete
+  container.querySelectorAll('.btn-del-modal-lv').forEach(btn => {
+    btn.addEventListener('click', () => deleteInlineLevel(parseInt(btn.dataset.idx)));
+  });
+
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function openAddInlineLevel() {
+  inlineEditIdx = null; // adding new
+  document.getElementById('inline-lv-name').value = '';
+  document.getElementById('inline-lv-sequence').value = '';
+  document.getElementById('inline-lv-salary-min').value = '';
+  document.getElementById('inline-lv-salary-max').value = '';
+  document.getElementById('inline-lv-headcount').value = '';
+  document.querySelector('#inline-level-modal .modal-title-simple').textContent = '新建职级';
+  document.getElementById('inline-level-modal-overlay').classList.add('show');
+}
+
+let inlineEditIdx = null;
+
+function openInlineLevelEditModal(idx) {
+  inlineEditIdx = idx;
+  const lv = modalLevels[idx];
+  document.getElementById('inline-lv-name').value = lv.name;
+  document.getElementById('inline-lv-sequence').value = lv.sequence || '';
+  document.getElementById('inline-lv-salary-min').value = lv.salaryMin;
+  document.getElementById('inline-lv-salary-max').value = lv.salaryMax;
+  document.getElementById('inline-lv-headcount').value = lv.headcount || 0;
+  document.querySelector('#inline-level-modal .modal-title-simple').textContent = '编辑职级';
+  document.getElementById('inline-level-modal-overlay').classList.add('show');
+}
+
+function closeInlineLevelModal() {
+  document.getElementById('inline-level-modal-overlay').classList.remove('show');
+  inlineEditIdx = null;
+}
+
+function submitInlineLevel() {
+  const name = document.getElementById('inline-lv-name').value.trim();
+  const sequence = document.getElementById('inline-lv-sequence').value;
+  const salaryMin = parseInt(document.getElementById('inline-lv-salary-min').value) || 0;
+  const salaryMax = parseInt(document.getElementById('inline-lv-salary-max').value) || 0;
+  const headcount = parseInt(document.getElementById('inline-lv-headcount').value) || 0;
+
+  if (!name) { showToast('请输入职级名称'); return; }
+  if (salaryMin <= 0 || salaryMax <= 0) { showToast('请输入有效薪资范围'); return; }
+  if (salaryMin > salaryMax) { showToast('最低薪资不能高于最高薪资'); return; }
+
+  if (inlineEditIdx !== null) {
+    modalLevels[inlineEditIdx] = { ...modalLevels[inlineEditIdx], name, sequence, salaryMin, salaryMax, headcount };
+    showToast('职级更新成功');
+  } else {
+    modalLevels.push({ id: 'ML' + Date.now(), name, sequence, salaryMin, salaryMax, headcount });
+    showToast('职级添加成功');
+  }
+
+  closeInlineLevelModal();
+  renderModalLevelList();
+}
+
+function deleteInlineLevel(idx) {
+  const lv = modalLevels[idx];
+  if (!confirm(`确定要删除职级"${lv.name}"吗？`)) return;
+  modalLevels.splice(idx, 1);
+  renderModalLevelList();
+}
+
+function submitPosition() {
+  const name = document.getElementById('pos-name').value.trim();
+  const dept = document.getElementById('pos-dept').value.trim();
+  const sequence = document.getElementById('pos-sequence').value;
+  const type = document.getElementById('pos-type').value;
+  const salaryMin = parseInt(document.getElementById('pos-salary-min').value) || 0;
+  const salaryMax = parseInt(document.getElementById('pos-salary-max').value) || 0;
+  const education = document.getElementById('pos-edu').value;
+  const healthMonitor = document.getElementById('pos-health-monitor').value === 'yes';
+  const deptId = document.getElementById('pos-dept').dataset.deptId || '';
+
+  if (!name) { showToast('请输入岗位名称'); return; }
+  if (!dept) { showToast('请输入所属部门'); return; }
+  if (!sequence) { showToast('请选择所属序列'); return; }
+  if (salaryMin <= 0 || salaryMax <= 0) { showToast('请输入有效薪资范围'); return; }
+  if (salaryMin > salaryMax) { showToast('最低薪资不能高于最高薪资'); return; }
+
+  // Calculate headcount from modal levels
+  const headcount = modalLevels.reduce((sum, l) => sum + (l.headcount || 0), 0);
+
+  if (editPosId) {
+    const pos = positionData.find(p => p.id === editPosId);
+    if (pos) {
+      pos.name = name;
+      pos.dept = dept;
+      pos.deptId = deptId;
+      pos.sequence = sequence;
+      pos.type = type;
+      pos.salaryMin = salaryMin;
+      pos.salaryMax = salaryMax;
+      pos.education = education;
+      pos.healthMonitor = healthMonitor;
+      pos.headcount = headcount;
+      // Save modal levels to position
+      pos.levels = JSON.parse(JSON.stringify(modalLevels));
+    }
+    showToast('岗位更新成功');
+  } else {
+    nextId++;
+    positionData.push({
+      id: nextId,
+      name,
+      dept,
+      deptId,
+      sequence,
+      type,
+      salaryMin,
+      salaryMax,
+      education,
+      healthMonitor,
+      headcount,
+      levels: JSON.parse(JSON.stringify(modalLevels))
+    });
+    showToast('岗位添加成功');
+  }
+
+  closePositionModal();
+  refreshAll();
+}
+
+// ==================== Delete Confirm ====================
+function openDeleteConfirm(posId) {
+  deleteTargetId = posId;
+  const pos = positionData.find(p => p.id === posId);
+  if (pos) {
+    document.getElementById('delete-msg').textContent =
+      `确定要删除"${pos.name}"吗？${pos.levels && pos.levels.length > 0 ? '其下所有职级配置也将一并删除。' : ''}此操作不可撤销。`;
+  }
+  document.getElementById('delete-modal-overlay').classList.add('show');
+  lucide.createIcons();
+}
+
+function closeDeleteModal() {
+  document.getElementById('delete-modal-overlay').classList.remove('show');
+  deleteTargetId = null;
+}
+
+function confirmDelete() {
+  if (deleteTargetId) {
+    const idx = positionData.findIndex(p => p.id === deleteTargetId);
+    if (idx > -1) {
+      const name = positionData[idx].name;
+      positionData.splice(idx, 1);
+      showToast(`已删除"${name}"`);
+    }
+  }
+  closeDeleteModal();
+  if (currentPos && currentPos.id === deleteTargetId) {
+    closeLevelDrawer();
+  }
+  refreshAll();
+}
+
+// ==================== Level Drawer ====================
+function openLevelDrawer(posId) {
+  currentPos = positionData.find(p => p.id === posId);
+  if (!currentPos) return;
+  renderLevelDrawer();
+  document.getElementById('drawer-overlay').classList.add('show');
+  document.getElementById('level-drawer').classList.add('show');
+}
+
+function renderLevelDrawer() {
+  if (!currentPos) return;
+  document.getElementById('drawer-pos-title').textContent = currentPos.name;
+  document.getElementById('drawer-pos-count').textContent = `当前职位总人数：${currentPos.headcount}`;
+
+  const levelList = document.getElementById('level-list');
+  if (currentPos.levels && currentPos.levels.length > 0) {
+    levelList.innerHTML = currentPos.levels.map(level => `
+      <div class="level-card animate-fade-in">
+        <div class="level-card-header">
+          <span class="level-name">${level.name}</span>
+          <div class="level-actions">
+            <button class="action-link btn-edit-level" data-lid="${level.id}">编辑</button>
+            <button class="action-link danger btn-del-level" data-lid="${level.id}">删除</button>
+          </div>
+        </div>
+        <div class="level-meta">${level.sequence ? '序列：' + level.sequence + ' | ' : ''}薪资范围：${level.salaryMin}-${level.salaryMax}K | 在职：${level.headcount}人</div>
+      </div>
+    `).join('');
+
+    levelList.querySelectorAll('.btn-edit-level').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditLevelModal(btn.dataset.lid);
+      });
+    });
+    levelList.querySelectorAll('.btn-del-level').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteLevel(btn.dataset.lid);
+      });
+    });
+  } else {
+    levelList.innerHTML = '<p style="color:var(--muted-foreground);font-size:13px;text-align:center;padding:40px 0;">暂无职级配置，点击下方按钮新增</p>';
+  }
+
+  lucide.createIcons();
+}
+
+function closeLevelDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('show');
+  document.getElementById('level-drawer').classList.remove('show');
+}
+
+function deleteLevel(levelId) {
+  if (!currentPos) return;
+  const level = currentPos.levels.find(l => l.id === levelId);
+  if (!level) return;
+  if (!confirm(`确定要删除职级"${level.name}"吗？`)) return;
+
+  currentPos.levels = currentPos.levels.filter(l => l.id !== levelId);
+  showToast(`已删除职级"${level.name}"`);
+  renderLevelDrawer();
+  currentPos.headcount = currentPos.levels.reduce((sum, l) => sum + l.headcount, 0);
+  renderTable();
+}
+
+// ==================== Edit Level Modal ====================
+function openEditLevelModal(levelId) {
+  if (!currentPos) return;
+  const level = currentPos.levels.find(l => l.id === levelId);
+  if (!level) return;
+  levelEditTargetName = level.id;
+
+  document.getElementById('new-level-name').value = level.name;
+  document.getElementById('new-level-sequence').value = level.sequence || '';
+  document.getElementById('new-level-min').value = level.salaryMin;
+  document.getElementById('new-level-mid').value = '';
+  document.getElementById('new-level-max').value = level.salaryMax;
+
+  document.querySelector('#new-level-modal .modal-title-simple').innerHTML = '编辑职级';
+
+  document.getElementById('modal-overlay').classList.add('show');
+  lucide.createIcons();
+}
+
+// ==================== New Level Dialog ====================
+function openNewLevelModal() {
+  levelEditTargetName = null;
+  document.getElementById('new-level-name').value = '';
+  document.getElementById('new-level-sequence').value = '';
+  document.getElementById('new-level-min').value = '';
+  document.getElementById('new-level-mid').value = '';
+  document.getElementById('new-level-max').value = '';
+
+  document.querySelector('#new-level-modal .modal-title-simple').innerHTML = '新建 <span class="plus-circle-icon">&#8857;</span>';
+
+  document.getElementById('modal-overlay').classList.add('show');
+  lucide.createIcons();
+}
+
+function closeNewLevelModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function submitNewLevel() {
+  const name = document.getElementById('new-level-name').value.trim();
+  const sequence = document.getElementById('new-level-sequence').value;
+  const min = parseInt(document.getElementById('new-level-min').value) || 0;
+  const max = parseInt(document.getElementById('new-level-max').value) || 0;
+
+  if (!name) { showToast('请输入职级名称'); return; }
+  if (min <= 0 || max <= 0) { showToast('请输入有效薪资范围'); return; }
+  if (min > max) { showToast('最低薪资不能高于最高薪资'); return; }
+
+  if (!currentPos) return;
+
+  if (levelEditTargetName) {
+    const level = currentPos.levels.find(l => l.id === levelEditTargetName);
+    if (level) {
+      level.name = name;
+      level.sequence = sequence;
+      level.salaryMin = min;
+      level.salaryMax = max;
+      showToast('职级更新成功');
+    }
+  } else {
+    if (!currentPos.levels) currentPos.levels = [];
+    const newLevelId = 'L' + Date.now();
+    currentPos.levels.push({ id: newLevelId, name, sequence, salaryMin: min, salaryMax: max, headcount: 0 });
+    showToast('职级添加成功');
+  }
+
+  closeNewLevelModal();
+  renderLevelDrawer();
+  renderTable();
+}
+
+// ==================== Detail Modal ====================
+function openDetailModal(posId) {
+  currentPos = positionData.find(p => p.id === posId);
+  if (!currentPos) return;
+
+  const detailBody = document.getElementById('detail-body');
+
+  // Build level cards
+  const hasLevels = currentPos.levels && currentPos.levels.length > 0;
+  let selectedLevelIdx = 0;
+
+  const levelCardsHTML = hasLevels ? `
+    <div class="level-cards-row" id="detail-level-cards">
+      ${currentPos.levels.map((l, idx) => `
+        <div class="level-info-card detail-level-card ${idx === 0 ? 'active' : ''}" data-idx="${idx}" style="cursor:pointer;">
+          <div class="level-info-name">${l.name}</div>
+          <div class="level-info-meta">${l.sequence ? '序列：' + l.sequence + ' | ' : ''}薪资范围：${l.salaryMin}-${l.salaryMax}k | 在职：${l.headcount || 0}人</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '<p style="color:var(--muted-foreground);font-size:13px;padding:12px 0;">暂无职级配置</p>';
+
+  function getActiveLevelData() {
+    if (!hasLevels) return null;
+    return currentPos.levels[selectedLevelIdx] || currentPos.levels[0];
+  }
+
+  const activeLv = getActiveLevelData();
+  const reqGridHTML = hasLevels && activeLv ? `
+    <div class="detail-req-grid">
+      <div class="detail-field">
+        <label class="detail-field-label">学历要求</label>
+        <div class="detail-field-value" id="detail-req-edu">${currentPos.education}及以上</div>
+      </div>
+      <div class="detail-field">
+        <label class="detail-field-label">工作经验</label>
+        <div class="detail-field-value" id="detail-req-exp">${activeLv.experienceReq || '视职级而定'}</div>
+      </div>
+      <div class="detail-field">
+        <label class="detail-field-label">知识传递与积累</label>
+        <div class="detail-field-value" id="detail-req-knowledge">${activeLv.knowledgeReq || '按公司考核标准'}</div>
+      </div>
+      <div class="detail-field">
+        <label class="detail-field-label">任职要求（问题解决 和 工作成果）</label>
+        <div class="detail-field-value" id="detail-req-duty">${activeLv.dutyReq || '按职级评定标准'}</div>
+      </div>
+      <div class="detail-field detail-full">
+        <label class="detail-field-label">岗位职责</label>
+        <div class="detail-field-value" id="detail-responsibility">${activeLv.responsibility || '完成所属岗位相关工作，积极参与团队协作与项目交付'}</div>
+      </div>
+    </div>
+  ` : '';
+
+  detailBody.innerHTML = `
+    <h3 class="modal-title-simple" style="margin-bottom:4px;">详情</h3>
+
+    <!-- Section: Position Basic Info -->
+    <div class="detail-section">
+      <div class="detail-section-title">岗位基本信息</div>
+      <div class="detail-grid">
+        <div class="detail-field detail-full">
+          <label class="detail-field-label">岗位名称</label>
+          <div class="detail-field-value">${currentPos.name}</div>
+        </div>
+        <div class="detail-field">
+          <label class="detail-field-label">岗位序列</label>
+          <div class="detail-field-value">${currentPos.sequence || '-'}</div>
+        </div>
+        <div class="detail-field">
+          <label class="detail-field-label">薪资类型</label>
+          <div class="detail-field-value">${currentPos.type === 'monthly' ? '月薪' : '时薪'}</div>
+        </div>
+        <div class="detail-field">
+          <label class="detail-field-label">薪资范围(k)</label>
+          <div class="detail-field-value">${currentPos.salaryMin} — ${currentPos.salaryMax}</div>
+        </div>
+        <div class="detail-field">
+          <label class="detail-field-label">学历要求</label>
+          <div class="detail-field-value">${currentPos.education}</div>
+        </div>
+        <div class="detail-field">
+          <label class="detail-field-label">是否重点职业健康监测对象</label>
+          <div class="detail-field-value">${currentPos.healthMonitor ? '是' : '否'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Level Info -->
+    <div class="detail-section">
+      <div class="detail-section-title">职级基本信息</div>
+      ${levelCardsHTML}
+    </div>
+
+    <!-- Section: Promotion Requirements (1:N with levels) -->
+    ${hasLevels ? `
+    <div class="detail-section">
+      <div class="detail-section-title">职级晋升要求</div>
+      ${reqGridHTML}
+    </div>
+    ` : ''}
+
+    <div class="modal-footer-simple" style="border:none;display:flex;justify-content:flex-end;">
+      <button class="btn btn-default" id="detail-cancel">关闭</button>
+    </div>
+  `;
+
+  document.getElementById('detail-cancel').addEventListener('click', closeDetailModal);
+
+  // Bind level card click for tab switching
+  if (hasLevels) {
+    detailBody.querySelectorAll('.detail-level-card').forEach(card => {
+      card.addEventListener('click', () => {
+        // Remove active from all
+        detailBody.querySelectorAll('.detail-level-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedLevelIdx = parseInt(card.dataset.idx);
+        const lv = currentPos.levels[selectedLevelIdx];
+
+        // Animate the req grid
+        const reqGrid = document.querySelector('.detail-req-grid');
+        if (reqGrid) {
+          reqGrid.classList.remove('animate-switch');
+          // Force reflow to restart animation
+          void reqGrid.offsetWidth;
+          reqGrid.classList.add('animate-switch');
+        }
+
+        // Update the promotion requirements section with slight stagger
+        setTimeout(() => {
+          const eduEl = document.getElementById('detail-req-edu');
+          if (eduEl) eduEl.textContent = `${currentPos.education}及以上`;
+          const expEl = document.getElementById('detail-req-exp');
+          if (expEl) expEl.textContent = lv.experienceReq || '视职级而定';
+          const knEl = document.getElementById('detail-req-knowledge');
+          if (knEl) knEl.textContent = lv.knowledgeReq || '按公司考核标准';
+          const dutyEl = document.getElementById('detail-req-duty');
+          if (dutyEl) dutyEl.textContent = lv.dutyReq || '按职级评定标准';
+          const respEl = document.getElementById('detail-responsibility');
+          if (respEl) respEl.textContent = lv.responsibility || '完成所属岗位相关工作，积极参与团队协作与项目交付';
+        }, 50);
+      });
+    });
+  }
+
+  document.getElementById('detail-modal-overlay').classList.add('show');
+  lucide.createIcons();
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal-overlay').classList.remove('show');
+}
+
+// ==================== Toast ====================
+function showToast(msg) {
+  let toast = document.getElementById('global-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'global-toast';
+    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2a3d;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;font-family:var(--font-sans);pointer-events:none;transition:all 0.3s ease;opacity:0;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.top = '20px';
+  clearTimeout(toast._tid);
+  toast._tid = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.top = '10px';
+  }, 2000);
+}
+
+// ==================== Export CSV ====================
+function exportCSV() {
+  const filtered = getFilteredPositions();
+  const header = '序号,岗位名称,岗位序列,所属部门,岗位在职人数,薪资类型,薪资最低(K),薪资最高(K),学历要求\n';
+  const rows = filtered.map((p, i) =>
+    `${i+1},${p.name},${p.sequence || ''},${p.dept},${p.headcount},${p.type==='monthly'?'月薪':'时薪'},${p.salaryMin},${p.salaryMax},${p.education}`
+  ).join('\n');
+  const csv = '\uFEFF' + header + rows;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '岗位列表_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('导出成功');
+}
+
+// ==================== Refresh All ====================
+function refreshAll() {
+  renderTree();
+  renderSequenceTabs();
+  renderTable();
+}
+
+// ==================== Event Bindings ====================
+function initApp() {
+  renderTree();
+  renderSequenceTabs();
+  renderTable();
+
+  // Tree search
+  document.getElementById('tree-search').addEventListener('input', (e) => {
+    treeSearchQuery = e.target.value;
+    renderTree();
+  });
+
+  // Filter bar
+  document.getElementById('filter-edu').addEventListener('change', (e) => {
+    filterEdu = e.target.value;
+    renderTable();
+  });
+  document.getElementById('filter-salary-type').addEventListener('change', (e) => {
+    filterSalaryType = e.target.value;
+    renderTable();
+  });
+  document.getElementById('filter-name').addEventListener('input', (e) => {
+    filterNameQuery = e.target.value;
+    renderTable();
+  });
+
+  // Context menu actions
+  const contextMenu = document.getElementById('context-menu');
+  contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const action = item.dataset.action;
+      if (!contextMenuDept) return;
+
+      if (action === 'add-position') {
+        // Select this node and open add position modal
+        selectedDeptId = contextMenuDept.id;
+        const deptPathStr = getDeptPathString(contextMenuDept.id);
+        openPositionModalWithDefaults('', deptPathStr, contextMenuDept.id);
+        document.getElementById('pos-name').focus();
+      }
+
+      hideContextMenu();
+    });
+  });
+
+  // Drawer close
+  document.getElementById('drawer-close').addEventListener('click', closeLevelDrawer);
+  document.getElementById('drawer-overlay').addEventListener('click', () => {
+    closeLevelDrawer();
+  });
+
+  // Modal overlay click to close
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modal-overlay')) closeNewLevelModal();
+  });
+  document.getElementById('detail-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('detail-modal-overlay')) closeDetailModal();
+  });
+  document.getElementById('position-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('position-modal-overlay')) closePositionModal();
+  });
+  document.getElementById('delete-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('delete-modal-overlay')) closeDeleteModal();
+  });
+
+  // New Level
+  document.getElementById('btn-new-level').addEventListener('click', openNewLevelModal);
+  document.getElementById('new-level-cancel').addEventListener('click', closeNewLevelModal);
+  document.getElementById('new-level-confirm').addEventListener('click', submitNewLevel);
+
+  // Position Add/Edit Modal — top-right button follows current dept context
+  document.getElementById('btn-add-position').addEventListener('click', () => {
+    const deptPathStr = getDeptPathString(selectedDeptId);
+    openPositionModalWithDefaults('', deptPathStr, selectedDeptId);
+    document.getElementById('pos-name').focus();
+  });
+  document.getElementById('pos-modal-cancel').addEventListener('click', closePositionModal);
+  document.getElementById('pos-modal-confirm').addEventListener('click', submitPosition);
+
+  // Inline Level Modal (in position modal)
+  document.getElementById('btn-add-inline-level').addEventListener('click', openAddInlineLevel);
+  document.getElementById('inline-lv-cancel').addEventListener('click', closeInlineLevelModal);
+  document.getElementById('inline-lv-confirm').addEventListener('click', submitInlineLevel);
+  document.getElementById('inline-level-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('inline-level-modal-overlay')) closeInlineLevelModal();
+  });
+
+  // Delete Modal
+  document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+  document.getElementById('delete-confirm').addEventListener('click', confirmDelete);
+
+  // Export
+  document.getElementById('btn-export').addEventListener('click', exportCSV);
+}
+</script>
+
+</body>
+</html>

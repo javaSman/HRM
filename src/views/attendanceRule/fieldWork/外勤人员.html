@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动打卡记录</title>
+    <style>
+        /* ============================================
+           CSS Variables — Blue-White Theme
+           ============================================ */
+        :root {
+            --radius: 0.5rem;
+            --background: #f8fafd;
+            --foreground: #1a2a3d;
+            --card: #ffffff;
+            --card-foreground: #1a2a3d;
+            --primary: #2563eb;
+            --primary-rgb: 37, 99, 235;
+            --primary-foreground: #ffffff;
+            --secondary: #eff3fb;
+            --secondary-foreground: #1e3a5f;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --accent: #eef2ff;
+            --accent-foreground: #1e3a5f;
+            --destructive: #ef4444;
+            --border: #e2e8f0;
+            --input: #e2e8f0;
+            --ring: #2563eb;
+            --success: #16a34a;
+            --warning: #f97316;
+            --danger: #ef4444;
+            --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--foreground);
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.15); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), 0.3); }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(var(--primary-rgb), 0.04);
+            overflow: hidden;
+        }
+
+        /* 头部标题 */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            background-size: 200% 200%;
+            animation: gradient-shift 6s ease infinite;
+            color: #fff;
+            padding: 28px 32px;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .header p {
+            margin-top: 6px;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* 统计卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 24px 32px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: box-shadow 0.2s ease, transform 0.15s ease;
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08);
+            transform: translateY(-1px);
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .stat-icon.normal { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+        .stat-icon.late { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .stat-icon.early { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-icon.missing { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-info h4 {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .stat-info p {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            margin-top: 2px;
+        }
+
+        /* 筛选区 */
+        .filter-section {
+            padding: 16px 32px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+        }
+        .filter-group input,
+        .filter-group select {
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid var(--input);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--foreground);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.12);
+        }
+        .filter-group input { width: 140px; }
+        .filter-group select { width: 150px; }
+
+        .btn {
+            height: 34px;
+            padding: 0 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2d78ff, #00b4d8);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 4px 14px rgba(45, 120, 255, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(22, 163, 74, 0.2);
+            font-weight: 600;
+        }
+        .btn-success:hover {
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+            transform: translateY(-1px);
+        }
+
+        /* 表格 */
+        .table-wrap {
+            overflow-x: auto;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead th {
+            background: var(--muted);
+            padding: 12px 14px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--muted-foreground);
+            white-space: nowrap;
+            border: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        tbody td {
+            padding: 14px;
+            border: 1px solid var(--border);
+            vertical-align: middle;
+            text-align: center;
+            white-space: nowrap;
+        }
+        tbody tr:hover {
+            background: rgba(var(--primary-rgb), 0.02);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .status-normal {
+            background: rgba(22, 163, 74, 0.1);
+            color: #16a34a;
+        }
+        .status-late {
+            background: rgba(249, 115, 22, 0.08);
+            color: #f97316;
+        }
+        .status-early {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        .status-missing {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* 打卡类型标签 */
+        .type-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .type-checkin {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .type-checkout {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        /* 操作按钮 */
+        .op-btn {
+            height: 28px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .op-btn.view {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .op-btn.view:hover {
+            background: rgba(var(--primary-rgb), 0.15);
+        }
+
+        /* 查看图片按钮 */
+        .photo-btn {
+            height: 30px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #2d78ff, #00b4d8);
+            box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .photo-btn:hover {
+            box-shadow: 0 4px 14px rgba(45, 120, 255, 0.35);
+            transform: translateY(-1px);
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-top: 1px solid var(--border);
+        }
+        .pagination-info {
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+        .pagination-btns {
+            display: flex;
+            gap: 6px;
+        }
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .page-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* 详情弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 14px;
+            width: 560px;
+            max-width: 92vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: modal-in 0.25s ease;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .modal-close {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-close:hover {
+            background: var(--border);
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .detail-item.full {
+            grid-column: 1 / -1;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+        .detail-value {
+            font-size: 14px;
+            color: var(--foreground);
+            padding: 8px 12px;
+            background: var(--muted);
+            border-radius: 6px;
+        }
+
+        /* 地点图标 */
+        .location-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+        }
+        .location-text::before {
+            content: '📍';
+            font-size: 12px;
+        }
+
+        /* 异常说明 */
+        .anomaly-note {
+            font-size: 12px;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.06);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--danger);
+        }
+
+        /* 地图选点 */
+        .map-picker {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #eef3fb;
+        }
+        .map-canvas {
+            position: relative;
+            height: 180px;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        .map-grid {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .map-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(37,99,235,0.3));
+            animation: pin-bounce 0.4s ease;
+        }
+        @keyframes pin-bounce {
+            0% { transform: translate(-50%, -140%); opacity: 0; }
+            60% { transform: translate(-50%, -95%); }
+            100% { transform: translate(-50%, -100%); opacity: 1; }
+        }
+        .map-accuracy {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -30%);
+            border-radius: 50%;
+            background: rgba(var(--primary-rgb), 0.1);
+            border: 2px solid rgba(var(--primary-rgb), 0.2);
+            z-index: 1;
+        }
+        .map-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+        .map-info-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .map-info-text {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        /* 人员选择列表 */
+        .person-list {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .person-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .person-item:hover {
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+        .person-item + .person-item {
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选区 -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>开始日期</label>
+                    <input type="date" value="2025-12-01">
+                </div>
+                <div class="filter-group">
+                    <label>结束日期</label>
+                    <input type="date" value="2025-12-31">
+                </div>
+                <div class="filter-group">
+                    <label>外勤点名称</label>
+                    <input type="text" placeholder="请输入外勤点名称">
+                </div>
+                <div class="filter-group">
+                    <label>地址</label>
+                    <input type="text" placeholder="请输入地址">
+                </div>
+                <button class="btn btn-primary" onclick="openAddSite()">＋ 新增外勤人员</button>
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-outline">重置</button>
+            </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:40px"><input type="checkbox" id="checkAll" style="cursor:pointer"></th>
+                        <th>公司</th>
+                        <th>部门</th>
+                        <th>工号</th>
+                        <th>姓名</th>
+                        <th>外勤点</th>
+                        <th>考勤规则</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>研发部</td>
+                        <td>EMP001</td>
+                        <td>张三</td>
+                        <td>深圳湾科技园</td>
+                        <td>固定班制</td>
+                        <td>2025-12-01 08:55</td>
+                        <td>2025-12-31 18:02</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>研发部</td>
+                        <td>EMP002</td>
+                        <td>李四</td>
+                        <td>福田CBD中心</td>
+                        <td>弹性班制</td>
+                        <td>2025-12-01 09:12</td>
+                        <td>2025-12-31 18:30</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>财务部</td>
+                        <td>EMP003</td>
+                        <td>王五</td>
+                        <td>宝安产业园</td>
+                        <td>固定班制</td>
+                        <td>2025-12-01 08:48</td>
+                        <td>2025-12-31 17:48</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>市场部</td>
+                        <td>EMP004</td>
+                        <td>赵六</td>
+                        <td>龙华工业区</td>
+                        <td>排班制</td>
+                        <td>2025-12-01 09:05</td>
+                        <td>--</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞装备</td>
+                        <td>生产部</td>
+                        <td>EMP005</td>
+                        <td>孙七</td>
+                        <td>光明科学城</td>
+                        <td>固定班制</td>
+                        <td>2025-12-01 08:50</td>
+                        <td>2025-12-31 18:02</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞装备</td>
+                        <td>生产部</td>
+                        <td>EMP006</td>
+                        <td>周八</td>
+                        <td>龙岗软件园</td>
+                        <td>排班制</td>
+                        <td>--</td>
+                        <td>2025-12-31 18:00</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>人事部</td>
+                        <td>EMP007</td>
+                        <td>吴九</td>
+                        <td>坪山制造基地</td>
+                        <td>固定班制</td>
+                        <td>2025-12-01 08:30</td>
+                        <td>2025-12-31 17:55</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>强瑞技术</td>
+                        <td>人事部</td>
+                        <td>EMP008</td>
+                        <td>郑十</td>
+                        <td>盐田港物流园</td>
+                        <td>弹性班制</td>
+                        <td>2025-12-01 09:00</td>
+                        <td>2025-12-31 18:10</td>
+                        <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="pagination-info">共 176 条记录，第 1/22 页</div>
+            <div class="pagination-btns">
+                <button class="page-btn">‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">...</button>
+                <button class="page-btn">22</button>
+                <button class="page-btn">›</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>打卡记录详情</h3>
+                <button class="modal-close" onclick="closeDetail()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">公司</span>
+                        <span class="detail-value" id="d-company">强瑞技术</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">部门</span>
+                        <span class="detail-value" id="d-dept">研发部</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">工号</span>
+                        <span class="detail-value" id="d-empId">EMP001</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">姓名</span>
+                        <span class="detail-value" id="d-name">张三</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">外勤点</span>
+                        <span class="detail-value" id="d-site">深圳湾科技园</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">考勤规则</span>
+                        <span class="detail-value" id="d-rule">固定班制</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">开始时间</span>
+                        <span class="detail-value" id="d-start">2025-12-01 08:55</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">结束时间</span>
+                        <span class="detail-value" id="d-end">2025-12-31 18:02</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增外勤人员弹窗 -->
+    <div class="modal-overlay" id="addSiteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新增外勤人员</h3>
+                <button class="modal-close" onclick="closeAddSite()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item full">
+                        <span class="detail-label">姓名</span>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <input type="text" id="add-name" placeholder="请选择人员" readonly style="flex:1;height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none;background:#f8fafd;cursor:pointer" onclick="openSelectPerson()">
+                            <button class="btn btn-primary" onclick="openSelectPerson()" style="height:36px;white-space:nowrap">选择人员</button>
+                        </div>
+                    </div>
+                    <div class="detail-item full">
+                        <span class="detail-label">外勤点</span>
+                        <input type="text" id="add-site" placeholder="请输入外勤点名称" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none">
+                    </div>
+                    <div class="detail-item full">
+                        <span class="detail-label">考勤规则</span>
+                        <select id="add-rule" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none;background:#fff">
+                            <option>固定班制</option>
+                            <option>弹性班制</option>
+                            <option>排班制</option>
+                        </select>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">开始时间</span>
+                        <input type="date" id="add-start" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none">
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">结束时间</span>
+                        <input type="date" id="add-end" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none">
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">
+                    <button class="btn btn-outline" onclick="closeAddSite()">取消</button>
+                    <button class="btn btn-primary" onclick="submitAddSite()">确认新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择人员弹窗 -->
+    <div class="modal-overlay" id="selectPersonModal">
+        <div class="modal" style="width:480px">
+            <div class="modal-header">
+                <h3>选择人员</h3>
+                <button class="modal-close" onclick="closeSelectPerson()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:16px 24px">
+                <input type="text" id="person-search" placeholder="搜索姓名 / 工号" style="width:100%;height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:13px;color:var(--foreground);outline:none;margin-bottom:12px" onfocus="this.style.borderColor='var(--ring)'" onblur="this.style.borderColor='var(--input)'">
+                <div class="person-list" id="personList">
+                    <div class="person-item" onclick="pickPerson('张三','强瑞技术','研发部','EMP001')">
+                        <div><div style="font-weight:600;font-size:14px">张三</div><div style="font-size:12px;color:var(--muted-foreground)">EMP001 · 强瑞技术 · 研发部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('李四','强瑞技术','研发部','EMP002')">
+                        <div><div style="font-weight:600;font-size:14px">李四</div><div style="font-size:12px;color:var(--muted-foreground)">EMP002 · 强瑞技术 · 研发部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('王五','强瑞技术','财务部','EMP003')">
+                        <div><div style="font-weight:600;font-size:14px">王五</div><div style="font-size:12px;color:var(--muted-foreground)">EMP003 · 强瑞技术 · 财务部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('赵六','强瑞技术','市场部','EMP004')">
+                        <div><div style="font-weight:600;font-size:14px">赵六</div><div style="font-size:12px;color:var(--muted-foreground)">EMP004 · 强瑞技术 · 市场部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('孙七','强瑞装备','生产部','EMP005')">
+                        <div><div style="font-weight:600;font-size:14px">孙七</div><div style="font-size:12px;color:var(--muted-foreground)">EMP005 · 强瑞装备 · 生产部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('周八','强瑞装备','生产部','EMP006')">
+                        <div><div style="font-weight:600;font-size:14px">周八</div><div style="font-size:12px;color:var(--muted-foreground)">EMP006 · 强瑞装备 · 生产部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('吴九','强瑞技术','人事部','EMP007')">
+                        <div><div style="font-weight:600;font-size:14px">吴九</div><div style="font-size:12px;color:var(--muted-foreground)">EMP007 · 强瑞技术 · 人事部</div></div>
+                    </div>
+                    <div class="person-item" onclick="pickPerson('郑十','强瑞技术','人事部','EMP008')">
+                        <div><div style="font-weight:600;font-size:14px">郑十</div><div style="font-size:12px;color:var(--muted-foreground)">EMP008 · 强瑞技术 · 人事部</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全选
+        document.getElementById('checkAll').addEventListener('change', function () {
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked);
+        });
+
+        // 详情弹窗
+        function openDetail(btn) {
+            const row = btn.closest('tr');
+            const cells = row.querySelectorAll('td');
+            document.getElementById('d-company').textContent = cells[1].textContent.trim();
+            document.getElementById('d-dept').textContent = cells[2].textContent.trim();
+            document.getElementById('d-empId').textContent = cells[3].textContent.trim();
+            document.getElementById('d-name').textContent = cells[4].textContent.trim();
+            document.getElementById('d-site').textContent = cells[5].textContent.trim();
+            document.getElementById('d-rule').textContent = cells[6].textContent.trim();
+            document.getElementById('d-start').textContent = cells[7].textContent.trim();
+            document.getElementById('d-end').textContent = cells[8].textContent.trim();
+
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        // 照片预览
+        function openPhotoPreview(btn) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)';
+            const placeholder = document.createElement('div');
+            placeholder.style.cssText = 'background:#fff;border-radius:12px;padding:40px 60px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)';
+            placeholder.innerHTML = '<div style="font-size:48px;margin-bottom:12px">📷</div><div style="font-size:14px;color:#64748b">打卡照片预览</div><div style="font-size:12px;color:#94a3b8;margin-top:6px">（原型示意，实际对接图片URL）</div>';
+            overlay.appendChild(placeholder);
+            overlay.addEventListener('click', () => overlay.remove());
+            document.body.appendChild(overlay);
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        document.getElementById('detailModal').addEventListener('click', function (e) {
+            if (e.target === this) closeDetail();
+        });
+
+        // 新增外勤人员弹窗
+        let selectedPerson = {};
+
+        function openAddSite() {
+            document.getElementById('add-name').value = '';
+            document.getElementById('add-site').value = '';
+            document.getElementById('add-start').value = '';
+            document.getElementById('add-end').value = '';
+            selectedPerson = {};
+            document.getElementById('addSiteModal').classList.add('show');
+        }
+
+        function closeAddSite() {
+            document.getElementById('addSiteModal').classList.remove('show');
+        }
+
+        function submitAddSite() {
+            const name = document.getElementById('add-name').value.trim();
+            const site = document.getElementById('add-site').value.trim();
+            const rule = document.getElementById('add-rule').value.trim();
+            const start = document.getElementById('add-start').value.trim();
+            const end = document.getElementById('add-end').value.trim();
+
+            if (!name) {
+                alert('请选择人员');
+                return;
+            }
+
+            const tbody = document.querySelector('table tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                <td>${selectedPerson.company || '--'}</td>
+                <td>${selectedPerson.dept || '--'}</td>
+                <td>${selectedPerson.empId || '--'}</td>
+                <td>${name}</td>
+                <td>${site || '--'}</td>
+                <td>${rule}</td>
+                <td>${start || '--'}</td>
+                <td>${end || '--'}</td>
+                <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+            `;
+            tbody.insertBefore(newRow, tbody.firstChild);
+            closeAddSite();
+        }
+
+        // 选择人员
+        function openSelectPerson() {
+            document.getElementById('person-search').value = '';
+            filterPersons('');
+            document.getElementById('selectPersonModal').classList.add('show');
+        }
+
+        function closeSelectPerson() {
+            document.getElementById('selectPersonModal').classList.remove('show');
+        }
+
+        function pickPerson(name, company, dept, empId) {
+            document.getElementById('add-name').value = name;
+            selectedPerson = { name, company, dept, empId };
+            closeSelectPerson();
+        }
+
+        function filterPersons(keyword) {
+            const items = document.querySelectorAll('#personList .person-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(keyword.toLowerCase()) ? 'flex' : 'none';
+            });
+        }
+
+        document.getElementById('addSiteModal').addEventListener('click', function (e) {
+            if (e.target === this) closeAddSite();
+        });
+
+        document.getElementById('person-search').addEventListener('input', function() {
+            filterPersons(this.value);
+        });
+
+        document.getElementById('selectPersonModal').addEventListener('click', function (e) {
+            if (e.target === this) closeSelectPerson();
+        });
+    </script>
+</body>
+</html>

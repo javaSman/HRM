@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动打卡记录</title>
+    <style>
+        /* ============================================
+           CSS Variables — Blue-White Theme
+           ============================================ */
+        :root {
+            --radius: 0.5rem;
+            --background: #f8fafd;
+            --foreground: #1a2a3d;
+            --card: #ffffff;
+            --card-foreground: #1a2a3d;
+            --primary: #2563eb;
+            --primary-rgb: 37, 99, 235;
+            --primary-foreground: #ffffff;
+            --secondary: #eff3fb;
+            --secondary-foreground: #1e3a5f;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --accent: #eef2ff;
+            --accent-foreground: #1e3a5f;
+            --destructive: #ef4444;
+            --border: #e2e8f0;
+            --input: #e2e8f0;
+            --ring: #2563eb;
+            --success: #16a34a;
+            --warning: #f97316;
+            --danger: #ef4444;
+            --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--foreground);
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.15); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), 0.3); }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(var(--primary-rgb), 0.04);
+            overflow: hidden;
+        }
+
+        /* 头部标题 */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            background-size: 200% 200%;
+            animation: gradient-shift 6s ease infinite;
+            color: #fff;
+            padding: 28px 32px;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .header p {
+            margin-top: 6px;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* 统计卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 24px 32px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: box-shadow 0.2s ease, transform 0.15s ease;
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08);
+            transform: translateY(-1px);
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .stat-icon.normal { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+        .stat-icon.late { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .stat-icon.early { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-icon.missing { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-info h4 {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .stat-info p {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            margin-top: 2px;
+        }
+
+        /* 筛选区 */
+        .filter-section {
+            padding: 16px 32px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+        }
+        .filter-group input,
+        .filter-group select {
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid var(--input);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--foreground);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.12);
+        }
+        .filter-group input { width: 140px; }
+        .filter-group select { width: 150px; }
+
+        .btn {
+            height: 34px;
+            padding: 0 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2d78ff, #00b4d8);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 4px 14px rgba(45, 120, 255, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(22, 163, 74, 0.2);
+            font-weight: 600;
+        }
+        .btn-success:hover {
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+            transform: translateY(-1px);
+        }
+
+        /* 表格 */
+        .table-wrap {
+            overflow-x: auto;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead th {
+            background: var(--muted);
+            padding: 12px 14px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--muted-foreground);
+            white-space: nowrap;
+            border: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        tbody td {
+            padding: 14px;
+            border: 1px solid var(--border);
+            vertical-align: middle;
+            text-align: center;
+            white-space: nowrap;
+        }
+        tbody tr:hover {
+            background: rgba(var(--primary-rgb), 0.02);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .status-normal {
+            background: rgba(22, 163, 74, 0.1);
+            color: #16a34a;
+        }
+        .status-late {
+            background: rgba(249, 115, 22, 0.08);
+            color: #f97316;
+        }
+        .status-early {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        .status-missing {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* 打卡类型标签 */
+        .type-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .type-checkin {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .type-checkout {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        /* 操作按钮 */
+        .op-btn {
+            height: 28px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .op-btn.view {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .op-btn.view:hover {
+            background: rgba(var(--primary-rgb), 0.15);
+        }
+
+        /* 查看图片按钮 */
+        .photo-btn {
+            height: 30px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #2d78ff, #00b4d8);
+            box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .photo-btn:hover {
+            box-shadow: 0 4px 14px rgba(45, 120, 255, 0.35);
+            transform: translateY(-1px);
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-top: 1px solid var(--border);
+        }
+        .pagination-info {
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+        .pagination-btns {
+            display: flex;
+            gap: 6px;
+        }
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .page-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* 详情弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 14px;
+            width: 560px;
+            max-width: 92vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: modal-in 0.25s ease;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .modal-close {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-close:hover {
+            background: var(--border);
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .detail-item.full {
+            grid-column: 1 / -1;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+        .detail-value {
+            font-size: 14px;
+            color: var(--foreground);
+            padding: 8px 12px;
+            background: var(--muted);
+            border-radius: 6px;
+        }
+
+        /* 地点图标 */
+        .location-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+        }
+        .location-text::before {
+            content: '📍';
+            font-size: 12px;
+        }
+
+        /* 异常说明 */
+        .anomaly-note {
+            font-size: 12px;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.06);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--danger);
+        }
+
+        /* 地图选点 */
+        .map-picker {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #eef3fb;
+        }
+        .map-canvas {
+            position: relative;
+            height: 180px;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        .map-grid {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .map-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(37,99,235,0.3));
+            animation: pin-bounce 0.4s ease;
+        }
+        @keyframes pin-bounce {
+            0% { transform: translate(-50%, -140%); opacity: 0; }
+            60% { transform: translate(-50%, -95%); }
+            100% { transform: translate(-50%, -100%); opacity: 1; }
+        }
+        .map-accuracy {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -30%);
+            border-radius: 50%;
+            background: rgba(var(--primary-rgb), 0.1);
+            border: 2px solid rgba(var(--primary-rgb), 0.2);
+            z-index: 1;
+        }
+        .map-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+        .map-info-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .map-info-text {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选区 -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>开始日期</label>
+                    <input type="date" value="2025-12-01">
+                </div>
+                <div class="filter-group">
+                    <label>结束日期</label>
+                    <input type="date" value="2025-12-31">
+                </div>
+                <div class="filter-group">
+                    <label>外勤点名称</label>
+                    <input type="text" placeholder="请输入外勤点名称">
+                </div>
+                <div class="filter-group">
+                    <label>地址</label>
+                    <input type="text" placeholder="请输入地址">
+                </div>
+                <button class="btn btn-primary" onclick="openAddSite()">＋ 新增外勤点</button>
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-outline">重置</button>
+            </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:40px"><input type="checkbox" id="checkAll" style="cursor:pointer"></th>
+                        <th>外勤点名称</th>
+                        <th>地址</th>
+                        <th>上班时间</th>
+                        <th>下班时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>深圳湾科技园</td>
+                        <td>深圳市南山区科技园南路88号</td>
+                        <td>08:55</td>
+                        <td>18:02</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>福田CBD中心</td>
+                        <td>深圳市福田区益田路3008号</td>
+                        <td>09:12</td>
+                        <td>18:30</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>宝安产业园</td>
+                        <td>深圳市宝安区新安街道创业一路</td>
+                        <td>08:48</td>
+                        <td>17:48</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>龙华工业区</td>
+                        <td>深圳市龙华区民治街道工业路</td>
+                        <td>09:05</td>
+                        <td>--</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>光明科学城</td>
+                        <td>深圳市光明区科学大道168号</td>
+                        <td>08:50</td>
+                        <td>18:02</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>龙岗软件园</td>
+                        <td>深圳市龙岗区龙城街道龙翔大道</td>
+                        <td>--</td>
+                        <td>18:00</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>坪山制造基地</td>
+                        <td>深圳市坪山区坑梓街道锦绣路</td>
+                        <td>08:30</td>
+                        <td>17:55</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                        <td>盐田港物流园</td>
+                        <td>深圳市盐田区盐田港后方陆域</td>
+                        <td>09:00</td>
+                        <td>18:10</td>
+                        <td>
+                            <button class="op-btn view" onclick="openDetail(this)">详情</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="pagination-info">共 176 条记录，第 1/22 页</div>
+            <div class="pagination-btns">
+                <button class="page-btn">‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">...</button>
+                <button class="page-btn">22</button>
+                <button class="page-btn">›</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>打卡记录详情</h3>
+                <button class="modal-close" onclick="closeDetail()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">外勤点名称</span>
+                        <span class="detail-value" id="d-site">深圳湾科技园</span>
+                    </div>
+                    <div class="detail-item full">
+                        <span class="detail-label">地址</span>
+                        <span class="detail-value" id="d-address">深圳市南山区科技园南路88号</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">上班时间</span>
+                        <span class="detail-value" id="d-clockin">08:55</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">下班时间</span>
+                        <span class="detail-value" id="d-clockout">18:02</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增外勤点弹窗 -->
+    <div class="modal-overlay" id="addSiteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新增外勤点</h3>
+                <button class="modal-close" onclick="closeAddSite()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item full">
+                        <span class="detail-label">外勤点名称</span>
+                        <input type="text" id="add-site-name" placeholder="请输入外勤点名称" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none;transition:border-color 0.2s,box-shadow 0.2s" onfocus="this.style.borderColor='var(--ring)';this.style.boxShadow='0 0 0 2px rgba(var(--primary-rgb),0.12)'" onblur="this.style.borderColor='var(--input)';this.style.boxShadow='none'">
+                    </div>
+                    <div class="detail-item full">
+                        <span class="detail-label">地址（地图选点）</span>
+                        <div class="map-picker">
+                            <div class="map-canvas">
+                                <!-- 模拟地图网格 -->
+                                <svg class="map-grid" viewBox="0 0 400 180" preserveAspectRatio="none">
+                                    <defs>
+                                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(37,99,235,0.06)" stroke-width="1"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="400" height="180" fill="#eef3fb"/>
+                                    <rect width="400" height="180" fill="url(#grid)"/>
+                                    <!-- 模拟道路 -->
+                                    <line x1="0" y1="90" x2="400" y2="90" stroke="rgba(37,99,235,0.1)" stroke-width="3"/>
+                                    <line x1="200" y1="0" x2="200" y2="180" stroke="rgba(37,99,235,0.1)" stroke-width="3"/>
+                                    <line x1="0" y1="45" x2="400" y2="45" stroke="rgba(37,99,235,0.06)" stroke-width="1.5"/>
+                                    <line x1="0" y1="135" x2="400" y2="135" stroke="rgba(37,99,235,0.06)" stroke-width="1.5"/>
+                                    <line x1="100" y1="0" x2="100" y2="180" stroke="rgba(37,99,235,0.06)" stroke-width="1.5"/>
+                                    <line x1="300" y1="0" x2="300" y2="180" stroke="rgba(37,99,235,0.06)" stroke-width="1.5"/>
+                                    <!-- 模拟建筑色块 -->
+                                    <rect x="30" y="20" width="50" height="35" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                    <rect x="120" y="55" width="60" height="25" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                    <rect x="250" y="15" width="45" height="40" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                    <rect x="310" y="100" width="55" height="30" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                    <rect x="50" y="110" width="40" height="45" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                    <rect x="220" y="110" width="50" height="35" rx="3" fill="rgba(37,99,235,0.05)"/>
+                                </svg>
+                                <!-- 定位标记 -->
+                                <div class="map-pin">
+                                    <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
+                                        <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.268 21.732 0 14 0z" fill="var(--primary)"/>
+                                        <circle cx="14" cy="14" r="6" fill="#fff"/>
+                                    </svg>
+                                </div>
+                                <!-- 精度圈 -->
+                                <div class="map-accuracy"></div>
+                            </div>
+                            <div class="map-info">
+                                <span class="map-info-icon">📍</span>
+                                <span class="map-info-text" id="add-site-address">点击地图选择位置</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">上班时间</span>
+                        <input type="time" id="add-site-clockin" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none;transition:border-color 0.2s,box-shadow 0.2s" onfocus="this.style.borderColor='var(--ring)';this.style.boxShadow='0 0 0 2px rgba(var(--primary-rgb),0.12)'" onblur="this.style.borderColor='var(--input)';this.style.boxShadow='none'">
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">下班时间</span>
+                        <input type="time" id="add-site-clockout" style="height:36px;padding:0 12px;border:1px solid var(--input);border-radius:6px;font-size:14px;color:var(--foreground);outline:none;transition:border-color 0.2s,box-shadow 0.2s" onfocus="this.style.borderColor='var(--ring)';this.style.boxShadow='0 0 0 2px rgba(var(--primary-rgb),0.12)'" onblur="this.style.borderColor='var(--input)';this.style.boxShadow='none'">
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">
+                    <button class="btn btn-outline" onclick="closeAddSite()">取消</button>
+                    <button class="btn btn-primary" onclick="submitAddSite()">确认新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全选
+        document.getElementById('checkAll').addEventListener('change', function () {
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked);
+        });
+
+        // 详情弹窗
+        function openDetail(btn) {
+            const row = btn.closest('tr');
+            const cells = row.querySelectorAll('td');
+            document.getElementById('d-site').textContent = cells[1].textContent.trim();
+            document.getElementById('d-address').textContent = cells[2].textContent.trim();
+            document.getElementById('d-clockin').textContent = cells[3].textContent.trim();
+            document.getElementById('d-clockout').textContent = cells[4].textContent.trim();
+
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        // 照片预览
+        function openPhotoPreview(btn) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)';
+            const placeholder = document.createElement('div');
+            placeholder.style.cssText = 'background:#fff;border-radius:12px;padding:40px 60px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3)';
+            placeholder.innerHTML = '<div style="font-size:48px;margin-bottom:12px">📷</div><div style="font-size:14px;color:#64748b">打卡照片预览</div><div style="font-size:12px;color:#94a3b8;margin-top:6px">（原型示意，实际对接图片URL）</div>';
+            overlay.appendChild(placeholder);
+            overlay.addEventListener('click', () => overlay.remove());
+            document.body.appendChild(overlay);
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        document.getElementById('detailModal').addEventListener('click', function (e) {
+            if (e.target === this) closeDetail();
+        });
+
+        // 新增外勤点弹窗
+        function openAddSite() {
+            document.getElementById('add-site-name').value = '';
+            document.getElementById('add-site-address').textContent = '点击地图选择位置';
+            document.getElementById('add-site-clockin').value = '';
+            document.getElementById('add-site-clockout').value = '';
+            document.getElementById('addSiteModal').classList.add('show');
+        }
+
+        function closeAddSite() {
+            document.getElementById('addSiteModal').classList.remove('show');
+        }
+
+        function submitAddSite() {
+            const name = document.getElementById('add-site-name').value.trim();
+            const address = document.getElementById('add-site-address').textContent.trim();
+            const clockin = document.getElementById('add-site-clockin').value.trim();
+            const clockout = document.getElementById('add-site-clockout').value.trim();
+
+            if (!name) {
+                alert('请填写外勤点名称');
+                return;
+            }
+            if (!address || address === '点击地图选择位置') {
+                alert('请在地图上选择位置');
+                return;
+            }
+
+            const tbody = document.querySelector('table tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="checkbox" class="row-check" style="cursor:pointer"></td>
+                <td>${name}</td>
+                <td>${address}</td>
+                <td>${clockin || '--'}</td>
+                <td>${clockout || '--'}</td>
+                <td><button class="op-btn view" onclick="openDetail(this)">详情</button></td>
+            `;
+            tbody.insertBefore(newRow, tbody.firstChild);
+            closeAddSite();
+        }
+
+        document.getElementById('addSiteModal').addEventListener('click', function (e) {
+            if (e.target === this) closeAddSite();
+        });
+    </script>
+</body>
+</html>

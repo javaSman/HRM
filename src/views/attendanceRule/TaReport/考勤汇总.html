@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工月度考勤汇总表</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1677ff;
+            --danger: #f53f3f;
+            --gray-bg: #f7f8fa;
+            --border: #e5e7eb;
+        }
+        body {
+            background-color: var(--gray-bg);
+            font-size: 14px;
+        }
+        .page-wrap {
+            padding: 24px;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-tabs .tab-item {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+        .filter-tabs .tab-item[data-type="all"] { background: #1677ff; }
+        .filter-tabs .tab-item[data-type="月薪"] { background: #52c41a; }
+        .filter-tabs .tab-item[data-type="时薪"] { background: #fa8c16; }
+        .filter-tabs .tab-item:hover {
+            opacity: 0.85;
+        }
+        .filter-tabs .tab-item.active {
+            opacity: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+        .table-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .table-header-bar h4 {
+            margin: 0;
+            font-weight: 500;
+        }
+        .table {
+            background: #fff;
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #f2f6fc;
+            font-weight: 500;
+            border-color: var(--border);
+            text-align: center;
+        }
+        .table td {
+            border-color: var(--border);
+            vertical-align: middle;
+            text-align: center;
+        }
+        .table-hover tbody tr:hover {
+            background: #f0f7ff;
+        }
+        .link-blue {
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .link-blue:hover {
+            text-decoration: underline;
+        }
+        .link-red {
+            color: var(--danger);
+            cursor: pointer;
+        }
+        .link-red:hover {
+            text-decoration: underline;
+        }
+        .btn-blue {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 16px;
+        }
+        .btn-blue:hover {
+            opacity: 0.9;
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            background: #fff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .search-bar .search-field {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .search-bar .search-field label {
+            font-size: 13px;
+            color: #555;
+            white-space: nowrap;
+        }
+        .search-bar .search-field input,
+        .search-bar .search-field select {
+            padding: 4px 10px;
+            font-size: 13px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            height: 32px;
+            line-height: 1.2;
+            min-width: 120px;
+        }
+        .search-bar .search-field input:focus,
+        .search-bar .search-field select:focus {
+            outline: none;
+            border-color: #1677ff;
+            box-shadow: 0 0 0 2px rgba(22,119,255,0.1);
+        }
+        .search-bar .btn {
+            padding: 5px 18px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            height: 32px;
+        }
+        .search-bar .btn-search {
+            background: #1677ff;
+            color: #fff;
+            border: none;
+        }
+        .search-bar .btn-search:hover {
+            background: #4096ff;
+        }
+        .search-bar .btn-reset {
+            background: #fff;
+            color: #555;
+            border: 1px solid #d9d9d9;
+        }
+        .search-bar .btn-reset:hover {
+            border-color: #1677ff;
+            color: #1677ff;
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 20px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .tag-blue {
+            color: #1890ff;
+            background: #e6f7ff;
+            border-color: #91d5ff;
+        }
+        .tag-green {
+            color: #52c41a;
+            background: #f6ffed;
+            border-color: #b7eb8f;
+        }
+        .tag-orange {
+            color: #fa8c16;
+            background: #fff7e6;
+            border-color: #ffd591;
+        }
+        .tag-purple {
+            color: #722ed1;
+            background: #f9f0ff;
+            border-color: #d3adf7;
+        }
+        .tag-cyan {
+            color: #13c2c2;
+            background: #e6fffb;
+            border-color: #87e8de;
+        }
+        .tag-red {
+            color: #f53f3f;
+            background: #fff2f0;
+            border-color: #ffccc7;
+        }
+
+        /* 全勤标签 */
+        .tag-full {
+            color: #fff;
+            background: #52c41a;
+            border-color: #52c41a;
+            font-weight: 500;
+        }
+        .tag-not-full {
+            color: #fa8c16;
+            background: #fff7e6;
+            border-color: #ffd591;
+        }
+
+        .table th, .table td {
+            white-space: nowrap;
+        }
+        .col-name, .col-dept, .col-position {
+            min-width: 80px;
+        }
+
+        /* 滚动容器 */
+        .table-responsive {
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        /* 出勤记录弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .attendance-modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 800px;
+            height: 600px;
+            max-width: 95vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: height 0.2s;
+        }
+        .attendance-modal.auto-height {
+            height: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: linear-gradient(90deg, #1890ff 0%, #13c2c2 100%);
+            color: #fff;
+        }
+        .modal-header h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .modal-close {
+            background: rgba(255,255,255,0.25);
+            border: none;
+            font-size: 20px;
+            color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .modal-body {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .attendance-modal.auto-height .modal-body {
+            overflow: auto;
+        }
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+        .modal-tabs .modal-tab {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .modal-tabs .modal-tab:hover {
+            color: var(--primary);
+        }
+        .modal-tabs .modal-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 500;
+        }
+
+        .calendar-container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        .calendar-header {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .calendar-weekdays span {
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+            padding: 4px 0;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .calendar-day {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 2px;
+            text-align: center;
+            min-height: 72px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #fff;
+        }
+        .calendar-day .day-number {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .calendar-day .day-hours {
+            font-size: 13px;
+            color: #1677ff;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .calendar-day .day-tag {
+            font-size: 12px;
+            margin-top: 4px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .calendar-day .day-tag.sick {
+            color: #f5222d;
+            background: #fff1f0;
+            border: 1px solid #ffa39e;
+        }
+        .calendar-day .day-tag.personal {
+            color: #fa8c16;
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+        }
+        .calendar-day .day-tag.annual {
+            color: #52c41a;
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+        }
+        .calendar-day.rest-day {
+            background: #fafafa;
+            color: #999;
+        }
+        .calendar-day.rest-day .day-number {
+            color: #999;
+        }
+        .calendar-day.rest-day .day-hours {
+            color: #999;
+        }
+        .modal-table-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 24px;
+            overflow: auto;
+            min-height: 0;
+            position: relative;
+        }
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .modal-table thead th {
+            background: #e6f7ff;
+            color: #333;
+            font-weight: 500;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #91d5ff;
+        }
+        .modal-table tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: #333;
+            vertical-align: middle;
+        }
+        .modal-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .modal-table tbody tr:hover {
+            background: #f5f7fa;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 24px;
+            border-top: 1px solid var(--border);
+            background: #fff;
+        }
+        .modal-footer .btn-close-modal {
+            padding: 6px 22px;
+            font-size: 13px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #555;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-footer .btn-close-modal:hover {
+            color: #1677ff;
+            border-color: #1677ff;
+        }
+        .modal-status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #d9d9d9;
+        }
+        .modal-empty-state {
+            flex: 1;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            color: #999;
+            font-size: 14px;
+        }
+        .modal-pagination {
+            display: none;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 10px 0 4px;
+            font-size: 13px;
+            color: #666;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .modal-pagination .page-total {
+            margin-right: 6px;
+        }
+        .modal-pagination button {
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            transition: all 0.2s;
+        }
+        .modal-pagination button:hover:not(:disabled) {
+            color: #1677ff;
+            border-color: #1677ff;
+        }
+        .modal-pagination button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        .modal-pagination .page-info {
+            color: #333;
+            font-weight: 500;
+        }
+        /* 主表格分页栏 */
+        .main-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 12px 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .main-pagination .page-total {
+            margin-right: 6px;
+        }
+        .main-pagination button {
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            transition: all 0.2s;
+        }
+        .main-pagination button:hover:not(:disabled) {
+            color: #1677ff;
+            border-color: #1677ff;
+        }
+        .main-pagination button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        .main-pagination .page-info {
+            color: #333;
+            font-weight: 500;
+        }
+        .modal-empty-state .empty-wrap {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal-empty-state .empty-icon {
+            width: 84px;
+            height: 84px;
+            margin-bottom: 12px;
+        }
+        .modal-no-data {
+            display: none;
+        }
+        /* 假期余额弹窗 */
+        .leave-balance-modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 520px;
+            max-width: 95vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .leave-balance-modal .modal-header {
+            background: linear-gradient(90deg, #1890ff 0%, #13c2c2 100%);
+        }
+        .leave-balance-body {
+            padding: 16px 20px;
+            overflow: auto;
+        }
+        .leave-balance-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1677ff;
+            padding: 8px 0 4px;
+            border-bottom: 2px solid #1677ff;
+            margin-bottom: 8px;
+        }
+        .leave-balance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .leave-balance-item:last-child {
+            border-bottom: none;
+        }
+        .leave-balance-label {
+            color: #555;
+            flex: 0 0 100px;
+        }
+        .leave-balance-value {
+            color: #333;
+            font-weight: 500;
+            text-align: right;
+            flex: 1;
+        }
+        .leave-balance-item-three {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .leave-balance-item-three:last-child {
+            border-bottom: none;
+        }
+        .leave-balance-item-three .leave-balance-label {
+            color: #555;
+            flex: 0 0 100px;
+        }
+        .leave-balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #999;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 4px;
+        }
+        .leave-balance-header span:first-child {
+            flex: 0 0 100px;
+        }
+        .leave-balance-header .header-center {
+            flex: 1;
+            text-align: center;
+        }
+        .leave-balance-header .header-right {
+            flex: 1;
+            text-align: right;
+        }
+        .leave-balance-item-three .leave-balance-col-center {
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+        }
+        .leave-balance-item-three .leave-balance-col-right {
+            color: #333;
+            font-weight: 500;
+            text-align: right;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrap">
+    <!-- 薪资类型筛选 TAB -->
+    <div class="filter-tabs">
+        <button type="button" class="tab-item active" data-type="all" onclick="switchTab('all')">全部(20)</button>
+        <button type="button" class="tab-item" data-type="月薪" onclick="switchTab('月薪')">月薪(10)</button>
+        <button type="button" class="tab-item" data-type="时薪" onclick="switchTab('时薪')">时薪(10)</button>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+        <div class="search-field">
+            <label>姓名</label>
+            <input type="text" id="searchName" placeholder="请输入姓名">
+        </div>
+        <div class="search-field">
+            <label>工号</label>
+            <input type="text" id="searchEmpNo" placeholder="请输入工号">
+        </div>
+        <div class="search-field">
+            <label>公司</label>
+            <input type="text" id="searchCompany" placeholder="请输入公司">
+        </div>
+        <div class="search-field">
+            <label>部门</label>
+            <input type="text" id="searchDept" placeholder="请输入部门">
+        </div>
+        <div class="search-field">
+            <label>所属年月</label>
+            <input type="month" id="searchMonth">
+        </div>
+        <button type="button" class="btn btn-search" onclick="doSearch()">查询</button>
+        <button type="button" class="btn btn-reset" onclick="resetSearch()">重置</button>
+    </div>
+
+    <!-- 数据表 -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>薪资类型</th>
+                    <th>当月是否全勤</th>
+                    <th>工号</th>
+                    <th class="col-name">姓名</th>
+                    <th>公司</th>
+                    <th class="col-dept">部门</th>
+                    <th class="col-position">岗位</th>
+                    <th>所属年月</th>
+                    <th>出勤总天数</th>
+                    <th>出勤总时长</th>
+                    <th id="headerNormal">平时天数</th>
+                    <th id="headerWeekend">周末天数</th>
+                    <th>迟到/早退天数</th>
+                    <th>迟到/早退分钟</th>
+                    <th id="headerRate15">1.5倍天数</th>
+                    <th id="headerRate2">2倍天数</th>
+                    <th id="headerRate3">3倍天数</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+    <!-- 主表格分页栏 -->
+    <div class="main-pagination" id="mainPagination">
+        <span class="page-total" id="mainPageTotal"></span>
+        <button id="mainPrevBtn" onclick="mainGoToPage(mainPage - 1)">上一页</button>
+        <span class="page-info" id="mainPageInfo"></span>
+        <button id="mainNextBtn" onclick="mainGoToPage(mainPage + 1)">下一页</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="attendanceModal" onclick="closeModalOnOverlay(event)">
+    <div class="attendance-modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h5 id="modalTitle">当月出勤记录</h5>
+            <button type="button" class="modal-close" onclick="closeAttendanceModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-tabs">
+                <button type="button" class="modal-tab active" data-tab="calendar" onclick="switchModalTab('calendar')">出勤日历</button>
+                <button type="button" class="modal-tab" data-tab="punch" onclick="switchModalTab('punch')">打卡记录</button>
+                <button type="button" class="modal-tab" data-tab="leave" onclick="switchModalTab('leave')">请假记录</button>
+                <button type="button" class="modal-tab" data-tab="makeup" onclick="switchModalTab('makeup')">补卡申请</button>
+                <button type="button" class="modal-tab" data-tab="overtime" onclick="switchModalTab('overtime')">加班申请</button>
+                <button type="button" class="modal-tab" data-tab="out" onclick="switchModalTab('out')">外出申请</button>
+                <button type="button" class="modal-tab" data-tab="mobile" onclick="switchModalTab('mobile')">移动打卡申请</button>
+            </div>
+            <div class="modal-table-wrap" id="modalTableWrap">
+                <table class="modal-table" id="modalTable">
+                    <thead id="modalTableHead"></thead>
+                    <tbody id="modalTableBody"></tbody>
+                </table>
+                <div class="modal-pagination" id="modalPagination" style="display:none;"></div>
+                <div class="modal-empty-state" id="modalEmptyState" style="display:none;">
+                    <div class="empty-wrap">
+                        <svg class="empty-icon" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M128 320h768v512a64 64 0 0 1-64 64H192a64 64 0 0 1-64-64V320z" fill="#f5f5f5" stroke="#d9d9d9" stroke-width="48"/><path d="M64 320l96-160h704l96 160H64z" fill="#fafafa" stroke="#d9d9d9" stroke-width="48"/><path d="M416 160l96-96 96 96" fill="none" stroke="#d9d9d9" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/><rect x="320" y="512" width="384" height="48" rx="8" fill="#d9d9d9"/><rect x="320" y="640" width="256" height="48" rx="8" fill="#1677ff"/></svg>
+                        <div>暂无数据</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-close-modal" onclick="closeAttendanceModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 假期余额弹窗 -->
+<div class="modal-overlay" id="leaveBalanceModal" onclick="closeLeaveBalanceOnOverlay(event)">
+    <div class="leave-balance-modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h5 id="leaveBalanceTitle">假期余额</h5>
+            <button type="button" class="modal-close" onclick="closeLeaveBalanceModal()">&times;</button>
+        </div>
+        <div class="leave-balance-body" id="leaveBalanceBody"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let tableData = [
+        { empNo:"QR001", empName:"张伟", company:"强瑞技术", dept:"CNC四组", position:"CNC技术员", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:24, totalHours:"192h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:2, rate2Days:0, rate3Days:0, annualTotal:10, annualUsed:3, annualRemain:7, annualMonth:0, overtimeRest:1, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR002", empName:"李芳", company:"强瑞技术", dept:"商务部", position:"商务", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:25, totalHours:"200h", normalDays:17, weekendDays:4, lateDays:1, lateMinutes:8, fullAttendance:"否", rate15Days:4, rate2Days:1, rate3Days:0, annualTotal:10, annualUsed:5, annualRemain:5, annualMonth:1, overtimeRest:0, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR003", empName:"王磊", company:"强瑞技术", dept:"硬件组", position:"电子工程师", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:26, totalHours:"208h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:0, rate2Days:0, rate3Days:0, annualTotal:15, annualUsed:2, annualRemain:13, annualMonth:0, overtimeRest:2, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR004", empName:"赵敏", company:"强瑞技术", dept:"PLM组", position:"初级PLM工程师", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:22, totalHours:"176h", normalDays:16, weekendDays:4, lateDays:2, lateMinutes:25, fullAttendance:"否", rate15Days:5, rate2Days:2, rate3Days:1, annualTotal:10, annualUsed:8, annualRemain:2, annualMonth:2, overtimeRest:0, injury:0, sick:1, prenatal:0, maternity:0, paternity:0, personalLeave:1, marriage:0 },
+        { empNo:"QR005", empName:"陈强", company:"强瑞技术", dept:"装配部", position:"电工学徒", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:24, totalHours:"192h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:6, rate2Days:3, rate3Days:0, annualTotal:5, annualUsed:1, annualRemain:4, annualMonth:0, overtimeRest:3, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR006", empName:"刘洋", company:"强瑞技术", dept:"顾问组", position:"内部顾问", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:25, totalHours:"200h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:0, rate2Days:0, rate3Days:0, annualTotal:12, annualUsed:4, annualRemain:8, annualMonth:0, overtimeRest:0, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:3 },
+        { empNo:"QR007", empName:"周伟", company:"强瑞技术", dept:"CNC一组", position:"CNC技术员", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:23, totalHours:"184h", normalDays:17, weekendDays:4, lateDays:1, lateMinutes:12, fullAttendance:"否", rate15Days:3, rate2Days:1, rate3Days:0, annualTotal:10, annualUsed:6, annualRemain:4, annualMonth:1, overtimeRest:1, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:1, marriage:0 },
+        { empNo:"QP001", empName:"孙涛", company:"强鹏芯", dept:"钣金组", position:"打磨工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:26, totalHours:"208h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:8, rate2Days:4, rate3Days:1, annualTotal:5, annualUsed:0, annualRemain:5, annualMonth:0, overtimeRest:4, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QP002", empName:"吴刚", company:"强鹏芯", dept:"机加组", position:"CNC技术员", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:26, totalHours:"208h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:1, rate2Days:0, rate3Days:0, annualTotal:10, annualUsed:2, annualRemain:8, annualMonth:0, overtimeRest:0, injury:1, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR008", empName:"黄丽", company:"强瑞技术", dept:"装配部", position:"装配电工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:25, totalHours:"200h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:3, rate2Days:0, rate3Days:0, annualTotal:10, annualUsed:3, annualRemain:7, annualMonth:0, overtimeRest:2, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR009", empName:"郑军", company:"强瑞技术", dept:"仓库组", position:"仓管员", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:20, totalHours:"160h", normalDays:16, weekendDays:4, lateDays:3, lateMinutes:45, fullAttendance:"否", rate15Days:4, rate2Days:2, rate3Days:0, annualTotal:10, annualUsed:9, annualRemain:1, annualMonth:0, overtimeRest:0, injury:0, sick:2, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR010", empName:"杨静", company:"强瑞技术", dept:"人事部", position:"人事文员", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"月薪", totalDays:27, totalHours:"216h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:0, rate2Days:0, rate3Days:0, annualTotal:10, annualUsed:4, annualRemain:6, annualMonth:0, overtimeRest:0, injury:0, sick:0, prenatal:2, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QP003", empName:"马超", company:"强鹏芯", dept:"钣金组", position:"折弯工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:25, totalHours:"200h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:6, rate2Days:2, rate3Days:0, annualTotal:5, annualUsed:2, annualRemain:3, annualMonth:0, overtimeRest:2, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QP004", empName:"何勇", company:"强鹏芯", dept:"机加组", position:"铣床操作工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:19, totalHours:"152h", normalDays:16, weekendDays:4, lateDays:1, lateMinutes:15, fullAttendance:"否", rate15Days:5, rate2Days:3, rate3Days:1, annualTotal:5, annualUsed:3, annualRemain:2, annualMonth:1, overtimeRest:0, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR011", empName:"林小红", company:"强瑞技术", dept:"装配部", position:"装配工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:22, totalHours:"176h", normalDays:17, weekendDays:4, lateDays:1, lateMinutes:5, fullAttendance:"否", rate15Days:4, rate2Days:1, rate3Days:0, annualTotal:5, annualUsed:4, annualRemain:1, annualMonth:0, overtimeRest:1, injury:0, sick:1, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR012", empName:"高飞", company:"强瑞技术", dept:"CNC二组", position:"CNC操作工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:27, totalHours:"216h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:7, rate2Days:4, rate3Days:2, annualTotal:5, annualUsed:0, annualRemain:5, annualMonth:0, overtimeRest:3, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QP005", empName:"贺兰", company:"强鹏芯", dept:"仓库组", position:"搬运工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:18, totalHours:"144h", normalDays:15, weekendDays:4, lateDays:3, lateMinutes:38, fullAttendance:"否", rate15Days:2, rate2Days:0, rate3Days:0, annualTotal:5, annualUsed:5, annualRemain:0, annualMonth:0, overtimeRest:0, injury:0, sick:2, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR013", empName:"宋宇", company:"强瑞技术", dept:"CNC三组", position:"CNC学徒", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:25, totalHours:"200h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:3, rate2Days:1, rate3Days:0, annualTotal:5, annualUsed:1, annualRemain:4, annualMonth:0, overtimeRest:2, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QP006", empName:"魏芳", company:"强鹏芯", dept:"钣金组", position:"焊接工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:23, totalHours:"184h", normalDays:17, weekendDays:4, lateDays:2, lateMinutes:20, fullAttendance:"否", rate15Days:5, rate2Days:2, rate3Days:0, annualTotal:5, annualUsed:2, annualRemain:3, annualMonth:0, overtimeRest:1, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 },
+        { empNo:"QR014", empName:"段鹏", company:"强瑞技术", dept:"装配部", position:"电工", yearMonth:"2026-07", bigWeek:2, smallWeek:1, salaryType:"时薪", totalDays:28, totalHours:"224h", normalDays:18, weekendDays:4, lateDays:0, lateMinutes:0, fullAttendance:"是", rate15Days:8, rate2Days:5, rate3Days:1, annualTotal:5, annualUsed:0, annualRemain:5, annualMonth:0, overtimeRest:5, injury:0, sick:0, prenatal:0, maternity:0, paternity:0, personalLeave:0, marriage:0 }
+    ];
+
+    let currentTab = 'all';
+    let mainPage = 1;
+    let mainPageSize = 10;
+
+    function getCompanyTag(val) {
+        if (!val) return '-';
+        return `<span class="tag tag-blue">${val}</span>`;
+    }
+    function getSalaryTag(val) {
+        if (val === '月薪') return `<span class="tag tag-cyan">${val}</span>`;
+        if (val === '时薪') return `<span class="tag tag-orange">${val}</span>`;
+        return val || '-';
+    }
+    function getFullTag(val) {
+        if (val === '是') return `<span class="tag tag-full">是</span>`;
+        if (val === '否') return `<span class="tag tag-not-full">否</span>`;
+        return val || '-';
+    }
+    function getLateTag(val) {
+        if (val > 0) return `<span class="tag tag-red">${val}</span>`;
+        return `<span class="tag tag-green">${val}</span>`;
+    }
+    function getDaysTag(val) {
+        if (val >= 25) return `<span class="tag tag-green">${val}</span>`;
+        return `<span class="tag tag-red">${val}</span>`;
+    }
+    function getHoursTag(val) {
+        var num = parseInt(val);
+        if (num >= 200) return `<span class="tag tag-green">${val}</span>`;
+        return `<span class="tag tag-red">${val}</span>`;
+    }
+
+    function updateTabCounts(list) {
+        var total = list.length;
+        var monthly = list.filter(function(item) { return item.salaryType === '月薪'; }).length;
+        var hourly = list.filter(function(item) { return item.salaryType === '时薪'; }).length;
+        document.querySelector('.tab-item[data-type="all"]').textContent = '全部(' + total + ')';
+        document.querySelector('.tab-item[data-type="月薪"]').textContent = '月薪(' + monthly + ')';
+        document.querySelector('.tab-item[data-type="时薪"]').textContent = '时薪(' + hourly + ')';
+    }
+
+    function switchTab(type) {
+        currentTab = type;
+        mainPage = 1;
+        document.querySelectorAll('.tab-item').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.type === type);
+        });
+        doSearch();
+    }
+
+    function updateTableHeaders() {
+        var isHourly = currentTab === '时薪';
+        var suffix = isHourly ? '小时' : '天数';
+        document.getElementById('headerNormal').textContent = '平时' + suffix;
+        document.getElementById('headerWeekend').textContent = '周末' + suffix;
+        document.getElementById('headerRate15').textContent = '1.5倍' + suffix;
+        document.getElementById('headerRate2').textContent = '2倍' + suffix;
+        document.getElementById('headerRate3').textContent = '3倍' + suffix;
+    }
+
+    function renderTable(list) {
+        var isHourly = currentTab === '时薪';
+        var multiplier = isHourly ? 8 : 1;
+        updateTableHeaders();
+        var tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        list.forEach((item, idx) => {
+            let tr = document.createElement("tr");
+            var html = `
+                <td>${getSalaryTag(item.salaryType)}</td>
+                <td>${getFullTag(item.fullAttendance)}</td>
+                <td>${item.empNo}</td>
+                <td class="col-name">${item.empName}</td>
+                <td>${getCompanyTag(item.company)}</td>
+                <td class="col-dept">${item.dept}</td>
+                <td class="col-position">${item.position}</td>
+                <td>${item.yearMonth}</td>
+                <td>${getDaysTag(item.totalDays)}</td>
+                <td>${getHoursTag(item.totalHours)}</td>
+                <td>${item.normalDays * multiplier}</td>
+                <td>${item.weekendDays * multiplier}</td>
+                <td>${getLateTag(item.lateDays)}</td>
+                <td>${item.lateMinutes}</td>
+                <td>${item.rate15Days * multiplier}</td>
+                <td>${item.rate2Days * multiplier}</td>
+                <td>${item.rate3Days * multiplier}</td>
+                <td><button type="button" class="btn btn-blue" style="padding:4px 12px;font-size:12px;" onclick="openAttendanceModal('${item.empName}')">出勤记录</button><button type="button" class="btn" style="padding:4px 12px;font-size:12px;margin-left:6px;background:#722ed1;color:#fff;border:none;border-radius:4px;" onclick="openLeaveBalanceModal('${item.empName}')">假期余额</button></td>`;
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function getSearchFiltered() {
+        var name = document.getElementById('searchName').value.trim().toLowerCase();
+        var empNo = document.getElementById('searchEmpNo').value.trim().toLowerCase();
+        var company = document.getElementById('searchCompany').value.trim().toLowerCase();
+        var dept = document.getElementById('searchDept').value.trim().toLowerCase();
+        var month = document.getElementById('searchMonth').value.trim();
+
+        return tableData.filter(function(item) {
+            if (name && !item.empName.toLowerCase().includes(name)) return false;
+            if (empNo && !item.empNo.toLowerCase().includes(empNo)) return false;
+            if (company && !item.company.toLowerCase().includes(company)) return false;
+            if (dept && !item.dept.toLowerCase().includes(dept)) return false;
+            if (month && !item.yearMonth.startsWith(month)) return false;
+            return true;
+        });
+    }
+
+    function applyFilter() {
+        var list = getSearchFiltered();
+        updateTabCounts(list);
+        if (currentTab !== 'all') {
+            list = list.filter(function(item) { return item.salaryType === currentTab; });
+        }
+        var totalItems = list.length;
+        var totalPages = Math.ceil(totalItems / mainPageSize);
+        if (mainPage > totalPages) mainPage = totalPages;
+        if (mainPage < 1) mainPage = 1;
+        var start = (mainPage - 1) * mainPageSize;
+        var renderList = list.slice(start, start + mainPageSize);
+        renderTable(renderList);
+        renderMainPagination(totalItems, totalPages);
+    }
+
+    function renderMainPagination(totalItems, totalPages) {
+        var bar = document.getElementById('mainPagination');
+        document.getElementById('mainPageTotal').textContent = '共 ' + totalItems + ' 条';
+        document.getElementById('mainPageInfo').textContent = mainPage + ' / ' + totalPages;
+        document.getElementById('mainPrevBtn').disabled = mainPage <= 1;
+        document.getElementById('mainNextBtn').disabled = mainPage >= totalPages;
+        bar.style.display = totalPages > 1 ? 'flex' : 'none';
+    }
+
+    function mainGoToPage(p) {
+        if (p < 1) return;
+        mainPage = p;
+        applyFilter();
+    }
+
+    function doSearch() {
+        mainPage = 1;
+        applyFilter();
+    }
+
+    function resetSearch() {
+        document.getElementById('searchName').value = '';
+        document.getElementById('searchEmpNo').value = '';
+        document.getElementById('searchCompany').value = '';
+        document.getElementById('searchDept').value = '';
+        document.getElementById('searchMonth').value = '';
+        currentTab = 'all';
+        mainPage = 1;
+        document.querySelectorAll('.tab-item').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.type === 'all');
+        });
+        applyFilter();
+    }
+
+    let currentModalTab = 'punch';
+    let currentModalEmployee = '';
+    let punchPage = 1;
+    let pageSize = 10;
+
+    function openAttendanceModal(empName) {
+        currentModalEmployee = empName || '';
+        currentModalTab = 'calendar';
+        punchPage = 1;
+        document.querySelectorAll('.modal-tab').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.tab === 'calendar');
+        });
+        document.getElementById('attendanceModal').classList.add('show');
+        updateModalTitle();
+        renderModalTable();
+    }
+
+    function closeAttendanceModal() {
+        document.getElementById('attendanceModal').classList.remove('show');
+    }
+
+    function closeModalOnOverlay(event) {
+        if (event.target.id === 'attendanceModal') {
+            closeAttendanceModal();
+        }
+    }
+
+    function switchModalTab(tab) {
+        currentModalTab = tab;
+        punchPage = 1;
+        document.querySelectorAll('.modal-tab').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        updateModalTitle();
+        renderModalTable();
+    }
+
+    function updateModalTitle() {
+        var tabNames = {
+            calendar: '出勤日历',
+            punch: '打卡记录',
+            leave: '请假记录',
+            makeup: '补卡申请',
+            overtime: '加班申请',
+            out: '外出申请',
+            mobile: '移动打卡申请'
+        };
+        var emp = tableData.find(function(item) { return item.empName === currentModalEmployee; });
+        var empNo = emp ? emp.empNo : '';
+        var title = tabNames[currentModalTab] || '出勤记录';
+        if (currentModalEmployee) {
+            title += ' - ' + currentModalEmployee + (empNo ? ' (' + empNo + ')' : '');
+        }
+        document.getElementById('modalTitle').textContent = title;
+    }
+
+    function renderCalendar(year, month) {
+        var grid = document.getElementById('calendarGrid');
+        var header = document.getElementById('calendarHeader');
+        if (!grid || !header) return;
+        grid.innerHTML = '';
+        header.textContent = year + '年' + month + '月';
+
+        var firstDay = new Date(year, month - 1, 1);
+        var startWeekDay = firstDay.getDay();
+        var daysInMonth = new Date(year, month, 0).getDate();
+
+        // 日历出勤数据：工作日默认 8.0h，可覆盖为病假/事假/年假及 4.0h/0.0h
+        var calendarData = {
+            7:  { hours: '0.0h', tag: '病假', tagClass: 'sick' },
+            8:  { hours: '4.0h', tag: '事假', tagClass: 'personal' },
+            10: { hours: '0.0h', tag: '年假', tagClass: 'annual' },
+            14: { hours: '4.0h', tag: '病假', tagClass: 'sick' },
+            17: { hours: '0.0h', tag: '年假', tagClass: 'annual' },
+            22: { hours: '4.0h', tag: '事假', tagClass: 'personal' }
+        };
+
+        // 补齐月初空白
+        for (var i = 0; i < startWeekDay; i++) {
+            var empty = document.createElement('div');
+            empty.className = 'calendar-day';
+            empty.style.visibility = 'hidden';
+            grid.appendChild(empty);
+        }
+
+        // 生成每一天
+        for (var d = 1; d <= daysInMonth; d++) {
+            var date = new Date(year, month - 1, d);
+            var isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            var cell = document.createElement('div');
+            cell.className = 'calendar-day' + (isWeekend ? ' rest-day' : '');
+            var info = calendarData[d] || {};
+            var hours = isWeekend ? '0.0h' : (info.hours || '8.0h');
+            var tag = isWeekend ? '' : (info.tag || '');
+            var tagClass = info.tagClass || '';
+            var html = '<div class="day-number">' + d + '</div>';
+            if (tag) {
+                html += '<div class="day-tag ' + tagClass + '">' + tag + '</div>';
+            }
+            html += '<div class="day-hours">' + hours + '</div>';
+            cell.innerHTML = html;
+            grid.appendChild(cell);
+        }
+    }
+
+    function renderModalTable() {
+        var modal = document.querySelector('.attendance-modal');
+        if (modal) modal.classList.remove('auto-height');
+
+        var head = document.getElementById('modalTableHead');
+        var body = document.getElementById('modalTableBody');
+        var emptyState = document.getElementById('modalEmptyState');
+        if (emptyState) emptyState.style.display = 'none';
+        var paginationBar = document.getElementById('modalPagination');
+        if (paginationBar) paginationBar.style.display = 'none';
+        head.innerHTML = '';
+        body.innerHTML = '';
+
+        // 出勤日历 Tab：高度自适应，确保日历完整显示
+        if (currentModalTab === 'calendar') {
+            if (modal) modal.classList.add('auto-height');
+            var calendarHtml = '<tr><td colspan="1" style="padding:0;border:none;">';
+            calendarHtml += '<div class="calendar-container">';
+            calendarHtml += '<div class="calendar-header" id="calendarHeader">2026年7月</div>';
+            calendarHtml += '<div class="calendar-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>';
+            calendarHtml += '<div class="calendar-grid" id="calendarGrid"></div>';
+            calendarHtml += '</div>';
+            calendarHtml += '</td></tr>';
+            body.innerHTML = calendarHtml;
+            document.getElementById('modalTable').style.width = '100%';
+            renderCalendar(2026, 7);
+            return;
+        }
+        document.getElementById('modalTable').style.width = '100%';
+
+        var tabs = {
+            punch: {
+                columns: ['序号', '打卡时间', '打卡方式', '是否补卡', '状态'],
+                data: [
+                    { time: '2026-07-01 07:55:32', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-01 17:33:18', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-02 07:48:15', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-02 17:42:03', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-03 08:02:11', way: '考勤机', makeUp: '是', status: '正常' },
+                    { time: '2026-07-03 17:28:48', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-06 07:51:24', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-06 17:35:09', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-08 07:56:41', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-08 12:18:30', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-08 13:05:22', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-08 17:40:15', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-09 07:49:08', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-09 17:31:45', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-13 07:53:19', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-13 17:38:55', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-14 07:47:33', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-14 12:11:42', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-15 07:59:17', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-15 11:54:20', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-15 12:09:41', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-15 17:45:08', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-16 07:50:21', way: '考勤机', makeUp: '-', status: '-' },
+                    { time: '2026-07-16 17:33:56', way: '考勤机', makeUp: '-', status: '-' }
+                ]
+            },
+            leave: {
+                columns: ['序号', '开始时间', '结束时间', '请假时长', '请假类型'],
+                data: []
+            },
+            makeup: {
+                columns: ['序号', '补卡日期', '补卡时间'],
+                data: [
+                    { date: '2026-07-05', time: '08:30' },
+                    { date: '2026-07-12', time: '17:30' },
+                    { date: '2026-07-19', time: '08:45' }
+                ]
+            },
+            overtime: {
+                columns: ['序号', '加班日期', '开始时间', '结束时间', '加班时长', '单位'],
+                data: []
+            },
+            out: {
+                columns: ['序号', '开始时间', '结束时间', '外出原因'],
+                data: []
+            },
+            mobile: {
+                columns: ['序号', '位置名称', '开始时间', '结束时间'],
+                data: []
+            }
+        };
+
+        var config = tabs[currentModalTab] || tabs.punch;
+
+        // 表头
+        var trHead = document.createElement('tr');
+        config.columns.forEach(function(col) {
+            var th = document.createElement('th');
+            th.textContent = col;
+            trHead.appendChild(th);
+        });
+        head.appendChild(trHead);
+
+        // 数据
+        if (config.data.length === 0) {
+            body.innerHTML = '';
+            if (emptyState) emptyState.style.display = 'flex';
+            return;
+        }
+
+        // 有数据时高度根据内容自适应，避免下方留白
+        if (modal) modal.classList.add('auto-height');
+
+        // 打卡记录分页处理
+        var renderList = config.data;
+        var totalPages = 1;
+        if (currentModalTab === 'punch') {
+            totalPages = Math.ceil(config.data.length / pageSize);
+            if (punchPage > totalPages) punchPage = totalPages;
+            var start = (punchPage - 1) * pageSize;
+            renderList = config.data.slice(start, start + pageSize);
+        }
+
+        var keyMap = { '打卡时间': 'time', '打卡方式': 'way', '是否补卡': 'makeUp', '状态': 'status', '请假类型': 'type', '开始时间': 'start', '结束时间': 'end', '请假时长': 'leaveHours', '补卡日期': 'date', '补卡时间': 'time', '加班日期': 'date', '加班时长': 'hours', '单位': 'unit', '外出原因': 'reason', '位置名称': 'location' };
+
+        var globalOffset = (currentModalTab === 'punch') ? (punchPage - 1) * pageSize : 0;
+        renderList.forEach(function(row, rowIndex) {
+            var tr = document.createElement('tr');
+            config.columns.forEach(function(col) {
+                var td = document.createElement('td');
+                if (col === '序号') {
+                    td.textContent = globalOffset + rowIndex + 1;
+                } else if (col === '打卡时间') {
+                    td.innerHTML = '<strong>' + (row['time'] || '') + '</strong>';
+                } else {
+                    var value = row[keyMap[col]] || '';
+                    if (col === '状态' && value !== '-') {
+                        td.innerHTML = '<span class="modal-status-tag">' + value + '</span>';
+                    } else {
+                        td.textContent = value;
+                    }
+                }
+                tr.appendChild(td);
+            });
+            body.appendChild(tr);
+        });
+
+        // 渲染分页栏
+        var pagination = document.getElementById('modalPagination');
+        if (pagination) {
+            if (currentModalTab === 'punch' && totalPages > 1) {
+                var prevDisabled = punchPage <= 1 ? ' disabled' : '';
+                var nextDisabled = punchPage >= totalPages ? ' disabled' : '';
+                pagination.innerHTML =
+                    '<span class="page-total">共 ' + config.data.length + ' 条</span>' +
+                    '<button onclick="goToPage(' + (punchPage - 1) + ')"' + prevDisabled + '>上一页</button>' +
+                    '<span class="page-info">' + punchPage + ' / ' + totalPages + '</span>' +
+                    '<button onclick="goToPage(' + (punchPage + 1) + ')"' + nextDisabled + '>下一页</button>';
+                pagination.style.display = 'flex';
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+    }
+
+    function goToPage(p) {
+        if (p < 1) return;
+        punchPage = p;
+        renderModalTable();
+    }
+    function openLeaveBalanceModal(empName) {
+        var emp = tableData.find(function(item) { return item.empName === empName; });
+        if (!emp) return;
+        document.getElementById('leaveBalanceTitle').textContent = emp.empName + '的假期余额';
+        // 年假汇总
+        var html = '';
+        html += '<div class="leave-balance-item"><span class="leave-balance-label">年假总数</span><span class="leave-balance-value">' + emp.annualTotal + '天</span></div>';
+        html += '<div class="leave-balance-item"><span class="leave-balance-label">已休年假天数</span><span class="leave-balance-value">' + emp.annualUsed + '天</span></div>';
+        html += '<div class="leave-balance-item"><span class="leave-balance-label">剩余年假天数</span><span class="leave-balance-value">' + emp.annualRemain + '天</span></div>';
+        var today = new Date();
+        var yearEnd = new Date(today.getFullYear(), 11, 31);
+        var countdownDays = Math.ceil((yearEnd - today) / (1000 * 60 * 60 * 24));
+        html += '<div class="leave-balance-item"><span class="leave-balance-label">年假剩余时间</span><span class="leave-balance-value">' + countdownDays + '天</span></div>';
+        // 当月请假天数（三列）
+        html += '<div class="leave-balance-section-title">当月请假天数</div>';
+        html += '<div class="leave-balance-header"><span>假期类型</span><span class="header-center">当月请假天数</span><span class="header-right">剩余天数</span></div>';
+        var monthlyFields = [
+            { label: '加班调休', value: emp.overtimeRest, remain: 0, unlimited: false },
+            { label: '病假', value: emp.sick, remain: 0, unlimited: true },
+            { label: '事假', value: emp.personalLeave, remain: 0, unlimited: true },
+            { label: '年假', value: emp.annualMonth, remain: emp.annualRemain, unlimited: false },
+            { label: '工伤', value: emp.injury, remain: 0, unlimited: true },
+            { label: '产检', value: emp.prenatal, remain: 0, unlimited: true },
+            { label: '产假', value: emp.maternity, remain: 0, unlimited: true },
+            { label: '陪产假', value: emp.paternity, remain: 0, unlimited: true },
+            { label: '婚假', value: emp.marriage, remain: 0, unlimited: true }
+        ];
+        monthlyFields.forEach(function(f) {
+            var remainText = f.unlimited ? '不限额' : f.remain + '天';
+            html += '<div class="leave-balance-item-three"><span class="leave-balance-label">' + f.label + '</span><span class="leave-balance-col-center">' + f.value + '天</span><span class="leave-balance-col-right">' + remainText + '</span></div>';
+        });
+        document.getElementById('leaveBalanceBody').innerHTML = html;
+        document.getElementById('leaveBalanceModal').classList.add('show');
+    }
+    function closeLeaveBalanceModal() {
+        document.getElementById('leaveBalanceModal').classList.remove('show');
+    }
+    function closeLeaveBalanceOnOverlay(event) {
+        if (event.target.id === 'leaveBalanceModal') {
+            closeLeaveBalanceModal();
+        }
+    }
+
+    applyFilter();
+</script>
+</body>
+</html>

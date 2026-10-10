@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>我的审批</title>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#f0f3f8;
+  --card:#ffffff;
+  --fg:#1a2c3e;
+  --fg2:#4a5b6e;
+  --fg3:#8b9aaf;
+  --p:#4f6ef6;
+  --pr:79,110,246;
+  --grad:linear-gradient(135deg,#4f6ef6 0%,#7c5cfc 50%,#38bdf8 100%);
+  --grad2:linear-gradient(135deg,#f0f3ff 0%,#e8f4fd 100%);
+  --grad3:linear-gradient(135deg,#f8faff 0%,#eef2ff 100%);
+  --border:#e2e8f0;
+  --shadow:0 1px 3px rgba(16,24,40,.04),0 1px 2px rgba(16,24,40,.03);
+  --shadow-lg:0 4px 16px rgba(16,24,40,.06),0 2px 6px rgba(16,24,40,.04);
+  --radius-sm:8px;
+  --radius:12px;
+  --radius-lg:16px;
+  --font:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',ui-sans-serif,system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:var(--font);
+  color:var(--fg);background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+body{padding:20px;background:linear-gradient(180deg,#eef1f8 0%,#f0f3f8 40%,#f4f6fb 100%);}
+
+.page{
+  max-width:1440px;margin:0 auto;
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-radius:var(--radius-lg);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 4px 32px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04),inset 0 1px 0 rgba(255,255,255,.8);
+  height:calc(100vh - 40px);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* header */
+.header{
+  padding:26px 32px 0;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(79,110,246,.03) 0%,transparent 100%);
+}
+.hd-row{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;
+}
+.hd-row h1{
+  font-size:22px;font-weight:700;letter-spacing:-.3px;
+  background:var(--grad);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hd-row p{font-size:12px;color:var(--fg3);margin-top:4px;}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);}
+.tab{
+  padding:11px 26px;font-size:13px;font-weight:500;
+  color:var(--fg2);cursor:pointer;
+  border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+  border-bottom:2px solid transparent;
+  transition:all .2s ease;user-select:none;
+  position:relative;z-index:1;
+}
+.tab:hover{color:var(--fg);background:rgba(var(--pr),.03);}
+.tab.active{
+  color:var(--p);border-bottom-color:transparent;
+  background:linear-gradient(135deg,rgba(var(--pr),.08) 0%,rgba(124,92,252,.06) 100%);
+  font-weight:600;z-index:2;
+  box-shadow:0 -1px 6px rgba(var(--pr),.06);
+}
+.tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;border-radius:11px;
+  background:rgba(var(--pr),.12);color:var(--p);
+  font-size:12px;font-weight:700;padding:0 6px;
+  margin-left:6px;line-height:1;
+}
+.tab.active .tab-badge{background:var(--p);color:#fff;}
+
+/* main */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* left */
+.left{
+  width:348px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  background:rgba(248,250,255,.5);
+  padding:14px 12px;
+  display:flex;flex-direction:column;gap:10px;overflow:hidden;
+}
+.left::-webkit-scrollbar{width:5px;}
+.left::-webkit-scrollbar-track{background:transparent;}
+.left::-webkit-scrollbar-thumb{background:rgba(var(--pr),.12);border-radius:99px;}
+
+/* filter bar - full width */
+.filter-bar{
+  flex-shrink:0;
+  padding:10px 32px;
+  background:linear-gradient(180deg,rgba(79,110,246,.02) 0%,transparent 100%);
+  border-bottom:1px solid var(--border);
+}
+.filter-row{
+  display:flex;align-items:center;gap:16px;
+}
+.filter-item{
+  display:flex;align-items:center;gap:6px;
+}
+.filter-item label{
+  font-size:12px;color:var(--fg3);font-weight:500;letter-spacing:.2px;
+  white-space:nowrap;flex-shrink:0;
+}
+.filter-item select,
+.filter-item input{
+  height:30px;border-radius:6px;
+  border:1px solid #e2e8f0;
+  font-size:12px;color:var(--fg);font-family:var(--font);
+  padding:0 10px;outline:none;
+  background:#fff;
+  transition:all .2s ease;
+}
+.filter-item select{width:140px;}
+.filter-item input[type="text"]{width:150px;}
+.filter-item input[type="date"]{width:130px;}
+.filter-item select:focus,
+.filter-item input:focus{
+  border-color:rgba(var(--pr),.5);
+  box-shadow:0 0 0 2px rgba(var(--pr),.08);
+}
+.filter-item input::placeholder{color:#b0bec5;font-size:11px;}
+.filter-actions{
+  display:flex;gap:6px;align-items:center;
+}
+.filter-btn{
+  height:30px;padding:0 18px;border-radius:6px;
+  font-size:12px;font-weight:600;font-family:var(--font);
+  cursor:pointer;border:none;transition:all .2s ease;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.filter-btn-primary{
+  background:var(--grad);color:#fff;
+  box-shadow:0 2px 8px rgba(var(--pr),.2);
+}
+.filter-btn-primary:hover{box-shadow:0 4px 14px rgba(var(--pr),.35);transform:translateY(-1px);}
+.filter-btn-reset{
+  background:#fff;color:var(--fg2);border:1px solid #e2e8f0;
+}
+.filter-btn-reset:hover{border-color:rgba(var(--pr),.3);color:var(--p);}
+.date-range{display:flex;align-items:center;gap:6px;}
+.date-range span{font-size:12px;color:var(--fg3);white-space:nowrap;}
+
+/* batch approve btn */
+.batch-btn{
+  width:100%;height:40px;border-radius:var(--radius);
+  background:linear-gradient(135deg,rgba(var(--pr),.06) 0%,rgba(124,92,252,.04) 100%);
+  border:1.5px dashed rgba(var(--pr),.25);
+  color:var(--p);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:var(--font);
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  flex-shrink:0;letter-spacing:.3px;
+}
+.batch-btn:hover{
+  background:linear-gradient(135deg,rgba(var(--pr),.12) 0%,rgba(124,92,252,.08) 100%);
+  border-color:rgba(var(--pr),.45);
+  box-shadow:0 2px 12px rgba(var(--pr),.1);
+  transform:translateY(-1px);
+}
+.batch-btn:active{transform:scale(.97);}
+
+.card-list{display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;}
+.card-list::-webkit-scrollbar{width:5px;}
+.card-list::-webkit-scrollbar-track{background:transparent;}
+.card-list::-webkit-scrollbar-thumb{background:rgba(var(--pr),.12);border-radius:99px;}
+
+/* card */
+.card{
+  background:linear-gradient(135deg,#fff 0%,#fafbff 100%);
+  border-radius:var(--radius);
+  border:1px solid rgba(var(--pr),.08);
+  padding:15px 17px;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:var(--grad);opacity:0;transition:opacity .25s ease;z-index:0;
+  border-radius:var(--radius);
+}
+.card:hover{
+  border-color:rgba(var(--pr),.2);
+  box-shadow:0 4px 20px rgba(var(--pr),.08);
+  transform:translateY(-1px);
+}
+.card.active{
+  border-color:rgba(var(--pr),.35);
+  box-shadow:0 0 0 3px rgba(var(--pr),.1),0 6px 24px rgba(var(--pr),.12);
+  background:linear-gradient(135deg,#f8faff 0%,#f0f4ff 100%);
+}
+.card-tag{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:600;margin-bottom:9px;position:relative;z-index:1;
+  letter-spacing:.3px;
+}
+.t-leave   {background:linear-gradient(135deg,#fee2e2,#fecaca);color:#dc2626;}
+.t-overtime{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#d97706;}
+.t-repair  {background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#2563eb;}
+.t-out     {background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#059669;}
+.t-other   {background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#7c3aed;}
+.card-name{
+  font-size:14px;font-weight:600;color:var(--fg);
+  margin-bottom:7px;line-height:1.4;
+  padding-right:22px;position:relative;z-index:1;
+}
+.card-meta{
+  display:flex;align-items:center;gap:16px;
+  font-size:11px;color:var(--fg3);flex-wrap:wrap;
+  position:relative;z-index:1;
+}
+.card-meta span{display:flex;align-items:center;gap:4px;}
+.card-arrow{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--fg3);font-size:12px;transition:all .2s;z-index:1;
+}
+.card.active .card-arrow{color:var(--p);}
+
+.empty-list{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:80px 16px;color:var(--fg3);
+}
+.empty-list i{font-size:44px;margin-bottom:10px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.empty-list span{font-size:13px;}
+
+/* right */
+.right{
+  flex:1;overflow-y:auto;padding:28px 36px;
+  background:linear-gradient(135deg,rgba(255,255,255,.9) 0%,rgba(248,250,255,.9) 100%);
+}
+.right::-webkit-scrollbar{width:5px;}
+.right::-webkit-scrollbar-track{background:transparent;}
+.right::-webkit-scrollbar-thumb{background:rgba(var(--pr),.12);border-radius:99px;}
+
+.detail-head{
+  margin-bottom:24px;padding-bottom:18px;
+  border-bottom:2px solid;
+  border-image:var(--grad) 1;
+}
+.detail-head h2{
+  font-size:19px;font-weight:700;color:var(--fg);
+  margin-bottom:12px;letter-spacing:-.2px;
+}
+.dh-row{display:flex;align-items:center;gap:12px;}
+.sp{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  letter-spacing:.2px;
+}
+.sp-pending {background:linear-gradient(135deg,#fef3c7,#fde68a);color:#b45309;}
+.sp-approved{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#047857;}
+.sp-rejected{background:linear-gradient(135deg,#fee2e2,#fecaca);color:#dc2626;}
+.sp-cc      {background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1d4ed8;}
+.detail-no{font-size:12px;color:var(--fg3);}
+
+.group{margin-bottom:26px;}
+.g-title{
+  font-size:13px;font-weight:600;color:var(--fg);
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.g-title::before{
+  content:'';width:4px;height:16px;border-radius:2px;
+  background:var(--grad);display:inline-block;
+}
+.row{display:flex;align-items:flex-start;margin-bottom:11px;font-size:13px;}
+.row label{width:90px;flex-shrink:0;color:var(--fg3);font-size:12px;}
+.row value{color:var(--fg);font-weight:500;}
+
+.actions{
+  margin-top:30px;padding-top:22px;
+  border-top:1px solid var(--border);
+  display:flex;gap:12px;
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:36px;padding:0 24px;font-size:13px;font-weight:600;
+  font-family:var(--font);border-radius:20px;cursor:pointer;
+  border:none;transition:all .25s cubic-bezier(.4,0,.2,1);
+  letter-spacing:.2px;
+}
+.btn i{font-size:13px;}
+.btn-primary{
+  color:#fff;background:var(--grad);
+  box-shadow:0 4px 16px rgba(var(--pr),.3);
+}
+.btn-primary:hover{
+  box-shadow:0 6px 24px rgba(var(--pr),.45);
+  transform:translateY(-2px);
+}
+.btn-primary:active{transform:scale(.96);}
+.btn-outline{
+  color:var(--fg);background:rgba(255,255,255,.8);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(var(--pr),.15);
+}
+.btn-outline:hover{
+  border-color:rgba(var(--pr),.35);
+  color:var(--p);
+  background:rgba(var(--pr),.04);
+  box-shadow:0 2px 12px rgba(var(--pr),.08);
+}
+.btn-outline:active{transform:scale(.97);}
+
+.detail-empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100%;color:var(--fg3);
+}
+.detail-empty i{
+  font-size:60px;margin-bottom:14px;
+  background:var(--grad);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;opacity:.3;
+}
+.detail-empty span{font-size:13px;}
+
+/* detail two-column layout */
+.detail-body{display:flex;gap:22px;}
+.detail-left{flex:1;min-width:0;}
+.detail-right{width:400px;flex-shrink:0;}
+
+/* info grid - 2 cols boxed */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;}
+.info-item{margin-bottom:0;}
+.info-item.full{grid-column:1/-1;}
+.info-item .label{font-size:12px;color:var(--fg2);margin-bottom:6px;font-weight:500;letter-spacing:.2px;}
+.info-item .value{
+  font-size:13px;color:var(--fg);font-weight:500;line-height:1.5;
+  background:#f3f5f9;border-radius:6px;padding:8px 12px;
+  border:1px solid #e8ecf2;
+}
+
+/* flow block */
+.flow-block{
+  background:#f8f9fc;
+  border-radius:var(--radius);padding:10px;
+}
+.flow-block .g-title{margin-bottom:10px;}
+.flow-list{position:relative;}
+.flow-step-row{
+  display:flex;align-items:flex-start;gap:0;padding-bottom:0;
+  position:relative;
+}
+.flow-step-row:last-child .flow-step-card{margin-bottom:0;}
+.flow-step-row:last-child .flow-dot-col::after{display:none;}
+.flow-dot-col{
+  width:20px;flex-shrink:0;display:flex;flex-direction:column;
+  align-items:center;position:relative;
+}
+.flow-dot-col::after{
+  content:'';position:absolute;top:22px;left:50%;transform:translateX(-50%);
+  width:1.5px;bottom:-6px;background:#dce1ea;
+}
+.flow-dot-icon{
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;z-index:1;flex-shrink:0;
+  color:#fff;
+}
+.flow-dot-icon.done{background:#10b981;}
+.flow-dot-icon.current{background:var(--p);box-shadow:0 0 0 2px rgba(var(--pr),.15);}
+.flow-dot-icon.pending{background:#cbd5e1;color:#fff;}
+.flow-dot-icon.rejected{background:#ef4444;}
+.flow-dot-icon.cc{background:#8b5cf6;}
+.flow-step-card{
+  flex:1;min-width:0;margin-left:6px;margin-bottom:6px;
+  background:#fff;border-radius:6px;
+  border:1px solid #e8ecf2;overflow:hidden;
+}
+.flow-step-card.current{
+  border-color:rgba(var(--pr),.2);
+  box-shadow:0 1px 4px rgba(var(--pr),.06);
+}
+.flow-step-card.rejected{border-color:rgba(239,68,68,.15);}
+.flow-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 8px 0;
+}
+.flow-card-title{
+  font-size:11px;font-weight:600;color:var(--fg);
+  display:flex;align-items:center;gap:4px;
+}
+.flow-card-tag{
+  font-size:8px;padding:1px 5px;border-radius:6px;
+  font-weight:500;
+}
+.flow-card-tag.countersign{background:rgba(var(--pr),.08);color:var(--p);}
+.flow-card-tag.or{background:rgba(245,158,11,.08);color:#d97706;}
+.flow-card-badge{
+  font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;
+}
+.flow-card-badge.ok{background:rgba(16,185,129,.1);color:#059669;}
+.flow-card-badge.now{background:rgba(var(--pr),.1);color:var(--p);}
+.flow-card-badge.wait{background:rgba(148,163,184,.1);color:#64748b;}
+.flow-card-badge.fail{background:rgba(239,68,68,.1);color:#dc2626;}
+.flow-card-badge.ccd{background:rgba(139,92,246,.1);color:#7c3aed;}
+.flow-person-list{padding:4px 8px 6px;}
+.flow-person{
+  display:flex;align-items:center;gap:6px;padding:3px 0;
+}
+.flow-person+.flow-person{border-top:1px solid #f0f2f6;}
+.flow-avatar{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#fff;
+}
+.flow-avatar.av-blue{background:linear-gradient(135deg,#4f6ef6,#7c5cfc);}
+.flow-avatar.av-green{background:linear-gradient(135deg,#10b981,#34d399);}
+.flow-avatar.av-orange{background:linear-gradient(135deg,#f59e0b,#f97316);}
+.flow-avatar.av-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.flow-avatar.av-pink{background:linear-gradient(135deg,#ec4899,#f472b6);}
+.flow-avatar.av-gray{background:#cbd5e1;color:#94a3b8;}
+.flow-person-info{flex:1;min-width:0;}
+.flow-person-name{font-size:10px;font-weight:600;color:var(--fg);}
+.flow-person-eid{font-size:9px;color:var(--fg3);margin-top:1px;}
+.flow-person-right{
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:1px;white-space:nowrap;flex-shrink:0;
+}
+.flow-person-result{
+  font-size:9px;font-weight:600;
+}
+.flow-person-result.done{color:#059669;}
+.flow-person-result.pending{color:#64748b;}
+.flow-person-result.rejected{color:#dc2626;}
+.flow-person-result.cc{color:#7c3aed;}
+.flow-person-time{font-size:9px;color:var(--fg3);}
+
+/* action bar */
+.action-bar{
+  margin-top:24px;padding-top:20px;
+  border-top:1px solid var(--border);
+  display:flex;gap:12px;
+}
+
+/* batch approve modal */
+.modal-mask{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(4px);z-index:999;display:none;
+  align-items:center;justify-content:center;
+}
+.modal-mask.show{display:flex;}
+.modal-sheet{
+  background:#fff;border-radius:16px;
+  width:100%;max-width:480px;max-height:75vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 40px rgba(0,0,0,.15);
+  animation:fadeIn .25s ease-out;
+}
+@keyframes fadeIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-head{
+  padding:18px 20px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.modal-back{
+  width:28px;height:28px;border-radius:50%;
+  border:none;background:#f3f5f9;
+  color:var(--fg2);font-size:13px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.modal-back:hover{background:#e8ecf2;color:var(--fg);}
+.modal-title{
+  font-size:17px;font-weight:700;color:var(--fg);
+  letter-spacing:-.2px;
+}
+.modal-body{flex:1;overflow-y:auto;padding:4px 0;}
+.modal-type-item{
+  display:flex;align-items:center;gap:12px;
+  padding:15px 20px;border-bottom:1px solid #f5f6f9;
+  cursor:pointer;transition:background .15s;
+}
+.modal-type-item:hover{background:rgba(var(--pr),.03);}
+.modal-type-check{
+  width:20px;height:20px;border-radius:4px;
+  border:2px solid #d0d7e0;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-type-check.checked{
+  border-color:var(--p);background:var(--p);
+}
+.modal-type-check.checked::after{
+  content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;
+  font-size:11px;color:#fff;
+}
+.modal-type-info{flex:1;}
+.modal-type-name{
+  font-size:14px;font-weight:600;color:var(--fg);
+}
+.modal-type-count{
+  font-size:12px;color:var(--fg3);margin-left:4px;
+}
+.modal-foot{
+  padding:14px 20px 22px;
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.modal-submit{
+  width:100%;height:42px;border-radius:10px;
+  background:var(--grad);color:#fff;
+  font-size:14px;font-weight:600;
+  font-family:var(--font);cursor:pointer;border:none;
+  letter-spacing:.3px;
+  transition:all .25s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.modal-submit:hover{box-shadow:0 6px 20px rgba(var(--pr),.4);}
+.modal-submit:active{transform:scale(.98);}
+
+/* fade-in */
+@keyframes in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:in .35s ease-out both;}
+.card:nth-child(1){animation-delay:.02s;}
+.card:nth-child(2){animation-delay:.06s;}
+.card:nth-child(3){animation-delay:.1s;}
+.card:nth-child(4){animation-delay:.14s;}
+.card:nth-child(5){animation-delay:.18s;}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="header">
+  <div class="hd-row">
+    <div>
+      <h1>我的审批</h1>
+      <p>处理待我审核的全部单据</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-t="pending">待审批<span class="tab-badge">2</span></div>
+    <div class="tab" data-t="approved">已审批</div>
+    <div class="tab" data-t="rejected">已驳回</div>
+    <div class="tab" data-t="cc">抄送我的</div>
+  </div>
+</div>
+<div class="filter-bar" id="filterBar">
+  <div class="filter-row">
+    <div class="filter-item">
+      <label>申请类型</label>
+      <select id="filterType">
+        <option value="">全部类型</option>
+        <option value="加班申请">加班申请</option>
+        <option value="补卡申请">补卡申请</option>
+        <option value="外出申请">外出申请</option>
+        <option value="公车申请">公车申请</option>
+        <option value="调岗申请">调岗申请</option>
+        <option value="请假申请">请假申请</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>申请人</label>
+      <input type="text" id="filterWho" placeholder="输入姓名搜索"/>
+    </div>
+    <div class="filter-item">
+      <label>日期范围</label>
+      <div class="date-range">
+        <input type="date" id="filterDateFrom"/>
+        <span>至</span>
+        <input type="date" id="filterDateTo"/>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="filter-btn filter-btn-primary" onclick="applyFilter()"><i class="fa-solid fa-magnifying-glass"></i> 查询</button>
+      <button class="filter-btn filter-btn-reset" onclick="resetFilter()"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+    </div>
+  </div>
+</div>
+<div class="main">
+  <div class="left">
+    <button class="batch-btn" id="batchBtn" onclick="approveAll()"><i class="fa-solid fa-check-double"></i> 一键审批全部</button>
+    <div class="card-list" id="list"></div>
+  </div>
+  <div class="right" id="detail">
+    <div class="detail-empty"><i class="fa-regular fa-file-lines"></i><span>请从左侧选择一个审批单查看详情</span></div>
+  </div>
+</div>
+</div>
+<div class="modal-mask" id="batchModal" onclick="if(event.target===this)closeBatchModal()">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <button class="modal-back" onclick="closeBatchModal()"><i class="fa-solid fa-chevron-left"></i></button>
+      <span class="modal-title">一键审批</span>
+    </div>
+    <div class="modal-body" id="batchTypeList"></div>
+    <div class="modal-foot">
+      <button class="modal-submit" onclick="submitBatchApprove()"><i class="fa-solid fa-check-double"></i> 确认审批</button>
+    </div>
+  </div>
+</div>
+<script>
+const D={
+pending:[
+{id:'P01',who:'张伟',eid:'EMP20220089',type:'加班申请',t:'t-overtime',why:'项目上线支持',from:'2026-06-17',to:'2026-06-17',d:1,dept:'产品运营部',at:'2026-06-15 16:00',s:'pending',note:'配合版本发布进行线上验证和监控。',startTime:'2026-06-17 18:00',endTime:'2026-06-17 22:00',hours:4,
+ flow:[{name:'部门经理',tag:'会签',status:'done',result:'已同意',members:[{name:'张永峰',eid:'4632'},{name:'李明辉',eid:'5821'}],time:'2026-06-15 16:30'},{name:'部门总监',tag:'',status:'done',result:'已同意',members:[{name:'张三',eid:'9527'}],time:'2026-06-15 17:00'},{name:'HR审批',tag:'',status:'current',result:'',members:[{name:'王丽',eid:'3412'}],time:''},{name:'抄送',tag:'',status:'pending',result:'',members:[{name:'李芳',eid:'5518'}],time:''}]},
+{id:'P02',who:'王芳',eid:'EMP20210432',type:'补卡申请',t:'t-repair',why:'外勤忘打卡补录',from:'2026-06-12',to:'2026-06-12',d:1,dept:'市场拓展部',at:'2026-06-15 09:15',s:'pending',note:'当天外出拜访客户，忘记打卡，已提供客户拜访记录。',repairDate:'2026-06-12',exceptionType:'外勤漏打卡',repairTimes:'09:00、18:30',
+ flow:[{name:'部门经理',tag:'',status:'done',result:'已同意',members:[{name:'孙丽',eid:'3829'}],time:'2026-06-15 10:00'},{name:'部门总监',tag:'',status:'done',result:'已同意',members:[{name:'黄鹏',eid:'7201'}],time:'2026-06-15 11:00'},{name:'HR审批',tag:'',status:'current',result:'',members:[{name:'王丽',eid:'3412'}],time:''},{name:'抄送',tag:'',status:'pending',result:'',members:[{name:'周明',eid:'6643'}],time:''}]}
+],
+approved:[
+{id:'A01',who:'赵大海',eid:'EMP20200015',type:'外出申请',t:'t-out',why:'客户现场支撑',from:'2026-06-10',to:'2026-06-10',d:1,dept:'技术支持部',at:'2026-06-08 10:20',s:'approved',apt:'2026-06-08 15:30',note:'前往深圳客户现场进行系统升级部署。',
+ flow:[{name:'部门经理',tag:'',status:'done',result:'已同意',members:[{name:'周鹏',eid:'5203'}],time:'2026-06-08 11:00'},{name:'部门总监',tag:'',status:'done',result:'已同意',members:[{name:'吴海',eid:'4098'}],time:'2026-06-08 14:30'},{name:'HR审批',tag:'',status:'done',result:'已备案',members:[{name:'李芳',eid:'5518'}],time:'2026-06-08 15:30'}]},
+
+
+{id:'A03',who:'陈建军',eid:'EMP20180056',type:'加班申请',t:'t-overtime',why:'季度报表赶制',from:'2026-06-08',to:'2026-06-08',d:1,dept:'财务部',at:'2026-06-07 17:45',s:'approved',apt:'2026-06-07 18:00',note:'季度财报数据汇总与核对。',startTime:'2026-06-08 09:00',endTime:'2026-06-08 18:00',hours:8,
+ flow:[{name:'部门经理',tag:'',status:'done',result:'已同意',members:[{name:'郑洁',eid:'1548'}],time:'2026-06-07 17:50'},{name:'部门总监',tag:'',status:'done',result:'已同意',members:[{name:'林涛',eid:'2309'}],time:'2026-06-07 18:00'}]},
+{id:'A04',who:'孙明辉',eid:'EMP20220037',type:'补卡申请',t:'t-repair',why:'公司停电无法打卡',from:'2026-06-05',to:'2026-06-05',d:1,dept:'行政部',at:'2026-06-05 10:30',s:'approved',apt:'2026-06-05 11:00',note:'当天公司线路检修停电，无法正常打卡。',repairDate:'2026-06-05',exceptionType:'公司停电',repairTimes:'09:00、17:30',
+ flow:[{name:'部门经理',tag:'',status:'done',result:'已同意',members:[{name:'高明',eid:'8734'}],time:'2026-06-05 10:45'},{name:'HR审批',tag:'',status:'done',result:'已备案',members:[{name:'李芳',eid:'5518'}],time:'2026-06-05 11:00'}]}
+],
+rejected:[
+{id:'R01',who:'吴志强',eid:'EMP20190062',type:'补卡申请',t:'t-repair',why:'补录遗漏打卡',from:'2026-05-28',to:'2026-05-28',d:1,dept:'销售部',at:'2026-06-10 16:20',s:'rejected',rr:'超过补卡申请时限（7天内），不予补录。',rt:'2026-06-11 09:30',note:'上次出差后忘记及时申请补卡。',repairDate:'2026-05-28',exceptionType:'漏打卡',repairTimes:'09:00、18:00',
+ flow:[{name:'部门经理',tag:'',status:'done',result:'已同意',members:[{name:'何强',eid:'7156'}],time:'2026-06-10 17:00'},{name:'部门总监',tag:'',status:'done',result:'已同意',members:[{name:'于飞',eid:'3902'}],time:'2026-06-11 09:00'},{name:'HR审批',tag:'',status:'rejected',result:'已驳回',members:[{name:'李芳',eid:'5518'}],time:'2026-06-11 09:30',comment:'超过补卡申请时限（7天内），不予补录。'}]}
+],
+cc:[
+{id:'C01',who:'马晓东',eid:'EMP20170003',type:'公车申请',t:'t-other',why:'接待客户用车',from:'2026-06-20',to:'2026-06-20',d:1,dept:'总经理办公室',at:'2026-06-15 11:00',s:'cc',note:'接待重要客户，申请公司别克商务车一辆。',
+ flow:[{name:'行政审批',tag:'',status:'done',result:'已安排',members:[{name:'高明',eid:'8734'}],time:'2026-06-15 14:00'},{name:'抄送',tag:'',status:'cc',result:'已抄送',members:[{name:'您',eid:''}],time:'2026-06-15 14:00'}]},
+{id:'C02',who:'黄丽',eid:'EMP20200519',type:'调岗申请',t:'t-other',why:'部门内部调岗',from:'2026-07-01',to:'2026-07-01',d:1,dept:'人力资源部',at:'2026-06-13 14:30',s:'cc',note:'由招聘组调至培训组，抄送上级领导知晓。',
+ flow:[{name:'HR经理',tag:'',status:'done',result:'已同意',members:[{name:'张敏',eid:'2817'}],time:'2026-06-13 16:00'},{name:'抄送',tag:'',status:'cc',result:'已抄送',members:[{name:'您',eid:''}],time:'2026-06-13 16:00'}]}
+]};
+
+let tab='pending',sel=null,filterActive=false;
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
+
+$$('.tab').forEach(t=>{
+  t.onclick=function(){
+    $$('.tab').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+    tab=this.dataset.t;sel=null;go();emptyD();
+    $('#batchBtn').style.display=tab==='pending'?'':'none';
+  }
+});
+
+function getFiltered(){
+  let a=D[tab]||[];
+  if(!filterActive) return a;
+  let fType=$('#filterType').value;
+  let fWho=$('#filterWho').value.trim();
+  let fFrom=$('#filterDateFrom').value;
+  let fTo=$('#filterDateTo').value;
+  return a.filter(x=>{
+    if(fType && x.type!==fType) return false;
+    if(fWho && !x.who.includes(fWho)) return false;
+    let dateField=x.repairDate||x.from;
+    if(fFrom && dateField<fFrom) return false;
+    if(fTo && dateField>fTo) return false;
+    return true;
+  });
+}
+
+function applyFilter(){
+  filterActive=true;sel=null;go();emptyD();
+}
+function resetFilter(){
+  filterActive=false;
+  $('#filterType').value='';
+  $('#filterWho').value='';
+  $('#filterDateFrom').value='';
+  $('#filterDateTo').value='';
+  sel=null;go();emptyD();
+}
+
+function go(){
+  let a=getFiltered();
+  if(!a.length){$('#list').innerHTML='<div class="empty-list"><i class="fa-regular fa-clipboard"></i><span>暂无审批单据</span></div>';return;}
+  $('#list').innerHTML=a.map(x=>`
+    <div class="card${sel===x.id?' active':''}" onclick="pick('${x.id}')">
+      <div class="card-tag ${x.t}">${x.type}</div>
+      <div class="card-name">${x.who}提交的${x.type}</div>
+      <div class="card-meta"><span><i class="fa-regular fa-building"></i>${x.dept}</span><span><i class="fa-regular fa-clock"></i>${x.at}</span></div>
+      <div class="card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+    </div>`).join('');
+}
+function pick(id){sel=id;go();showD(id);}
+function emptyD(){$('#detail').innerHTML='<div class="detail-empty"><i class="fa-regular fa-file-lines"></i><span>请从左侧选择一个审批单查看详情</span></div>';}
+
+function showD(id){
+  let x=getFiltered().find(d=>d.id===id);if(!x)return;
+  let M={pending:['<i class="fa-regular fa-clock"></i> 待审批','sp-pending'],approved:['<i class="fa-solid fa-circle-check"></i> 已通过','sp-approved'],rejected:['<i class="fa-solid fa-circle-xmark"></i> 已驳回','sp-rejected'],cc:['<i class="fa-regular fa-copy"></i> 抄送','sp-cc']};
+  let[sl,sc]=M[x.s]||['',''];
+
+  let items=[];
+  items.push(['申请人',x.who],['员工工号',x.eid],['所属部门',x.dept],['提交时间',x.at]);
+
+  if(x.t==='t-overtime'){
+    items.push(['加班日期',x.from]);
+    items.push(['加班开始时间',x.startTime||'—']);
+    items.push(['加班结束时间',x.endTime||'—']);
+    items.push(['加班时长',(x.hours||0)+' 小时']);
+    items.push(['加班原因',x.why]);
+  }else if(x.t==='t-repair'){
+    items.push(['补卡日期',x.repairDate||x.from]);
+    items.push(['异常类型',x.exceptionType||'—']);
+    items.push(['补卡时间',x.repairTimes||'—']);
+    items.push(['补卡原因',x.why]);
+  }else if(x.t==='t-leave'){
+    items.push(['请假类型',x.why]);
+    items.push(['开始日期',x.from]);
+    items.push(['结束日期',x.to]);
+    items.push(['天数',x.d+' 天']);
+  }else{
+    items.push(['申请事由',x.why]);
+    items.push(['日期',x.from+(x.from!==x.to?' ~ '+x.to:'')]);
+    if(x.d)items.push(['天数',x.d+' 天']);
+  }
+
+  if(x.s==='approved')items.push(['审批时间',x.apt]);
+  if(x.s==='rejected'){items.push(['驳回时间',x.rt]);items.push(['驳回原因',x.rr]);}
+  items.push(['备注说明',x.note]);
+
+  let infoHTML=items.map(([l,v])=>{
+    let full=(l==='备注说明'||l==='驳回原因')?' full':'';
+    return `<div class="info-item${full}"><div class="label">${l}</div><div class="value">${v}</div></div>`;
+  }).join('');
+
+  let iconMap={done:'<i class="fa-solid fa-check"></i>',current:'<i class="fa-solid fa-ellipsis"></i>',pending:'<i class="fa-regular fa-circle"></i>',rejected:'<i class="fa-solid fa-xmark"></i>',cc:'<i class="fa-regular fa-copy"></i>'};
+  let badgeMap={done:['已完成','ok'],current:['审批中','now'],pending:['待审批','wait'],rejected:['已驳回','fail'],cc:['已抄送','ccd']};
+  let avPool=['av-blue','av-green','av-orange','av-purple','av-pink'];
+  let flowHTML=(x.flow||[]).map(s=>{
+    let icon=iconMap[s.status]||'<i class="fa-regular fa-circle"></i>';
+    let[badgeText,badgeCls]=badgeMap[s.status]||['',''];
+    let tagCls=s.tag==='会签'?'countersign':(s.tag==='或签'?'or':'');
+    let tagHTML=s.tag?`<span class="flow-card-tag ${tagCls}">${s.tag}</span>`:'';
+    let resText=s.result||(s.status==='pending'?'待处理':'');
+    let resCls=s.status==='rejected'?'rejected':(s.status==='done'?'done':(s.status==='cc'?'cc':'pending'));
+    if(s.comment)resText=s.comment;
+    let membersHTML=(s.members||[]).map((m,i)=>{
+      let avCls=avPool[i%avPool.length];
+      let init=m.name.charAt(0);
+      let t=m.time||(i===0?s.time:'');
+      return `<div class="flow-person">
+        <div class="flow-avatar ${avCls}">${init}</div>
+        <div class="flow-person-info">
+          <div class="flow-person-name">${m.name}</div>
+          <div class="flow-person-eid">工号${m.eid}</div>
+        </div>
+        <div class="flow-person-right">
+          ${resText?`<span class="flow-person-result ${resCls}">${resText}</span>`:''}
+          ${t?`<span class="flow-person-time">${t}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="flow-step-row">
+      <div class="flow-dot-col">
+        <div class="flow-dot-icon ${s.status}">${icon}</div>
+      </div>
+      <div class="flow-step-card ${s.status}">
+        <div class="flow-card-header">
+          <div class="flow-card-title">${s.name}${tagHTML}</div>
+          <span class="flow-card-badge ${badgeCls}">${badgeText}</span>
+        </div>
+        <div class="flow-person-list">${membersHTML}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  let act='';
+  if(x.s==='pending')act=`<div class="action-bar"><button class="btn btn-primary" onclick="oK('${x.id}')"><i class="fa-solid fa-check"></i> 同意</button><button class="btn btn-outline" onclick="no('${x.id}')"><i class="fa-solid fa-xmark"></i> 驳回</button></div>`;
+
+  $('#detail').innerHTML=`
+    <div class="detail-head"><h2>${x.who}的${x.type} — ${(x.t==='t-repair'||x.t==='t-overtime')?x.at:x.why}</h2>
+    <div class="dh-row"><span class="sp ${sc}">${sl}</span></div></div>
+    <div class="detail-body">
+      <div class="detail-left">
+        <div class="group"><div class="g-title">申请信息</div>
+          <div class="info-grid">${infoHTML}</div>
+        </div>
+      </div>
+      <div class="detail-right">
+        <div class="flow-block">
+          <div class="g-title">审批流程</div>
+          <div class="flow-list">${flowHTML}</div>
+        </div>
+        ${act}
+      </div>
+    </div>`;
+}
+function oK(id){if(confirm('确认同意该审批单（'+id+'）？'))alert('审批已通过！');}
+function no(id){let r=prompt('请输入驳回原因：');if(r&&r.trim())alert('审批已驳回，原因：'+r);else if(r!==null)alert('请输入驳回原因');}
+function approveAll(){
+  let a=getFiltered();
+  if(!a.length){alert('当前没有待审批的单据');return;}
+  // 按类型分组统计
+  let typeMap={};
+  a.forEach(x=>{
+    if(!typeMap[x.type]) typeMap[x.type]=[];
+    typeMap[x.type].push(x);
+  });
+  window._batchTypes=Object.entries(typeMap).map(([name,list])=>({name,count:list.length,ids:list.map(x=>x.id)}));
+  window._selectedBatchIdxs=[0];
+  // 渲染类型列表
+  let html=window._batchTypes.map((t,i)=>`
+    <div class="modal-type-item" onclick="toggleBatchType(${i})">
+      <div class="modal-type-check ${i===0?'checked':''}" data-idx="${i}"></div>
+      <div class="modal-type-info">
+        <span class="modal-type-name">${t.name}</span>
+        <span class="modal-type-count">(${t.count})</span>
+      </div>
+    </div>
+  `).join('');
+  $('#batchTypeList').innerHTML=html;
+  $('#batchModal').classList.add('show');
+}
+function toggleBatchType(idx){
+  let pos=window._selectedBatchIdxs.indexOf(idx);
+  if(pos===-1){
+    window._selectedBatchIdxs.push(idx);
+  }else{
+    window._selectedBatchIdxs.splice(pos,1);
+  }
+  $$('.modal-type-check').forEach((el,i)=>{
+    el.classList.toggle('checked',window._selectedBatchIdxs.includes(i));
+  });
+}
+function closeBatchModal(){
+  $('#batchModal').classList.remove('show');
+}
+function submitBatchApprove(){
+  if(!window._selectedBatchIdxs||!window._selectedBatchIdxs.length){alert('请至少选择一种申请类型');return;}
+  let selTypes=window._selectedBatchIdxs.map(i=>window._batchTypes[i]);
+  let totalCount=selTypes.reduce((s,t)=>s+t.count,0);
+  let typeNames=selTypes.map(t=>t.name).join('、');
+  closeBatchModal();
+  if(confirm(`确认一键审批以下类型？\n\n${typeNames}\n共 ${totalCount} 条单据`))alert('已批量审批通过 '+totalCount+' 条单据！');
+}
+
+go();
+</script>
+</body>
+</html>

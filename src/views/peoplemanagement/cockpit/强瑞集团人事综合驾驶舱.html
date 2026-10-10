@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>强瑞集团 · 人事综合驾驶舱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.cn" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <style>
+:root {
+  --bg-primary: #eef2f7;
+  --bg-secondary: #e2e8f2;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f8fd;
+  --border-color: rgba(45, 120, 255, 0.10);
+  --border-glow: rgba(45, 120, 255, 0.30);
+  --blue-primary: #2563eb;
+  --blue-light: #3b82f6;
+  --blue-deep: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --cyan: #0891b2;
+  --cyan-light: #22d3ee;
+  --cyan-soft: #ecfeff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --orange: #ea580c;
+  --purple: #7c3aed;
+  --pink: #db2777;
+  --teal: #0d9488;
+  --slate: #475569;
+  --gradient-blue: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  --gradient-card: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-card-blue: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-card-hover: 0 8px 25px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-glow: 0 4px 24px rgba(37,99,235,0.10);
+  --shadow-lg: 0 10px 40px rgba(37,99,235,0.08), 0 2px 10px rgba(0,0,0,0.04);
+  --font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --header-height: 62px;
+  --scope-bar-height: 40px;
+  --page-padding: 16px;
+  --gap: 12px;
+  --gap-sm: 8px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Background Effects */
+.bg-base {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(37,99,235,0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 80% 80%, rgba(8,145,178,0.03) 0%, transparent 70%);
+  z-index: 0; pointer-events: none;
+}
+.bg-grid {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: linear-gradient(rgba(37,99,235,0.025) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(37,99,235,0.025) 1px, transparent 1px);
+  background-size: 48px 48px; z-index: 0; pointer-events: none;
+}
+.bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.particle {
+  position: absolute; border-radius: 50%;
+  background: rgba(37,99,235,0.12);
+  animation: float-up linear infinite;
+}
+@keyframes float-up {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+#app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+
+/* Header */
+.dashboard-header {
+  height: var(--header-height); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
+  z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--gradient-blue);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: 0 4px 16px rgba(37,99,235,0.25);
+}
+.header-logo svg { width: 22px; height: 22px; }
+.header-title-wrap { display: flex; flex-direction: column; gap: 1px; }
+.header-title { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; }
+.header-subtitle { font-size: 10px; color: var(--text-muted); font-weight: 400; letter-spacing: 2.5px; text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 24px; font-size: 12px; color: var(--text-secondary); }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 8px; box-shadow: 0 0 8px rgba(5,150,105,0.4); animation: status-pulse 2s infinite; }
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(5,150,105,0.4); }
+  50% { box-shadow: 0 0 18px rgba(5,150,105,0.7); }
+}
+.header-time { font-size: 24px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
+.header-date { font-size: 11px; text-align: right; color: var(--text-muted); }
+
+/* Scope Bar */
+.scope-bar {
+  height: var(--scope-bar-height); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(37,99,235,0.04);
+}
+.breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.breadcrumb-item { background: none; border: none; color: var(--blue-primary); cursor: pointer; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 6px; transition: var(--transition); }
+.breadcrumb-item:hover { background: var(--blue-soft); }
+.breadcrumb-item.current { font-weight: 700; color: var(--text-primary); background: rgba(37,99,235,0.05); }
+.breadcrumb-separator { color: var(--text-muted); font-size: 11px; }
+.scope-selector { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.scope-select { padding: 5px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 12px; background: #fff; color: var(--text-primary); cursor: pointer; transition: var(--transition); }
+.scope-select:focus { outline: none; border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.scope-badge { padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(37,99,235,0.07); color: var(--blue-primary); letter-spacing: 0.3px; }
+.scope-badge.subsidiary { background: rgba(5,150,105,0.07); color: var(--success); }
+
+/* Tab Bar */
+.tab-bar {
+  height: 48px; flex-shrink: 0;
+  display: flex; align-items: center; padding: 0 24px;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  gap: 0;
+  border-bottom: 1px solid rgba(37,99,235,0.04);
+}
+.tab-step { display: flex; align-items: center; gap: 0; }
+.nav-tab {
+  padding: 9px 22px; border: none; background: transparent;
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  cursor: pointer; border-radius: 10px; transition: var(--transition);
+  position: relative; white-space: nowrap; letter-spacing: 0.2px;
+}
+.nav-tab:hover { color: var(--blue-primary); background: var(--blue-soft); }
+.nav-tab.active {
+  color: #fff; background: var(--gradient-blue);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.30), 0 1px 4px rgba(37,99,235,0.15);
+  font-weight: 700;
+}
+.nav-tab.active::after {
+  content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent;
+  border-top: 7px solid #0891b2;
+}
+.tab-arrow { color: var(--text-muted); font-size: 11px; margin: 0 3px; opacity: 0.5; }
+
+/* Main Content */
+.dashboard-main {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  padding: var(--page-padding);
+}
+.dashboard-main::-webkit-scrollbar { width: 5px; }
+.dashboard-main::-webkit-scrollbar-track { background: transparent; }
+.dashboard-main::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.12); border-radius: 3px; }
+.dashboard-main::-webkit-scrollbar-thumb:hover { background: rgba(37,99,235,0.25); }
+
+/* Page Container */
+.page-container { display: none; width: 100%; flex-direction: column; gap: var(--gap); animation: fadeInUp 0.45s ease; }
+.page-container.active { display: flex; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Scope Info */
+.current-scope-info {
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 0 4px; font-size: 12px; color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.current-scope-info strong { color: var(--blue-primary); font-weight: 600; }
+
+/* Section Header */
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 4px 6px; flex-shrink: 0;
+}
+.section-header .section-dot {
+  width: 10px; height: 10px; border-radius: 3px;
+  background: var(--blue-primary);
+  box-shadow: 0 0 10px rgba(37,99,235,0.45);
+  animation: icon-soft-pulse 3s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes icon-soft-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(37,99,235,0.45); }
+  50% { opacity: 0.55; box-shadow: 0 0 20px rgba(37,99,235,0.7); }
+}
+.section-header .section-title { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.3px; }
+.section-header .section-subtitle { font-size: 11px; color: var(--text-muted); margin-left: 2px; font-weight: 400; }
+.section-header .section-tag {
+  margin-left: auto; padding: 3px 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
+}
+.section-tag.risk { background: rgba(220,38,38,0.08); color: var(--danger); }
+.section-tag.info { background: rgba(37,99,235,0.06); color: var(--blue-primary); }
+
+/* ============ Stat Pills (Refined) ============ */
+.stat-pills {
+  display: grid; gap: var(--gap); flex-shrink: 0;
+}
+.stat-pills.cols-7 { grid-template-columns: repeat(7, 1fr); }
+.stat-pills.cols-8 { grid-template-columns: repeat(8, 1fr); }
+.stat-pills.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.stat-pills.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.stat-pill {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafd 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  transition: var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 0 0 1px rgba(37,99,235,0.02);
+  position: relative; overflow: hidden; cursor: default;
+}
+.stat-pill::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(37,99,235,0.03) 0%, transparent 50%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.stat-pill::after {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.03), transparent);
+  transition: none; pointer-events: none;
+}
+.stat-pill:hover::before { opacity: 1; }
+.stat-pill:hover::after { animation: card-scan-light 0.5s ease forwards; }
+.stat-pill:hover {
+  transform: translateY(-2px); border-color: var(--border-glow);
+  box-shadow: var(--shadow-card-hover);
+}
+@keyframes card-scan-light {
+  from { left: -100%; } to { left: 120%; }
+}
+.stat-pill .pill-dot {
+  width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+.stat-pill .pill-dot.blue { background: var(--blue-primary); color: var(--blue-primary); }
+.stat-pill .pill-dot.green { background: var(--success); color: var(--success); }
+.stat-pill .pill-dot.orange { background: var(--orange); color: var(--orange); }
+.stat-pill .pill-dot.red { background: var(--danger); color: var(--danger); }
+.stat-pill .pill-dot.cyan { background: var(--cyan); color: var(--cyan); }
+.stat-pill .pill-dot.warn { background: var(--warning); color: var(--warning); }
+.stat-pill .pill-dot.purple { background: var(--purple); color: var(--purple); }
+.stat-pill .pill-value { font-size: 26px; font-weight: 900; color: var(--text-primary); line-height: 1.15; letter-spacing: -0.5px; }
+.stat-pill .pill-value.highlight { color: var(--blue-primary); }
+.stat-pill .pill-value.danger { color: var(--danger); animation: danger-blink 2s infinite; }
+@keyframes danger-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.stat-pill .pill-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; font-weight: 500; }
+.stat-pill .pill-info { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.stat-pill .pill-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.stat-pill .pill-trend {
+  font-size: 10px; font-weight: 600; margin-left: auto; flex-shrink: 0;
+  padding: 3px 8px; border-radius: 6px;
+}
+.pill-trend.up { color: var(--success); background: rgba(5,150,105,0.08); }
+.pill-trend.down { color: var(--danger); background: rgba(220,38,38,0.08); }
+.pill-trend.warn { color: var(--warning); background: rgba(217,119,6,0.08); }
+
+/* ============ Card ============ */
+.card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafcfe 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: 16px 18px; position: relative; overflow: hidden;
+  transition: var(--transition); box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.15), transparent);
+}
+.card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-card-hover);
+}
+.card-title {
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(37,99,235,0.05); flex-shrink: 0;
+}
+.card-title .icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--gradient-blue); display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.2);
+}
+.card-title .icon svg { width: 13px; height: 13px; }
+.chart-container { flex: 1; min-height: 0; width: 100%; }
+
+/* ============ Mini Card ============ */
+.mini-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius); padding: 14px 16px; position: relative; overflow: hidden;
+  transition: var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 0 0 1px rgba(37,99,235,0.015);
+  display: flex; flex-direction: column;
+}
+.mini-card::before {
+  content: ''; position: absolute; top: 0; left: 14px; right: 14px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.10), transparent);
+}
+.mini-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+.mini-card .mc-title {
+  font-size: 12px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 8px; display: flex; align-items: center; gap: 7px;
+  flex-shrink: 0; padding-bottom: 8px;
+  border-bottom: 1px solid rgba(37,99,235,0.04);
+}
+.mini-card .mc-title .mc-icon {
+  width: 20px; height: 20px; border-radius: 5px;
+  background: var(--gradient-blue); display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0; font-size: 10px;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.22);
+}
+.mini-card .mc-chart { flex: 1; min-height: 0; width: 100%; }
+.mini-card .mc-list { flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px; }
+.mini-card .mc-list::-webkit-scrollbar { width: 3px; }
+.mini-card .mc-list::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.15); border-radius: 2px; }
+.mini-card .mc-list::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ Alert Compact ============ */
+.alert-compact {
+  display: flex; flex-direction: column; gap: 5px;
+  overflow-y: auto; flex: 1; min-height: 0; padding-right: 4px;
+}
+.alert-compact::-webkit-scrollbar { width: 3px; }
+.alert-compact::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.15); border-radius: 2px; }
+.alert-compact .ac-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 8px;
+  background: rgba(37,99,235,0.025);
+  border-left: 2px solid var(--blue-light);
+  font-size: 11px; flex-shrink: 0;
+  transition: var(--transition);
+}
+.alert-compact .ac-item:hover { background: rgba(37,99,235,0.05); }
+.alert-compact .ac-item.danger { border-left-color: var(--danger); background: rgba(220,38,38,0.025); }
+.alert-compact .ac-item.danger:hover { background: rgba(220,38,38,0.05); }
+.alert-compact .ac-item.warn { border-left-color: var(--warning); background: rgba(217,119,6,0.025); }
+.alert-compact .ac-item.warn:hover { background: rgba(217,119,6,0.05); }
+.alert-compact .ac-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text-secondary); }
+.alert-compact .ac-num { font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.alert-compact .ac-sub-header {
+  font-size: 11px; font-weight: 700; margin-top: 4px; margin-bottom: 2px;
+  padding: 4px 8px; flex-shrink: 0; border-radius: 6px;
+}
+.alert-compact .ac-sub-header.blue { color: var(--blue-primary); background: rgba(37,99,235,0.05); }
+.alert-compact .ac-sub-header.red { color: var(--danger); background: rgba(220,38,38,0.05); }
+.alert-compact .ac-sub-header.cyan { color: var(--cyan); background: rgba(8,145,178,0.05); }
+.alert-compact .ac-sub-header.green { color: var(--success); background: rgba(5,150,105,0.05); }
+
+/* ============ Compact Item ============ */
+.compact-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid rgba(37,99,235,0.04);
+  font-size: 11px;
+}
+.compact-item:last-child { border-bottom: none; }
+.compact-item .ci-rank {
+  width: 20px; height: 20px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.compact-item .ci-rank.top { background: linear-gradient(135deg, var(--blue-primary), var(--blue-light)); }
+.compact-item .ci-rank.mid { background: linear-gradient(135deg, var(--cyan), var(--cyan-light)); }
+.compact-item .ci-rank.low { background: var(--slate); }
+.compact-item .ci-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font-weight: 500; }
+.compact-item .ci-value { font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; font-size: 12px; }
+.compact-item .ci-value.good { color: var(--success); }
+.compact-item .ci-value.warn { color: var(--warning); }
+.compact-item .ci-value.bad { color: var(--danger); }
+.compact-item .ci-bar-wrap { flex: 1; height: 7px; background: rgba(37,99,235,0.05); border-radius: 4px; overflow: hidden; min-width: 30px; }
+.compact-item .ci-bar-fill { height: 100%; border-radius: 4px; background: var(--gradient-blue); transition: width 0.8s ease; }
+
+/* ============ Risk Tag ============ */
+.risk-tag {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 5px;
+  font-size: 10px; font-weight: 700; flex-shrink: 0; letter-spacing: 0.2px;
+}
+.risk-tag.high { background: rgba(220,38,38,0.10); color: var(--danger); border: 1px solid rgba(220,38,38,0.15); animation: tag-pulse 2s infinite; }
+@keyframes tag-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(220,38,38,0.25); }
+  50% { box-shadow: 0 0 8px rgba(220,38,38,0.35); }
+}
+.risk-tag.mid { background: rgba(217,119,6,0.10); color: var(--warning); border: 1px solid rgba(217,119,6,0.15); }
+.risk-tag.info { background: rgba(37,99,235,0.08); color: var(--blue-primary); border: 1px solid rgba(37,99,235,0.12); }
+.risk-tag.good { background: rgba(5,150,105,0.08); color: var(--success); border: 1px solid rgba(5,150,105,0.12); }
+
+/* ============ Personnel Grid ============ */
+.personnel-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5px 10px;
+}
+.personnel-item {
+  display: flex; align-items: center; gap: 6px; font-size: 11px;
+}
+.personnel-item .pi-label {
+  color: var(--text-secondary); width: 56px; flex-shrink: 0; text-align: right; font-weight: 500;
+}
+.personnel-item .pi-bar {
+  flex: 1; height: 7px; background: rgba(37,99,235,0.05); border-radius: 4px; overflow: hidden; min-width: 20px;
+}
+.personnel-item .pi-bar-fill {
+  height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 6px currentColor;
+}
+.personnel-item .pi-val {
+  font-weight: 700; width: 30px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; font-size: 11px;
+}
+
+/* ============ Stat Card ============ */
+.stat-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); flex-shrink: 0; }
+.stat-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius); padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+  transition: var(--transition); box-shadow: var(--shadow-card);
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 14px; right: 14px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.10), transparent);
+}
+.stat-card:hover {
+  transform: translateY(-2px); border-color: var(--border-glow);
+  box-shadow: var(--shadow-card-hover);
+}
+.stat-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg { width: 22px; height: 22px; color: #fff; }
+.stat-icon.blue { background: linear-gradient(135deg, var(--blue-primary), var(--blue-light)); }
+.stat-icon.green { background: linear-gradient(135deg, var(--success), #34d399); }
+.stat-icon.orange { background: linear-gradient(135deg, var(--orange), #fb923c); }
+.stat-icon.red { background: linear-gradient(135deg, var(--danger), #f87171); }
+.stat-icon.cyan { background: linear-gradient(135deg, var(--cyan), var(--cyan-light)); }
+.stat-icon.purple { background: linear-gradient(135deg, var(--purple), #a78bfa); }
+.stat-value { font-size: 26px; font-weight: 900; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+.stat-trend { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ============ Grid Layouts ============ */
+.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); flex: 1; min-height: 0; }
+.grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); flex: 1; min-height: 0; }
+.grid-4col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--gap); flex: 1; min-height: 0; }
+.grid-left-right { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); flex: 1; min-height: 0; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--gap); flex: 1; min-height: 0; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap); flex: 1; min-height: 0; }
+
+/* ============ Risk Center Alert Items ============ */
+.risk-center-list {
+  display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; flex: 1; min-height: 0; padding-right: 6px;
+}
+.risk-center-list::-webkit-scrollbar { width: 4px; }
+.risk-center-list::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.15); border-radius: 2px; }
+.risk-center-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; border-radius: 10px;
+  border-left: 3px solid var(--blue-light);
+  background: rgba(37,99,235,0.025);
+  flex-shrink: 0; position: relative; overflow: hidden;
+  transition: var(--transition);
+}
+.risk-center-item:hover { background: rgba(37,99,235,0.05); }
+.risk-center-item.level-high { border-left-color: var(--danger); background: rgba(220,38,38,0.03); }
+.risk-center-item.level-high::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--danger);
+  animation: high-alert-pulse 1.5s ease-in-out infinite;
+}
+@keyframes high-alert-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(220,38,38,0.25); }
+  50% { box-shadow: 0 0 14px rgba(220,38,38,0.55); }
+}
+.risk-center-item.level-medium { border-left-color: var(--warning); background: rgba(217,119,6,0.025); }
+.risk-center-item .rc-category {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px;
+  flex-shrink: 0; min-width: 50px; text-align: center;
+}
+.rc-category.hr { background: rgba(37,99,235,0.08); color: var(--blue-primary); }
+.rc-category.attend { background: rgba(217,119,6,0.08); color: var(--warning); }
+.rc-category.comply { background: rgba(220,38,38,0.08); color: var(--danger); }
+.risk-center-item .rc-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.risk-center-item .rc-detail { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.risk-center-item .rc-action {
+  font-size: 11px; font-weight: 600; color: var(--blue-primary);
+  cursor: pointer; padding: 4px 12px; border-radius: 6px;
+  background: rgba(37,99,235,0.05); border: none; flex-shrink: 0;
+  transition: var(--transition);
+}
+.risk-center-item .rc-action:hover { background: rgba(37,99,235,0.10); }
+
+/* ============ Drill-down Tag ============ */
+.drill-tag {
+  font-size: 10px; color: var(--blue-primary); cursor: pointer;
+  padding: 2px 8px; border-radius: 5px; background: rgba(37,99,235,0.05);
+  transition: var(--transition); border: none; font-family: inherit;
+}
+.drill-tag:hover { background: rgba(37,99,235,0.10); }
+
+/* ============ Badge ============ */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.badge-danger { background: rgba(220,38,38,0.08); color: var(--danger); }
+.badge-warning { background: rgba(217,119,6,0.08); color: var(--warning); }
+.badge-success { background: rgba(5,150,105,0.08); color: var(--success); }
+.badge-info { background: rgba(37,99,235,0.08); color: var(--blue-primary); }
+
+/* ============ Responsive ============ */
+@media (max-width: 1400px) {
+  .stat-pills.cols-7, .stat-pills.cols-8 { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 1200px) {
+  .stat-pills.cols-7, .stat-pills.cols-8 { grid-template-columns: repeat(3, 1fr); }
+  .grid-3col, .grid-4col, .grid-2col, .grid-left-right, .grid-1-2, .grid-2-1 { grid-template-columns: 1fr; }
+  .stat-cards { grid-template-columns: repeat(3, 1fr); }
+  .nav-tab { padding: 8px 14px; font-size: 12px; }
+  .stat-pill .pill-value { font-size: 22px; }
+}
+@media (max-width: 768px) {
+  .stat-pills.cols-7, .stat-pills.cols-8 { grid-template-columns: repeat(2, 1fr); }
+  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .tab-step { flex-wrap: wrap; }
+  .nav-tab { padding: 6px 10px; font-size: 11px; }
+  .header-title { font-size: 15px; }
+  .header-subtitle { display: none; }
+  .dashboard-header { padding: 0 12px; }
+  .dashboard-main { padding: 10px; }
+  .scope-bar { padding: 0 12px; flex-direction: column; height: auto; padding-top: 6px; padding-bottom: 6px; gap: 6px; }
+  .stat-pill .pill-value { font-size: 20px; }
+  .stat-value { font-size: 22px; }
+}
+@media print {
+  .bg-grid, .bg-particles, .bg-base { display: none; }
+  .card, .stat-card, .mini-card { box-shadow: none; border: 1px solid #ddd; }
+  .dashboard-header, .scope-bar, .tab-bar { background: #fff; backdrop-filter: none; }
+}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav" style="position:absolute;top:-100px;left:0;background:var(--blue-primary);color:#fff;padding:8px;z-index:999;" aria-label="跳转到主要内容">跳转到主要内容</a>
+
+  <div id="app">
+    <div class="bg-base" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-particles" id="particles" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header class="dashboard-header" role="banner">
+      <div class="header-left">
+        <div class="header-logo" aria-hidden="true"><i data-lucide="layout-dashboard"></i></div>
+        <div class="header-title-wrap">
+          <h1 class="header-title" id="headerTitle">强瑞集团 · 人事综合驾驶舱</h1>
+          <div class="header-subtitle" aria-hidden="true">HR & ATTENDANCE COMPREHENSIVE DASHBOARD</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span><span class="status-dot" aria-hidden="true"></span>系统运行中</span>
+        <div>
+          <div class="header-time" id="headerTime" aria-live="polite">--:--:--</div>
+          <div class="header-date" id="headerDate">----年--月--日</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scope Bar -->
+    <div class="scope-bar" id="scopeBar">
+      <div class="breadcrumb" id="breadcrumb" aria-label="组织层级导航"></div>
+      <div class="scope-selector">
+        <label for="scopeLevel">视图层级：</label>
+        <select class="scope-select" id="scopeLevel" aria-label="选择组织层级">
+          <option value="group">集团总览</option>
+          <option value="subsidiary" data-id="yinhe">子公司 · 银星科技园</option>
+          <option value="subsidiary" data-id="qiaoan">子公司 · 侨安科技工业园</option>
+          <option value="subsidiary" data-id="huangji">子公司 · 皇基御景</option>
+        </select>
+        <span class="scope-badge" id="scopeBadge">集团</span>
+      </div>
+    </div>
+
+    <!-- Tab Navigation: 1总览 + 2专项 + 1预警 = 4页 -->
+    <div class="tab-bar" role="tablist" aria-label="分析导航" id="tabBar">
+      <div class="tab-step">
+        <button class="nav-tab active" role="tab" aria-selected="true" data-page="page1" aria-controls="page1">集团总览大屏</button>
+        <span class="tab-arrow" aria-hidden="true">→</span>
+        <button class="nav-tab" role="tab" aria-selected="false" data-page="page2" aria-controls="page2">人力核心看板</button>
+        <span class="tab-arrow" aria-hidden="true">→</span>
+        <button class="nav-tab" role="tab" aria-selected="false" data-page="page3" aria-controls="page3">考勤效能看板</button>
+        <span class="tab-arrow" aria-hidden="true">→</span>
+        <button class="nav-tab risk-alert-tab" role="tab" aria-selected="false" data-page="page4" aria-controls="page4">风险预警中心 <span class="risk-tag high" style="margin-left:4px;font-size:8px;" id="riskCountBadge">5</span></button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main" id="main-content">
+
+      <!-- ===== Page 1: 集团总览大屏 ===== -->
+      <section class="page-container active" id="page1" role="tabpanel" aria-label="集团总览大屏">
+        <div class="current-scope-info">
+          <span>当前视图：</span><strong id="page1ScopeName">强瑞集团 · 全集团数据</strong>
+          <span style="margin-left:auto;font-size:10px;color:var(--text-secondary);">数据更新: 2026-06-03 09:00 | 支持五级下钻</span>
+        </div>
+
+        <!-- 一、人力总览 - 8 pills -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">一、人力总览</span>
+          <span class="section-subtitle">(在编/在岗/核心人才/编制缺口)</span>
+        </div>
+        <div class="stat-pills cols-8">
+          <div class="stat-pill"><span class="pill-dot blue"></span><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="720">0</span></div><div class="pill-label">总在编</div></div><span class="pill-trend up">同比+3.2%</span></div>
+          <div class="stat-pill"><span class="pill-dot green"></span><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="614">0</span></div><div class="pill-label">日均在岗</div></div><span class="pill-trend up">在岗率85.3%</span></div>
+          <div class="stat-pill"><span class="pill-dot cyan"></span><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="63">0</span></div><div class="pill-label">试用期</div></div><span class="pill-trend up">新入职+8</span></div>
+          <div class="stat-pill"><span class="pill-dot purple"></span><div class="pill-info"><div class="pill-value highlight"><span class="count-up" data-target="12">0</span></div><div class="pill-label">博士工作站</div></div><span class="pill-sub">在研项目7个</span></div>
+          <div class="stat-pill"><span class="pill-dot warn"></span><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="3">0</span></div><div class="pill-label">高级工程师</div></div><span class="pill-sub">核心技术岗</span></div>
+          <div class="stat-pill"><span class="pill-dot red"><div class="pill-info"><div class="pill-value danger"><span class="count-up" data-target="5">0</span></div><div class="pill-label">关键岗位空缺</div></div></span><span class="pill-trend down">需紧急补充</span></div>
+          <div class="stat-pill"><span class="pill-dot orange"><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="12">0</span></div><div class="pill-label">本月入职</div></div></span><span class="pill-trend up">目标达成</span></div>
+          <div class="stat-pill"><span class="pill-dot red"><div class="pill-info"><div class="pill-value"><span class="count-up" data-target="12">0</span></div><div class="pill-label">本月离职</div></div></span><span class="pill-trend down">离职率1.7%</span></div>
+        </div>
+
+        <!-- 二、考勤总览 - 7 pills -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">二、考勤总览</span>
+          <span class="section-subtitle">(出勤率/全勤率/加班/补卡)</span>
+        </div>
+        <div class="stat-pills cols-7">
+          <div class="stat-pill"><span class="pill-dot blue"></span><div class="pill-info"><div class="pill-value">88.5%</div><div class="pill-label">整体出勤率</div></div><span class="pill-trend up">达标</span></div>
+          <div class="stat-pill"><span class="pill-dot green"></span><div class="pill-info"><div class="pill-value">62.3%</div><div class="pill-label">全勤率</div></div><span class="pill-trend up">环比+1.5%</span></div>
+          <div class="stat-pill"><span class="pill-dot warn"></span><div class="pill-info"><div class="pill-value">3,840</div><div class="pill-label">总加班工时(h)</div></div><span class="pill-trend down">超预算12%</span></div>
+          <div class="stat-pill"><span class="pill-dot orange"></span><div class="pill-info"><div class="pill-value">14.7%</div><div class="pill-label">异常考勤占比</div></div><span class="pill-trend warn">374人次</span></div>
+          <div class="stat-pill"><span class="pill-dot cyan"></span><div class="pill-info"><div class="pill-value">228</div><div class="pill-label">本月补卡次数</div></div><span class="pill-sub">环比+15%</span></div>
+          <div class="stat-pill"><span class="pill-dot purple"></span><div class="pill-info"><div class="pill-value">91.2%</div><div class="pill-label">月薪岗考勤达标</div></div><span class="pill-trend up">时薪岗86.8%</span></div>
+          <div class="stat-pill"><span class="pill-dot red"></span><div class="pill-info"><div class="pill-value danger">47</div><div class="pill-label">旷工人次</div></div><span class="pill-trend down">需关注</span></div>
+        </div>
+
+        <!-- 三、组织分布 & 人员结构 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">三、组织分布与人员结构</span>
+          <span class="section-subtitle">(园区/学历/司龄)</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="building-2"></i></span>园区人员分布</div>
+            <div class="mc-chart" id="chart-park-dist" style="height:140px;"></div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="graduation-cap"></i></span>学历结构</div>
+            <div class="personnel-grid">
+              <div class="personnel-item"><span class="pi-label">博士</span><div class="pi-bar"><div class="pi-bar-fill" style="width:2%;background:var(--purple);"></div></div><span class="pi-val">12</span></div>
+              <div class="personnel-item"><span class="pi-label">硕士</span><div class="pi-bar"><div class="pi-bar-fill" style="width:8%;background:var(--cyan);"></div></div><span class="pi-val">58</span></div>
+              <div class="personnel-item"><span class="pi-label">本科</span><div class="pi-bar"><div class="pi-bar-fill" style="width:35%;background:var(--blue-light);"></div></div><span class="pi-val">252</span></div>
+              <div class="personnel-item"><span class="pi-label">大专</span><div class="pi-bar"><div class="pi-bar-fill" style="width:30%;background:var(--success);"></div></div><span class="pi-val">216</span></div>
+              <div class="personnel-item"><span class="pi-label">高中以下</span><div class="pi-bar"><div class="pi-bar-fill" style="width:25%;background:var(--text-secondary);"></div></div><span class="pi-val">182</span></div>
+              <div style="font-size:9px;color:var(--text-secondary);grid-column:1/-1;margin-top:4px;">研发部学历: 博4 硕22 本65 | 工艺研究院: 博2 硕15 本28</div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="clock"></i></span>司龄结构</div>
+            <div class="personnel-grid">
+              <div class="personnel-item"><span class="pi-label">&lt;1年</span><div class="pi-bar"><div class="pi-bar-fill" style="width:20%;background:var(--orange);"></div></div><span class="pi-val">144</span></div>
+              <div class="personnel-item"><span class="pi-label">1-3年</span><div class="pi-bar"><div class="pi-bar-fill" style="width:42%;background:var(--warning);"></div></div><span class="pi-val">302</span></div>
+              <div class="personnel-item"><span class="pi-label">3-5年</span><div class="pi-bar"><div class="pi-bar-fill" style="width:25%;background:var(--cyan);"></div></div><span class="pi-val">180</span></div>
+              <div class="personnel-item"><span class="pi-label">5-10年</span><div class="pi-bar"><div class="pi-bar-fill" style="width:10%;background:var(--blue-primary);"></div></div><span class="pi-val">72</span></div>
+              <div class="personnel-item"><span class="pi-label">&ge;10年</span><div class="pi-bar"><div class="pi-bar-fill" style="width:3%;background:var(--purple);"></div></div><span class="pi-val">22</span></div>
+              <div style="font-size:9px;color:var(--danger);grid-column:1/-1;margin-top:4px;">生产岗&lt;1年流失率: 28%  <span class="risk-tag high">预警</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 四、考勤核心指标 + 补卡概览 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">四、考勤核心指标与补卡概览</span>
+          <span class="section-subtitle">(出勤率/补卡统计/子公司排名)</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="activity"></i></span>综合出勤率仪表盘</div>
+            <div class="mc-chart" id="chart-att-gauge" style="height:140px;"></div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="rotate-cw"></i></span>补卡申请总览</div>
+            <div class="mc-chart" id="chart-replenish-overview" style="height:140px;"></div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="bar-chart-horizontal"></i></span>子公司出勤率排名</div>
+            <div class="mc-list">
+              <div class="compact-item"><span class="ci-rank top">1</span><span class="ci-name">银星科技园</span><span class="ci-value good">90.2%</span></div>
+              <div class="compact-item"><span class="ci-rank mid">2</span><span class="ci-name">侨安科技工业园</span><span class="ci-value warn">87.8%</span></div>
+              <div class="compact-item"><span class="ci-rank low">3</span><span class="ci-name">皇基御景</span><span class="ci-value bad">85.0%</span></div>
+              <div style="font-size:9px;color:var(--text-secondary);padding-top:4px;">应出勤总工时: 49,088h | 实际: 43,446h</div>
+              <div style="font-size:9px;color:var(--text-secondary);">工时利用率: 88.5% | 全勤奖发放: ¥12.8万</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 五、补卡专项监控 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">五、补卡专项监控</span>
+          <span class="section-subtitle">(补卡趋势/部门分布/审批状态/原因分析)</span>
+          <span class="section-tag info">本月累计228次</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="card" style="min-height:260px;">
+            <div class="card-title"><span class="icon"><i data-lucide="trending-up"></i></span>实时在岗率趋势(5月)</div>
+            <div class="chart-container" id="chart-onduty-trend"></div>
+          </div>
+          <div class="card" style="min-height:260px;">
+            <div class="card-title"><span class="icon"><i data-lucide="bar-chart-3"></i></span>各子公司补卡次数统计</div>
+            <div class="chart-container" id="chart-replenish-dept"></div>
+          </div>
+          <div class="card" style="min-height:260px;">
+            <div class="card-title"><span class="icon"><i data-lucide="file-check"></i></span>补卡原因分布与审批状态</div>
+            <div class="chart-container" id="chart-replenish-reason"></div>
+          </div>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card" style="max-height:280px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="list-checks"></i></span>补卡申请明细</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">待审批补卡</span><span class="ac-num" style="color:var(--danger);">23条</span><span class="risk-tag high">需处理</span></div>
+              <div class="ac-item warn"><span class="ac-label">驳回补卡</span><span class="ac-num">12条</span><span class="risk-tag mid">待补充</span></div>
+              <div class="ac-item"><span class="ac-label">已通过补卡</span><span class="ac-num">186条</span><span class="risk-tag good">正常</span></div>
+              <div class="ac-item"><span class="ac-label">撤销补卡</span><span class="ac-num">7条</span></div>
+              <div class="ac-sub-header blue">高频补卡人员(Top3)</div>
+              <div class="ac-item warn"><span class="ac-label">张XX (侨安-事业一部)</span><span class="ac-num">8次</span><span class="risk-tag mid">异常</span></div>
+              <div class="ac-item"><span class="ac-label">李XX (银星-研发部)</span><span class="ac-num">6次</span></div>
+              <div class="ac-item"><span class="ac-label">王XX (皇基-市场部)</span><span class="ac-num">5次</span></div>
+            </div>
+          </div>
+          <div class="mini-card" style="max-height:280px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="clock"></i></span>补卡时效分析</div>
+            <div class="alert-compact">
+              <div class="ac-item"><span class="ac-label">平均审批时长</span><span class="ac-num">4.2h</span></div>
+              <div class="ac-item warn"><span class="ac-label">超24h未审批</span><span class="ac-num">8条</span><span class="risk-tag mid">积压</span></div>
+              <div class="ac-item"><span class="ac-label">平均补卡提交距漏打卡</span><span class="ac-num">1.8天</span></div>
+              <div class="ac-item danger"><span class="ac-label">超7天补卡申请</span><span class="ac-num">15条</span><span class="risk-tag high">违规</span></div>
+              <div class="ac-sub-header cyan">月度趋势</div>
+              <div class="ac-item"><span class="ac-label">上月补卡总数</span><span class="ac-num">198次</span></div>
+              <div class="ac-item warn"><span class="ac-label">本月补卡(截至3日)</span><span class="ac-num">228次</span><span class="risk-tag mid">环比+15%</span></div>
+              <div class="ac-item"><span class="ac-label">人均月补卡次数</span><span class="ac-num">0.32次</span></div>
+            </div>
+          </div>
+          <div class="mini-card" style="max-height:280px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="shield-alert"></i></span>补卡异常预警</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">月度补卡≥5次人员</span><span class="ac-num">3人</span><span class="risk-tag high">异常</span></div>
+              <div class="ac-item warn"><span class="ac-label">连续两月补卡≥3次</span><span class="ac-num">12人</span><span class="risk-tag mid">关注</span></div>
+              <div class="ac-item danger"><span class="ac-label">同天多次补卡</span><span class="ac-num">5起</span><span class="risk-tag high">需核查</span></div>
+              <div class="ac-item"><span class="ac-label">补卡集中在周一</span><span class="ac-num">38%</span></div>
+              <div class="ac-item warn"><span class="ac-label">补卡原因填"忘记打卡"占比</span><span class="ac-num">62%</span><span class="risk-tag mid">偏高</span></div>
+              <div class="ac-item"><span class="ac-label">侨安补卡率(人次/总人数)</span><span class="ac-num">33.7%</span></div>
+              <div class="ac-item warn"><span class="ac-label">皇基补卡率</span><span class="ac-num">22.2%</span><span class="risk-tag mid">需关注</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 六、异常速览 -->
+        <div class="section-header">
+          <span class="section-dot" style="background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,0.5);"></span>
+          <span class="section-title">六、异常与风险速览</span>
+          <span class="section-tag risk">董事长重点关注</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card" style="max-height:300px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="user-x"></i></span>旷工 & 请假 & 大小周异常</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">月度旷工人次</span><span class="ac-num" style="color:var(--danger);">47人次</span><span class="risk-tag high">高发</span></div>
+              <div class="ac-item warn"><span class="ac-label">大小周执行率&lt;80%部门</span><span class="ac-num">事业二部</span><span class="risk-tag high">标红</span></div>
+              <div class="ac-item"><span class="ac-label">高发单位: 侨安科技园</span><span class="ac-num">22人次</span></div>
+              <div class="ac-item danger"><span class="ac-label">连续3天异常人员</span><span class="ac-num">8人</span><span class="risk-tag high">已标注</span></div>
+              <div class="ac-item warn"><span class="ac-label">事假占比</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:38%"></div></span><span class="ac-num">38%</span></div>
+              <div class="ac-item warn"><span class="ac-label">病假占比</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:22%"></div></span><span class="ac-num">22%</span></div>
+              <div class="ac-item danger"><span class="ac-label">超长病假(&ge;15天)</span><span class="ac-num">8人</span><span class="risk-tag high">关注</span></div>
+              <div class="ac-item warn"><span class="ac-label">批量集中请假异常</span><span class="ac-num">3起</span><span class="risk-tag mid">已核查</span></div>
+            </div>
+          </div>
+          <div class="mini-card" style="max-height:300px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="clock"></i></span>加班管控 & 迟到早退</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">全集团加班总工时</span><span class="ac-num" style="color:var(--danger);">3,840h</span><span class="risk-tag high">超预算12%</span></div>
+              <div class="ac-item danger"><span class="ac-label">人均月加班>36h部门</span><span class="ac-num">侨安:1,680h</span><span class="risk-tag high">超标</span></div>
+              <div class="ac-item"><span class="ac-label">加班成本(估算)</span><span class="ac-num">¥19.2万</span></div>
+              <div class="ac-item warn"><span class="ac-label">无效加班偏高预警</span><span class="ac-num">23%</span><span class="risk-tag high">需核查</span></div>
+              <div class="ac-item"><span class="ac-label">调休总余额</span><span class="ac-num">1,860h</span></div>
+              <div class="ac-item warn"><span class="ac-label">即将过期调休</span><span class="ac-num">320h</span><span class="risk-tag mid">30天内</span></div>
+              <div class="ac-item warn"><span class="ac-label">月度迟到累计</span><span class="ac-num">211人次</span></div>
+              <div class="ac-item warn"><span class="ac-label">月度早退累计</span><span class="ac-num">163人次</span></div>
+            </div>
+          </div>
+          <div class="mini-card" style="max-height:300px;">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="shield-alert"></i></span>合规 & 外勤 & 干部梯队</div>
+            <div class="alert-compact">
+              <div class="ac-sub-header blue">外勤/出差管控</div>
+              <div class="ac-item"><span class="ac-label">外勤日均人数</span><span class="ac-num">42人</span></div>
+              <div class="ac-item warn"><span class="ac-label">长期驻外未核销</span><span class="ac-num">5人</span><span class="risk-tag mid">超30天</span></div>
+              <div class="ac-sub-header red">用工合规风险</div>
+              <div class="ac-item danger"><span class="ac-label">合同到期30天未续签</span><span class="ac-num" style="color:var(--danger);">3人</span><span class="risk-tag high">紧急</span></div>
+              <div class="ac-item warn"><span class="ac-label">合同到期90天未续签</span><span class="ac-num">11人</span><span class="risk-tag mid">关注</span></div>
+              <div class="ac-item danger"><span class="ac-label">劳务占比超标</span><span class="ac-num">11.9%</span><span class="risk-tag high">阈值10%</span></div>
+              <div class="ac-item warn"><span class="ac-label">超龄用工(&ge;60岁)</span><span class="ac-num">4人</span></div>
+              <div class="ac-sub-header cyan">干部梯队</div>
+              <div class="ac-item"><span class="ac-label">中高层在岗/空缺</span><span class="ac-num">38/5</span></div>
+              <div class="ac-item warn"><span class="ac-label">关键人才培养进度</span><span class="ac-num">68%</span><span class="risk-tag mid">落后</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Page 2: 人力核心专项看板 ===== -->
+      <section class="page-container" id="page2" role="tabpanel" aria-label="人力核心看板">
+        <div class="current-scope-info">
+          <span>当前视图：</span><strong id="page2ScopeName">强瑞集团 · 人力核心看板</strong>
+        </div>
+
+        <!-- 组织与人员结构 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">组织与人员结构分析</span>
+        </div>
+        <div class="stat-cards" style="margin-bottom:var(--gap);">
+          <div class="stat-card"><div class="stat-icon blue"><i data-lucide="building-2"></i></div><div><div class="stat-value">25</div><div class="stat-label">部门总数</div></div></div>
+          <div class="stat-card"><div class="stat-icon cyan"><i data-lucide="users"></i></div><div><div class="stat-value">720</div><div class="stat-label">在编总人数</div></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i data-lucide="user-check"></i></div><div><div class="stat-value">85.3%</div><div class="stat-label">在岗率</div></div></div>
+          <div class="stat-card"><div class="stat-icon orange"><i data-lucide="alert-circle"></i></div><div><div class="stat-value">5</div><div class="stat-label">编制缺口&gt;20%部门</div></div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i data-lucide="star"></i></div><div><div class="stat-value">22</div><div class="stat-label">储备干部</div></div></div>
+        </div>
+
+        <div class="grid-2col" style="flex:1;">
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="bar-chart-2"></i></span>编制执行对比(各部门编制 vs 实际)</div>
+            <div class="chart-container" id="chart-staffing-compare"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="pie-chart"></i></span>岗位类型占比(生产/技术/职能/管理)</div>
+            <div class="chart-container" id="chart-job-type-detail"></div>
+          </div>
+        </div>
+
+        <!-- 招聘与离职 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">招聘与离职分析</span>
+        </div>
+        <div class="stat-pills cols-5" style="margin-bottom:var(--gap);">
+          <div class="stat-pill"><span class="pill-dot green"></span><div class="pill-info"><div class="pill-value">76.5%</div><div class="pill-label">招聘计划完成率</div></div><span class="pill-trend up">目标80%</span></div>
+          <div class="stat-pill"><span class="pill-dot blue"></span><div class="pill-info"><div class="pill-value">18天</div><div class="pill-label">核心岗平均到岗周期</div></div><span class="pill-trend up">环比-2天</span></div>
+          <div class="stat-pill"><span class="pill-dot cyan"></span><div class="pill-info"><div class="pill-value">32%</div><div class="pill-label">简历转化率</div></div></div>
+          <div class="stat-pill"><span class="pill-dot warn"></span><div class="pill-info"><div class="pill-value">68%</div><div class="pill-label">面试通过率</div></div></div>
+          <div class="stat-pill"><span class="pill-dot orange"></span><div class="pill-info"><div class="pill-value">82%</div><div class="pill-label">Offer接受率</div></div><span class="pill-trend up">同比+5%</span></div>
+        </div>
+
+        <div class="grid-2col" style="flex:1;">
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="trending-down"></i></span>近12月离职率趋势(按园区拆分)</div>
+            <div class="chart-container" id="chart-turnover-trend"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="alert-triangle"></i></span>关键人才流失预警 & 离职原因</div>
+            <div class="chart-container" id="chart-turnover-reason"></div>
+          </div>
+        </div>
+
+        <!-- 员工全生命周期 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">员工全生命周期管理</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="user-plus"></i></span>试用期跟踪</div>
+            <div class="alert-compact">
+              <div class="ac-item"><span class="ac-label">试用期总人数</span><span class="ac-num">63人</span></div>
+              <div class="ac-item"><span class="ac-label">本月转正人数</span><span class="ac-num">8人</span><span class="risk-tag good">已完成</span></div>
+              <div class="ac-item"><span class="ac-label">转正率</span><span class="ac-num">92%</span></div>
+              <div class="ac-item warn"><span class="ac-label">试用期离职率</span><span class="ac-num">8%</span><span class="risk-tag mid">关注</span></div>
+              <div class="ac-sub-header red">待转正倒计时</div>
+              <div class="ac-item danger"><span class="ac-label">7天内到期</span><span class="ac-num" style="color:var(--danger);">3人</span><span class="risk-tag high">紧急</span></div>
+              <div class="ac-item warn"><span class="ac-label">14天内到期</span><span class="ac-num">7人</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="file-text"></i></span>合同合规监控</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">未签合同</span><span class="ac-num" style="color:var(--danger);">0人</span><span class="risk-tag good">合规</span></div>
+              <div class="ac-item"><span class="ac-label">合同过期</span><span class="ac-num">0人</span></div>
+              <div class="ac-sub-header blue">合同到期预警</div>
+              <div class="ac-item danger"><span class="ac-label">30天内到期</span><span class="ac-num" style="color:var(--danger);">3人</span><span class="risk-tag high">紧急</span></div>
+              <div class="ac-item warn"><span class="ac-label">60天内到期</span><span class="ac-num">11人</span><span class="risk-tag mid">关注</span></div>
+              <div class="ac-item"><span class="ac-label">90天内到期</span><span class="ac-num">23人</span></div>
+              <div class="ac-sub-header cyan">合同类型分布</div>
+              <div class="ac-item"><span class="ac-label">固定期限</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:72%"></div></span><span class="ac-num">72%</span></div>
+              <div class="ac-item"><span class="ac-label">无固定期限</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:18%"></div></span><span class="ac-num">18%</span></div>
+              <div class="ac-item"><span class="ac-label">试用期</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:10%"></div></span><span class="ac-num">10%</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="trending-up"></i></span>调薪晋升 & 假期统计</div>
+            <div class="alert-compact">
+              <div class="ac-sub-header blue">调薪与晋升</div>
+              <div class="ac-item"><span class="ac-label">本年度调薪人数</span><span class="ac-num">186人</span></div>
+              <div class="ac-item"><span class="ac-label">调薪比例</span><span class="ac-num">25.8%</span></div>
+              <div class="ac-item"><span class="ac-label">晋升人数</span><span class="ac-num">32人</span></div>
+              <div class="ac-item"><span class="ac-label">平均调薪幅度</span><span class="ac-num">8.5%</span></div>
+              <div class="ac-sub-header green">工龄与假期</div>
+              <div class="ac-item"><span class="ac-label">未休年假总时长</span><span class="ac-num">1,860h</span></div>
+              <div class="ac-item warn"><span class="ac-label">30天过期年假</span><span class="ac-num">320h</span><span class="risk-tag mid">预警</span></div>
+              <div class="ac-item"><span class="ac-label">平均工龄</span><span class="ac-num">2.8年</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Page 3: 考勤与生产效能专项看板 ===== -->
+      <section class="page-container" id="page3" role="tabpanel" aria-label="考勤效能看板">
+        <div class="current-scope-info">
+          <span>当前视图：</span><strong id="page3ScopeName">强瑞集团 · 考勤与生产效能看板</strong>
+        </div>
+
+        <!-- 考勤核心指标 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">考勤核心指标监控</span>
+        </div>
+        <div class="stat-pills cols-5" style="margin-bottom:var(--gap);">
+          <div class="stat-pill"><span class="pill-dot blue"></span><div class="pill-info"><div class="pill-value">88.5%</div><div class="pill-label">综合出勤率</div></div><span class="pill-trend up">环比+0.5%</span></div>
+          <div class="stat-pill"><span class="pill-dot green"></span><div class="pill-info"><div class="pill-value">62.3%</div><div class="pill-label">全勤率</div></div><span class="pill-trend up">全勤奖¥12.8万</span></div>
+          <div class="stat-pill"><span class="pill-dot warn"></span><div class="pill-info"><div class="pill-value">87.5%</div><div class="pill-label">大小周执行率</div></div><span class="pill-trend down">目标90%</span></div>
+          <div class="stat-pill"><span class="pill-dot orange"></span><div class="pill-info"><div class="pill-value">3,840h</div><div class="pill-label">总加班时长</div></div><span class="pill-trend down">超预算12%</span></div>
+          <div class="stat-pill"><span class="pill-dot red"></span><div class="pill-info"><div class="pill-value">14.7%</div><div class="pill-label">异常考勤率</div></div><span class="pill-trend warn">374人次</span></div>
+        </div>
+
+        <!-- 大小周 & 生产车间 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">大小周专项监控(强瑞核心规则)</span>
+          <span class="section-tag info">含节假日/补班调整</span>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="calendar"></i></span>大小周执行看板</div>
+            <div class="alert-compact">
+              <div class="ac-item"><span class="ac-label">本月应上小周天数</span><span class="ac-num">4天</span></div>
+              <div class="ac-item warn"><span class="ac-label">实际小周出勤天数</span><span class="ac-num">3.5天</span><span class="risk-tag mid">偏差</span></div>
+              <div class="ac-item"><span class="ac-label">银星小周出勤率</span><span class="ac-num">91.2%</span></div>
+              <div class="ac-item"><span class="ac-label">侨安小周出勤率</span><span class="ac-num">86.5%</span></div>
+              <div class="ac-item danger"><span class="ac-label">皇基小周出勤率</span><span class="ac-num">78.2%</span><span class="risk-tag high">标红</span></div>
+              <div class="ac-item warn"><span class="ac-label">执行率&lt;80%部门</span><span class="ac-num">皇基御景</span><span class="risk-tag high">需整改</span></div>
+              <div class="ac-sub-header red">加班补缺勤执行</div>
+              <div class="ac-item warn"><span class="ac-label">加班结余补全缺勤比例</span><span class="ac-num">76%</span><span class="risk-tag mid">偏低</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="factory"></i></span>核心生产车间考勤</div>
+            <div class="alert-compact">
+              <div class="ac-sub-header blue">机加部</div>
+              <div class="ac-item"><span class="ac-label">班组出勤率</span><span class="ac-num">89.5%</span></div>
+              <div class="ac-item"><span class="ac-label">夜班人数</span><span class="ac-num">42人</span></div>
+              <div class="ac-item"><span class="ac-label">异常考勤</span><span class="ac-num">18人次</span></div>
+              <div class="ac-sub-header cyan">装配部</div>
+              <div class="ac-item"><span class="ac-label">班组出勤率</span><span class="ac-num">87.2%</span></div>
+              <div class="ac-item"><span class="ac-label">夜班人数</span><span class="ac-num">35人</span></div>
+              <div class="ac-item warn"><span class="ac-label">异常考勤</span><span class="ac-num">22人次</span><span class="risk-tag mid">偏高</span></div>
+              <div class="ac-sub-header green">钣金部</div>
+              <div class="ac-item"><span class="ac-label">班组出勤率</span><span class="ac-num">91.0%</span></div>
+              <div class="ac-item"><span class="ac-label">夜班人数</span><span class="ac-num">28人</span></div>
+              <div class="ac-item"><span class="ac-label">异常考勤</span><span class="ac-num">10人次</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="map-pin"></i></span>外勤人员考勤</div>
+            <div class="alert-compact">
+              <div class="ac-item"><span class="ac-label">外勤人员总数</span><span class="ac-num">42人</span></div>
+              <div class="ac-item"><span class="ac-label">外勤打卡率</span><span class="ac-num">88.2%</span></div>
+              <div class="ac-item"><span class="ac-label">外勤点覆盖</span><span class="ac-num">12个</span></div>
+              <div class="ac-item warn"><span class="ac-label">未打卡外勤</span><span class="ac-num">5人</span><span class="risk-tag mid">需核实</span></div>
+              <div class="ac-item"><span class="ac-label">考勤确认进度</span><span class="ci-bar-wrap"><div class="ci-bar-fill" style="width:85%"></div></span><span class="ac-num">85%</span></div>
+              <div class="ac-item warn"><span class="ac-label">未确认人员</span><span class="ac-num">12人</span><span class="risk-tag mid">待催办</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 加班 & 调休成本 -->
+        <div class="section-header">
+          <span class="section-dot"></span>
+          <span class="section-title">加班与调休成本分析</span>
+        </div>
+        <div class="grid-2col" style="flex:1;">
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="pie-chart"></i></span>加班类型分布(1.5倍/2倍/3倍)</div>
+            <div class="chart-container" id="chart-overtime-type"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon"><i data-lucide="bar-chart-2"></i></span>各部门人均加班时长排名</div>
+            <div class="chart-container" id="chart-dept-overtime"></div>
+          </div>
+        </div>
+        <div class="grid-3col" style="flex:1;">
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="dollar-sign"></i></span>时薪岗位加班费专项</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">司机加班总时长</span><span class="ac-num">420h</span><span class="risk-tag high">夜班为主</span></div>
+              <div class="ac-item"><span class="ac-label">厨房加班总时长</span><span class="ac-num">180h</span></div>
+              <div class="ac-item"><span class="ac-label">保洁加班总时长</span><span class="ac-num">95h</span></div>
+              <div class="ac-item"><span class="ac-label">仓储加班总时长</span><span class="ac-num">210h</span></div>
+              <div class="ac-item danger"><span class="ac-label">预估加班费总额</span><span class="ac-num" style="color:var(--danger);">¥8.6万</span><span class="risk-tag high">超预算15%</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="credit-card"></i></span>调休账户监控</div>
+            <div class="alert-compact">
+              <div class="ac-item"><span class="ac-label">集团调休总余额</span><span class="ac-num">1,860h</span></div>
+              <div class="ac-item warn"><span class="ac-label">7天内过期</span><span class="ac-num">120h</span><span class="risk-tag high">紧急</span></div>
+              <div class="ac-item warn"><span class="ac-label">30天内过期</span><span class="ac-num">320h</span><span class="risk-tag mid">关注</span></div>
+              <div class="ac-item danger"><span class="ac-label">超3月未使用</span><span class="ac-num">560h</span><span class="risk-tag high">12人</span></div>
+              <div class="ac-sub-header blue">部门调休积压排名</div>
+              <div class="ac-item"><span class="ac-label">研发部</span><span class="ac-num">420h</span></div>
+              <div class="ac-item"><span class="ac-label">事业一部</span><span class="ac-num">380h</span></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mc-title"><span class="mc-icon"><i data-lucide="check-circle"></i></span>加班合规性检查</div>
+            <div class="alert-compact">
+              <div class="ac-item danger"><span class="ac-label">人均月加班>36h部门</span><span class="ac-num">侨安</span><span class="risk-tag high">超标</span></div>
+              <div class="ac-item warn"><span class="ac-label">人均月加班>36h人员</span><span class="ac-num">28人</span><span class="risk-tag mid">需核查</span></div>
+              <div class="ac-item"><span class="ac-label">夜班自动加班(司机)</span><span class="ac-num">合规</span><span class="risk-tag good">已校验</span></div>
+              <div class="ac-item"><span class="ac-label">加班审批流程</span><span class="ac-num">96%</span><span class="risk-tag good">规范</span></div>
+              <div class="ac-item warn"><span class="ac-label">考勤薪酬数据一致性</span><span class="ac-num">98.5%</span><span class="risk-tag mid">差异项2</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Page 4: 风险预警中心 ===== -->
+      <section class="page-container" id="page4" role="tabpanel" aria-label="风险预警中心">
+        <div class="current-scope-info">
+          <span>当前视图：</span><strong id="page4ScopeName">强瑞集团 · 风险预警中心</strong>
+          <span style="margin-left:auto;font-size:10px;color:var(--danger);">⚠ 共 <span id="riskTotalCount" style="font-weight:700;">15</span> 条风险预警</span>
+        </div>
+
+        <div class="section-header">
+          <span class="section-dot" style="background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,0.5);"></span>
+          <span class="section-title">人力风险预警</span>
+          <span class="section-tag risk">部门离职率>15% / 核心空缺>30天 / 合同未续签</span>
+        </div>
+        <div class="card" style="flex:1;min-height:200px;">
+          <div class="risk-center-list" id="riskHrList">
+            <div class="risk-center-item level-high"><span class="rc-category hr">人力</span><span class="rc-name">事业一部月度离职率16.5%，超阈值15%</span><span class="rc-detail">本月离职5人</span><button class="rc-action">查看详情</button></div>
+            <div class="risk-center-item level-high"><span class="rc-category hr">人力</span><span class="rc-name">博士工作站1人提出离职(张XX，电控方向)</span><span class="rc-detail">核心人才</span><button class="rc-action">立即处理</button></div>
+            <div class="risk-center-item level-high"><span class="rc-category hr">人力</span><span class="rc-name">装配部班组批量离职3人/周，触发批量预警</span><span class="rc-detail">需关注</span><button class="rc-action">查看详情</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category hr">人力</span><span class="rc-name">试用期离职率8%，接近阈值10%</span><span class="rc-detail">本月已离5人</span><button class="rc-action">查看详情</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category hr">人力</span><span class="rc-name">关键岗位空缺: 电控工程师(空缺30天)、软件架构师(空缺22天)</span><span class="rc-detail">2个岗位</span><button class="rc-action">启动招聘</button></div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-dot" style="background:var(--warning);box-shadow:0 0 8px rgba(245,158,11,0.5);"></span>
+          <span class="section-title">考勤风险预警</span>
+          <span class="section-tag info">大小周<80% / 加班>40h / 调休过期</span>
+        </div>
+        <div class="card" style="flex:1;min-height:200px;">
+          <div class="risk-center-list" id="riskAttendList">
+            <div class="risk-center-item level-high"><span class="rc-category attend">考勤</span><span class="rc-name">皇基御景大小周执行率78.2%，低于阈值80%</span><span class="rc-detail">需整改</span><button class="rc-action">下发督办</button></div>
+            <div class="risk-center-item level-high"><span class="rc-category attend">考勤</span><span class="rc-name">侨安科技园人均月加班42.5h，超36h标准</span><span class="rc-detail">28人超标</span><button class="rc-action">查看名单</button></div>
+            <div class="risk-center-item level-high"><span class="rc-category attend">考勤</span><span class="rc-name">调休过期未使用≥100h，12人合计560h</span><span class="rc-detail">需催办</span><button class="rc-action">发通知</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category attend">考勤</span><span class="rc-name">连续旷工≥2天: 侨安3人、银星1人</span><span class="rc-detail">4人</span><button class="rc-action">查看详情</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category attend">考勤</span><span class="rc-name">月度异常考勤≥5次/人: 共22人</span><span class="rc-detail">最高18次</span><button class="rc-action">查看名单</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category attend">考勤</span><span class="rc-name">时薪岗位加班费超预算15%，预估超支¥1.2万</span><span class="rc-detail">需审批</span><button class="rc-action">查看明细</button></div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-dot" style="background:var(--danger);box-shadow:0 0 8px rgba(239,68,68,0.5);"></span>
+          <span class="section-title">合规风险预警</span>
+          <span class="section-tag risk">未签合同 / 试用期超期 / 年假过期</span>
+        </div>
+        <div class="card" style="flex:1;min-height:180px;">
+          <div class="risk-center-list" id="riskComplyList">
+            <div class="risk-center-item level-high"><span class="rc-category comply">合规</span><span class="rc-name">劳务占比11.9%，超阈值10%，需降本调整</span><span class="rc-detail">86人</span><button class="rc-action">制定方案</button></div>
+            <div class="risk-center-item level-high"><span class="rc-category comply">合规</span><span class="rc-name">合同到期30天内未续签: 3人，触发合规红线</span><span class="rc-detail">紧急</span><button class="rc-action">立即处理</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category comply">合规</span><span class="rc-name">超龄用工≥60岁: 4人，需复核合规性</span><span class="rc-detail">关注</span><button class="rc-action">复核</button></div>
+            <div class="risk-center-item level-medium"><span class="rc-category comply">合规</span><span class="rc-name">年假过期未休≥50天: 累计320h，涉及28人</span><span class="rc-detail">需催休</span><button class="rc-action">发通知</button></div>
+            <div class="risk-center-item level-low"><span class="rc-category comply">合规</span><span class="rc-name">加班审批流程不规范: 4%加班单未完整审批</span><span class="rc-detail">可优化</span><button class="rc-action">查看</button></div>
+          </div>
+        </div>
+
+        <!-- 预警统计 -->
+        <div class="stat-pills cols-4" style="flex-shrink:0;">
+          <div class="stat-pill"><span class="pill-dot red"></span><div class="pill-info"><div class="pill-value danger">5</div><div class="pill-label">人力高风险</div></div></div>
+          <div class="stat-pill"><span class="pill-dot warn"></span><div class="pill-info"><div class="pill-value">6</div><div class="pill-label">考勤中高风险</div></div></div>
+          <div class="stat-pill"><span class="pill-dot red"></span><div class="pill-info"><div class="pill-value danger">2</div><div class="pill-label">合规高风险</div></div></div>
+          <div class="stat-pill"><span class="pill-dot blue"></span><div class="pill-info"><div class="pill-value">15</div><div class="pill-label">预警总数</div></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  const COLORS = {
+    blue: '#2563eb', blueLight: '#3b82f6', cyan: '#0891b2', cyanLight: '#22d3ee',
+    green: '#059669', warning: '#d97706', orange: '#ea580c', danger: '#dc2626',
+    purple: '#7c3aed', pink: '#db2777', teal: '#0d9488', slate: '#475569',
+  };
+
+  // ============ Org Data ============
+  const orgData = {
+    group: {
+      name: '强瑞集团', fullName: '强瑞集团 · 全集团数据',
+      subsidiaries: ['yinhe', 'qiaoan', 'huangji'],
+      stats: {
+        totalEmployees: 720, avgOnDuty: 614, abnormalCount: 398,
+        fullPunchRate: 88.5, abnormalRate: 14.7,
+        totalRecords: 74866, validRecords: 5084, statDays: 26,
+        replenishCount: 228, punchEmployees: 720,
+        onlyIn: 306, onlyOut: 92, lateCount: 211, earlyCount: 163,
+        departments: 25, maxRate: 96.2, minRate: 78.6,
+      }
+    },
+    subsidiaries: {
+      yinhe: {
+        id: 'yinhe', name: '银星科技园', fullName: '子公司 · 银星科技园 · 深圳市强瑞精密', parent: 'group',
+        stats: { totalEmployees: 280, avgOnDuty: 245, abnormalCount: 156, fullPunchRate: 90.2, abnormalRate: 12.8, totalRecords: 29500, validRecords: 2050, statDays: 26, replenishCount: 90, punchEmployees: 280, onlyIn: 120, onlyOut: 36, lateCount: 85, earlyCount: 70, departments: 8, maxRate: 96.2, minRate: 82.5 },
+        departments: [
+          { name: '总经办', employees: 12, rate: 95.5 }, { name: '人力资源部', employees: 28, rate: 93.2 },
+          { name: '财务部', employees: 15, rate: 91.0 }, { name: '研发部', employees: 55, rate: 88.5 },
+          { name: '供应链管理部', employees: 80, rate: 86.2 }, { name: '工艺研究院', employees: 45, rate: 90.8 },
+          { name: '事业一部', employees: 30, rate: 92.1 }, { name: '事业二部', employees: 15, rate: 89.3 }
+        ]
+      },
+      qiaoan: {
+        id: 'qiaoan', name: '侨安科技工业园', fullName: '子公司 · 侨安科技工业园 · 深圳市强瑞技术', parent: 'group',
+        stats: { totalEmployees: 350, avgOnDuty: 298, abnormalCount: 198, fullPunchRate: 87.8, abnormalRate: 16.2, totalRecords: 36800, validRecords: 2480, statDays: 26, replenishCount: 118, punchEmployees: 350, onlyIn: 160, onlyOut: 38, lateCount: 106, earlyCount: 72, departments: 14, maxRate: 94.5, minRate: 78.6 },
+        departments: [
+          { name: '总经办', employees: 5, rate: 94.5 }, { name: '事业一部', employees: 85, rate: 88.2 },
+          { name: '事业二部', employees: 70, rate: 87.5 }, { name: '运维支持中心', employees: 40, rate: 90.1 },
+          { name: '平台部门', employees: 35, rate: 86.8 }, { name: '利润中心二', employees: 45, rate: 85.3 },
+          { name: '利润中心三', employees: 40, rate: 84.2 }, { name: '综合保障部', employees: 8, rate: 92.0 },
+          { name: '信息部', employees: 12, rate: 91.5 }, { name: '内审部', employees: 5, rate: 90.0 }
+        ]
+      },
+      huangji: {
+        id: 'huangji', name: '皇基御景', fullName: '子公司 · 皇基御景 · 深圳市国科智图', parent: 'group',
+        stats: { totalEmployees: 90, avgOnDuty: 71, abnormalCount: 40, fullPunchRate: 85.0, abnormalRate: 18.5, totalRecords: 8566, validRecords: 554, statDays: 26, replenishCount: 20, punchEmployees: 90, onlyIn: 26, onlyOut: 18, lateCount: 20, earlyCount: 21, departments: 3, maxRate: 88.0, minRate: 82.5 },
+        departments: [
+          { name: '研发部', employees: 35, rate: 86.5 }, { name: '市场部', employees: 30, rate: 84.2 },
+          { name: '运营部', employees: 25, rate: 83.0 }
+        ]
+      }
+    }
+  };
+
+  let currentScope = 'group', currentSubId = null, currentPage = 'page1';
+  const chartInstances = {};
+
+  function getCurrentStats() {
+    if (currentScope === 'group') return orgData.group.stats;
+    if (currentScope === 'subsidiary' && currentSubId) return orgData.subsidiaries[currentSubId].stats;
+    return orgData.group.stats;
+  }
+  function getCurrentOrgName() {
+    if (currentScope === 'group') return orgData.group.fullName;
+    if (currentScope === 'subsidiary' && currentSubId) return orgData.subsidiaries[currentSubId].fullName;
+    return orgData.group.fullName;
+  }
+  function getCurrentOrgShortName() {
+    if (currentScope === 'group') return orgData.group.name;
+    if (currentScope === 'subsidiary' && currentSubId) return orgData.subsidiaries[currentSubId].name;
+    return orgData.group.name;
+  }
+
+  // ============ Time ============
+  function updateTime() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0'), m = String(now.getMinutes()).padStart(2,'0'), s = String(now.getSeconds()).padStart(2,'0');
+    const tEl = $('#headerTime'), dEl = $('#headerDate');
+    if (tEl) tEl.textContent = `${h}:${m}:${s}`;
+    if (dEl) {
+      const y = now.getFullYear(), mo = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+      const wd = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+      dEl.textContent = `${y}年${mo}月${d}日 ${wd[now.getDay()]}`;
+    }
+  }
+  setInterval(updateTime, 1000); updateTime();
+
+  // ============ Particles ============
+  (function() {
+    const c = $('#particles'); if (!c) return;
+    for (let i=0;i<20;i++) {
+      const p = document.createElement('div'); p.className='particle';
+      p.style.width=(Math.random()*4+1)+'px'; p.style.height=p.style.width;
+      p.style.left=Math.random()*100+'%'; p.style.animationDuration=(Math.random()*15+10)+'s';
+      p.style.animationDelay=(Math.random()*10)+'s'; p.style.opacity=Math.random()*0.3+0.05;
+      c.appendChild(p);
+    }
+  })();
+
+  // ============ Breadcrumb & Scope ============
+  function updateBreadcrumb() {
+    const bc = $('#breadcrumb'); if (!bc) return;
+    let h = '';
+    if (currentScope==='group') {
+      h = `<button class="breadcrumb-item current" onclick="window._switchScope('group')">${orgData.group.name}</button>`;
+    } else if (currentScope==='subsidiary' && currentSubId) {
+      const s = orgData.subsidiaries[currentSubId];
+      h = `<button class="breadcrumb-item" onclick="window._switchScope('group')">${orgData.group.name}</button><span class="breadcrumb-separator">/</span><button class="breadcrumb-item current" onclick="window._switchScope('subsidiary','${currentSubId}')">${s.name}</button>`;
+    }
+    bc.innerHTML = h;
+  }
+  function updateScopeBadge() {
+    const b = $('#scopeBadge'); if (!b) return;
+    b.textContent = getCurrentOrgShortName(); b.className = 'scope-badge';
+    if (currentScope==='subsidiary') b.classList.add('subsidiary');
+  }
+  function updateScopeInfos() {
+    const n = getCurrentOrgName();
+    ['page1','page2','page3','page4'].forEach(pid => {
+      const el = $(`#${pid}ScopeName`);
+      if (el) { el.textContent = n; }
+    });
+  }
+  function switchScope(scope, subId) {
+    currentScope = scope; currentSubId = subId || null;
+    const sel = $('#scopeLevel'); if (sel) { sel.value = scope==='group'?'group':'subsidiary'; if (subId) sel.setAttribute('data-current-sub', subId); }
+    updateBreadcrumb(); updateScopeBadge(); updateScopeInfos();
+    const ht = $('#headerTitle');
+    if (ht) ht.textContent = scope==='group' ? '强瑞集团 · 人事综合驾驶舱' : (subId ? orgData.subsidiaries[subId].name+' · 人事综合驾驶舱' : '强瑞集团 · 人事综合驾驶舱');
+    initChartsForPage(currentPage); animateCountUp();
+  }
+  window._switchScope = switchScope;
+
+  function initScopeSelector() {
+    const sel = $('#scopeLevel'); if (!sel) return;
+    sel.addEventListener('change', function() {
+      if (this.value==='group') { switchScope('group'); }
+      else { const sid = this.options[this.selectedIndex].getAttribute('data-id'); if (sid) switchScope('subsidiary', sid); }
+    });
+  }
+
+  // ============ Count-Up ============
+  function animateCountUp() {
+    $$('.count-up').forEach(el => {
+      const target = parseFloat(el.dataset.target), isFloat = String(target).includes('.');
+      const duration = 1500, startTime = performance.now();
+      function step(ct) {
+        const p = Math.min((ct-startTime)/duration, 1);
+        const eased = p===1 ? 1 : 1 - Math.pow(2, -10*p);
+        el.textContent = isFloat ? (target*eased).toFixed(1) : Math.round(target*eased);
+        if (p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  // ============ Tab Navigation ============
+  function switchPage(pageId) {
+    if (currentPage===pageId) return; currentPage = pageId;
+    $$('.page-container').forEach(p=>p.classList.remove('active'));
+    $$('.nav-tab').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false');});
+    const pe = $(`#${pageId}`), te = $(`.nav-tab[data-page="${pageId}"]`);
+    if (pe) pe.classList.add('active');
+    if (te) { te.classList.add('active'); te.setAttribute('aria-selected','true'); }
+    setTimeout(()=>{ initChartsForPage(pageId); animateCountUp(); if(typeof lucide!=='undefined') lucide.createIcons(); }, 100);
+  }
+  $$('.nav-tab').forEach(tab=>{ tab.addEventListener('click',()=>switchPage(tab.dataset.page)); });
+
+  // ============ ECharts Helpers ============
+  function initChart(domId) {
+    const dom = $(`#${domId}`); if (!dom) return null;
+    if (chartInstances[domId]) chartInstances[domId].dispose();
+    const c = echarts.init(dom, null, {renderer:'canvas'}); chartInstances[domId]=c; return c;
+  }
+  function baseTS() { return {color:'#64748b',fontSize:12}; }
+  function baseAL() { return {lineStyle:{color:'rgba(37,99,235,0.12)'}}; }
+  function baseSL() { return {lineStyle:{color:'rgba(37,99,235,0.05)'}}; }
+  const ts = { backgroundColor:'rgba(255,255,255,0.97)', borderColor:'rgba(37,99,235,0.12)', textStyle:{color:'#0f172a'}, extraCssText:'box-shadow:0 8px 30px rgba(37,99,235,0.12);border-radius:10px;' };
+
+  // ============ Page 1 Charts ============
+  function initPage1Charts() {
+    const stats = getCurrentStats();
+
+    // Park distribution
+    const c1 = initChart('chart-park-dist');
+    if (c1) c1.setOption({ tooltip:{trigger:'item',...ts}, series:[{ type:'pie', radius:['40%','65%'], center:['50%','50%'], itemStyle:{borderRadius:4,borderColor:'#fff',borderWidth:2}, label:{fontSize:9,color:'#6b7c93'}, data:[ {value:280,name:'银星科技园',itemStyle:{color:COLORS.blue}}, {value:350,name:'侨安科技工业园',itemStyle:{color:COLORS.cyan}}, {value:90,name:'皇基御景',itemStyle:{color:COLORS.green}} ], animationType:'scale',animationDuration:1200 }] });
+
+    // Attendance gauge
+    const c3 = initChart('chart-att-gauge');
+    if (c3) c3.setOption({ series:[{ type:'gauge',radius:'80%',center:['50%','55%'],startAngle:210,endAngle:-30,min:0,max:100, progress:{show:true,width:10,itemStyle:{color:{type:'linear',x:0,y:0,x2:1,y2:0,colorStops:[{offset:0,color:COLORS.blue},{offset:1,color:COLORS.cyan}]}}}, axisLine:{lineStyle:{width:10,color:[[1,'rgba(37,99,235,0.06)']]}}, axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false}, detail:{valueAnimation:true,formatter:'{value}%',fontSize:18,fontWeight:700,color:'#0f172a',offsetCenter:[0,'60%']}, data:[{value:stats.fullPunchRate,name:'综合出勤率'}], title:{offsetCenter:[0,'85%'],fontSize:9,color:'#64748b'} }] });
+
+    // Replenish overview pie
+    const cr1 = initChart('chart-replenish-overview');
+    if (cr1) cr1.setOption({ tooltip:{trigger:'item',...ts}, series:[{ type:'pie', radius:['40%','65%'], center:['50%','50%'], itemStyle:{borderRadius:4,borderColor:'#fff',borderWidth:2}, label:{fontSize:9,color:'#6b7c93'}, data:[ {value:186,name:'已通过',itemStyle:{color:COLORS.green}}, {value:23,name:'待审批',itemStyle:{color:COLORS.warning}}, {value:12,name:'已驳回',itemStyle:{color:COLORS.danger}}, {value:7,name:'已撤销',itemStyle:{color:COLORS.slate}} ], animationType:'scale',animationDuration:1200 }] });
+
+    // Onduty trend
+    const ct1 = initChart('chart-onduty-trend');
+    if (ct1) {
+      const days = ['5/1','5/2','5/3','5/4','5/5','5/6','5/7','5/8','5/9','5/10','5/11','5/12','5/13','5/14','5/15','5/16','5/17','5/18','5/19','5/20','5/21','5/22','5/23','5/24','5/25','5/26'];
+      const rate = [85.7,78.6,96.2,92.9,86.1,91.5,91.5,89.9,92.7,87.5,89.0,89.1,92.3,89.8,91.9,91.6,81.8,86.8,90.2,78.9,90.1,89.1,88.8,82.5,86.6,7.6];
+      const cnt = [52,42,121,447,586,686,696,695,656,305,698,702,617,694,690,631,318,687,698,688,693,689,587,240,681,677];
+      const sc = currentScope==='group'?1:(stats.totalEmployees/720);
+      const scCnt = cnt.map(v=>Math.round(v*sc));
+      ct1.setOption({
+        tooltip:{trigger:'axis',...ts},
+        legend:{data:['打卡率%','打卡人数'],textStyle:{...baseTS(),fontSize:11},top:2,right:10,itemWidth:10,itemHeight:8},
+        grid:{left:46,right:46,top:32,bottom:28},
+        xAxis:{type:'category',data:days,axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:9,rotate:30,interval:2}},
+        yAxis:[
+          {type:'value',name:'打卡率%',min:0,max:100,axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:10},splitLine:baseSL(),nameTextStyle:{...baseTS(),fontSize:10}},
+          {type:'value',name:'人数',axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:10},splitLine:{show:false},nameTextStyle:{...baseTS(),fontSize:10}}
+        ],
+        series:[
+          {name:'打卡率%',type:'line',smooth:true,yAxisIndex:0,data:rate,lineStyle:{color:COLORS.blue,width:2},itemStyle:{color:COLORS.blue},        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(37,99,235,0.10)'},{offset:1,color:'rgba(37,99,235,0)'}])},symbolSize:4,animationDuration:2000},
+          {name:'打卡人数',type:'bar',yAxisIndex:1,data:scCnt,barWidth:7,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(8,145,178,0.35)'},{offset:1,color:'rgba(8,145,178,0.04)'}])},animationDuration:2000}
+        ]
+      });
+    }
+
+    // Replenish by dept
+    const cr2 = initChart('chart-replenish-dept');
+    if (cr2) {
+      cr2.setOption({
+        tooltip:{trigger:'axis',...ts},
+        grid:{left:100,right:50,top:10,bottom:30},
+        xAxis:{type:'value',name:'次',axisLine:baseAL(),axisLabel:baseTS(),splitLine:baseSL()},
+        yAxis:{type:'category',data:['皇基御景','银星科技园','侨安科技工业园','事业一部','事业二部','研发部','供应链','工艺研究院'],axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:10}},
+        series:[{ type:'bar',data:[20,90,118,45,38,28,22,15],barWidth:14,itemStyle:{borderRadius:[0,4,4,0],color:function(p){var cs=[COLORS.blue,COLORS.cyan,COLORS.green,COLORS.warning,COLORS.orange,COLORS.purple,COLORS.teal,COLORS.slate];return cs[p.dataIndex%cs.length];}},label:{show:true,position:'right',color:'#1e2d3d',fontSize:11,fontWeight:500,formatter:'{c}次'},animationDuration:1500,animationDelay:function(i){return i*80;} }]
+      });
+    }
+
+    // Replenish reason & approval status
+    const cr3 = initChart('chart-replenish-reason');
+    if (cr3) {
+      cr3.setOption({
+        tooltip:{trigger:'axis',...ts},
+        legend:{data:['补卡次数','审批通过率'],textStyle:{...baseTS(),fontSize:10},top:2,right:10,itemWidth:10,itemHeight:8},
+        grid:{left:46,right:46,top:36,bottom:28},
+        xAxis:{type:'category',data:['忘记打卡','设备故障','外勤公出','请假补录','出差漏打','其他'],axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:9,rotate:25}},
+        yAxis:[
+          {type:'value',name:'次数',axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:10},splitLine:baseSL()},
+          {type:'value',name:'%',min:0,max:100,axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:10},splitLine:{show:false}}
+        ],
+        series:[
+          {name:'补卡次数',type:'bar',barWidth:18,data:[142,35,22,15,8,6],itemStyle:{borderRadius:[4,4,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:COLORS.blue},{offset:1,color:'rgba(37,99,235,0.15)'}])},label:{show:true,position:'top',fontSize:9,color:'#1e2d3d'},animationDuration:1500},
+          {name:'审批通过率',type:'line',smooth:true,yAxisIndex:1,data:[78,92,88,95,90,85],lineStyle:{color:COLORS.cyan,width:2.5},itemStyle:{color:COLORS.cyan},symbolSize:6,animationDuration:1800}
+        ]
+      });
+    }
+  }
+
+  // ============ Page 2 Charts: 人力核心 ============
+  function initPage2Charts() {
+    // Staffing compare
+    const c1 = initChart('chart-staffing-compare');
+    if (c1) {
+      const depts = ['研发部','工艺研究院','事业一部','事业二部','供应链','总经办','人力资源','财务部','机加部','装配部','钣金部'];
+      const plan = [60,50,85,70,80,12,30,15,42,35,28];
+      const actual = [55,45,80,65,80,12,28,15,38,30,26];
+      c1.setOption({
+        tooltip:{trigger:'axis',...ts},
+        legend:{data:['编制','实际'],textStyle:baseTS(),top:2},
+        grid:{left:60,right:20,top:32,bottom:30},
+        xAxis:{type:'category',data:depts,axisLine:baseAL(),axisLabel:{...baseTS(),fontSize:9,rotate:30}},
+        yAxis:{type:'value',axisLine:baseAL(),axisLabel:baseTS(),splitLine:baseSL()},
+        series:[
+          {name:'编制',type:'bar',barWidth:14,data:plan,itemStyle:{borderRadius:[4,4,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:COLORS.blue},{offset:1,color:'rgba(37,99,235,0.15)'}])},animationDuration:1500},
+          {name:'实际',type:'bar',barWidth:14,data:actual,itemStyle:{borderRadius:[4,4,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:COLORS.cyan},{offset:1,color:'rgba(8,145,178,0.15)'}])},animationDuration:1800}
+        ]
+      });
+    }
+
+    // Job type detail
+    const c2 = initChart('chart-job-type-detail');
+    if (c2) c2.setOption({ tooltip:{trigger:'item',...ts}, series:[{ type:'pie',radius:['35%','65%'],center:['50%','50%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:3},label:{fontSize:10,color:'#6b7c93'}, data:[ {value:380,name:'生产岗',itemStyle:{color:COLORS.blue}}, {value:145,name:'技术岗',itemStyle:{color:COLORS.cyan}}, {value:120,name:'职能岗',itemStyle:{color:COLORS.green}}, {value:75,name:'管理岗',itemStyle:{color:COLORS.purple}} ], animationType:'scale',animationDuration:1500 }] });
+
+    // Turnover trend
+    const c3 = initChart('chart-turnover-trend');
+    if (c3) {
+      const months = ['6月','7月','8月','9月','10月','11月','12月','1月','2月','3月','4月','5月'];
+      c3.setOption({
+        tooltip:{trigger:'axis',...ts},
+        legend:{data:['集团整体','银星','侨安','皇基'],textStyle:baseTS(),top:2},
+        grid:{left:50,right:20,top:36,bottom:30},
+        xAxis:{type:'category',data:months,axisLine:baseAL(),axisLabel:baseTS()},
+        yAxis:{type:'value',name:'离职率%',axisLine:baseAL(),axisLabel:baseTS(),splitLine:baseSL()},
+        series:[
+          {name:'集团整体',type:'line',smooth:true,data:[2.1,1.8,2.3,1.9,2.0,1.7,2.5,1.6,1.4,1.8,1.9,1.7],lineStyle:{color:COLORS.blue,width:3},itemStyle:{color:COLORS.blue},symbolSize:6,animationDuration:2000},
+          {name:'银星',type:'line',smooth:true,data:[1.8,1.5,2.0,1.6,1.7,1.5,2.2,1.3,1.2,1.5,1.6,1.4],lineStyle:{color:COLORS.green,width:2},itemStyle:{color:COLORS.green},symbolSize:4,animationDuration:2000},
+          {name:'侨安',type:'line',smooth:true,data:[2.5,2.2,2.8,2.3,2.4,2.0,2.9,1.9,1.6,2.1,2.3,2.0],lineStyle:{color:COLORS.warning,width:2},itemStyle:{color:COLORS.warning},symbolSize:4,animationDuration:2000},
+          {name:'皇基',type:'line',smooth:true,data:[1.8,1.6,1.9,1.7,1.8,1.5,2.0,1.4,1.3,1.6,1.7,1.5],lineStyle:{color:COLORS.purple,width:2},itemStyle:{color:COLORS.purple},symbolSize:4,animationDuration:2000}
+        ]
+      });
+    }
+
+    // Turnover reason
+    const c4 = initChart('chart-turnover-reason');
+    if (c4) c4.setOption({ tooltip:{trigger:'item',...ts}, legend:{bottom:0,textStyle:baseTS()}, series:[{ type:'pie',radius:['30%','55%'],center:['50%','45%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:3},label:{fontSize:10,color:'#6b7c93'}, data:[ {value:38,name:'薪资',itemStyle:{color:COLORS.blue}}, {value:28,name:'个人发展',itemStyle:{color:COLORS.cyan}}, {value:18,name:'家庭原因',itemStyle:{color:COLORS.warning}}, {value:16,name:'管理因素',itemStyle:{color:COLORS.danger}} ], animationType:'scale',animationDuration:1500 }] });
+  }
+
+  // ============ Page 3 Charts: 考勤效能 ============
+  function initPage3Charts() {
+    // Overtime type
+    const c1 = initChart('chart-overtime-type');
+    if (c1) c1.setOption({ tooltip:{trigger:'item',...ts}, legend:{bottom:0,textStyle:baseTS()}, series:[{ type:'pie',radius:['35%','65%'],center:['50%','45%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:3},label:{fontSize:10,color:'#6b7c93'}, data:[ {value:1920,name:'工作日1.5倍',itemStyle:{color:COLORS.blue}}, {value:1344,name:'休息日2倍',itemStyle:{color:COLORS.warning}}, {value:576,name:'法定节假日3倍',itemStyle:{color:COLORS.danger}} ], animationType:'scale',animationDuration:1500 }] });
+
+    // Dept overtime rank
+    const c2 = initChart('chart-dept-overtime');
+    if (c2) {
+      const depts = ['研发部','事业一部','供应链','工艺研究院','事业二部','财务部','总经办','人力资源'];
+      const hours = [58,52,45,40,38,28,18,12];
+      c2.setOption({
+        tooltip:{trigger:'axis',...ts},
+        grid:{left:100,right:50,top:10,bottom:30},
+        xAxis:{type:'value',axisLine:baseAL(),axisLabel:baseTS(),splitLine:baseSL()},
+        yAxis:{type:'category',data:depts.reverse(),axisLine:baseAL(),axisLabel:baseTS()},
+        series:[{ type:'bar',data:hours.reverse(),barWidth:16,itemStyle:{borderRadius:[0,4,4,0],color:function(p){var cs=[COLORS.blue,COLORS.cyan,COLORS.green,COLORS.warning,COLORS.orange];return cs[p.dataIndex%cs.length];}},label:{show:true,position:'right',color:'#1e2d3d',fontSize:12,fontWeight:500,formatter:'{c}h'},animationDuration:1500,animationDelay:function(i){return i*80;} }]
+      });
+    }
+  }
+
+  // ============ Page 4: Risk Center (no charts) ============
+  function initPage4Charts() {
+    // Static content, just update risk count
+    const tc = $('#riskTotalCount');
+    if (tc) tc.textContent = '15';
+    const cb = $('#riskCountBadge');
+    if (cb) cb.textContent = '5';
+  }
+
+  // ============ Dispatcher ============
+  function initChartsForPage(pageId) {
+    switch(pageId) {
+      case 'page1': initPage1Charts(); break;
+      case 'page2': initPage2Charts(); break;
+      case 'page3': initPage3Charts(); break;
+      case 'page4': initPage4Charts(); break;
+    }
+  }
+
+  // ============ Resize ============
+  let rt;
+  window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ Object.values(chartInstances).forEach(c=>{if(c&&!c.isDisposed())c.resize();}); },200); });
+
+  // ============ Init ============
+  function init() {
+    if (typeof lucide!=='undefined') lucide.createIcons();
+    initScopeSelector();
+    updateBreadcrumb(); updateScopeBadge(); updateScopeInfos();
+    initChartsForPage('page1'); animateCountUp();
+  }
+  if (document.readyState==='complete') init(); else window.addEventListener('load', init);
+})();
+  </script>
+</body>
+</html>

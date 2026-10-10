@@ -1,0 +1,144 @@
+@import '~@assets/less/common.less';
+
+.pass-probation-page {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 87vh;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.transfer-status-filter {
+  position: relative;
+  margin-bottom: 10px;
+
+  // flex 布局容器，使 tabs 和按钮在同一行
+  .transfer-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  // tabs 自动占据剩余空间
+  /deep/ .ant-tabs {
+    flex: 1;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar {
+    margin: 0;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab {
+    border-radius: 10px 10px 0 0;
+    background: #0082fc;
+    color: #e6f7ff;
+  }
+
+  // 审批中 - 橙色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+
+  // 已通过 - 绿色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='approved']) {
+    background: #55c42a;
+  }
+
+  // 已拒绝 - 红色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='rejected']) {
+    background: #f56c6c;
+  }
+
+  // 已取消 - 灰色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='cancelled']) {
+    background: #909399;
+  }
+
+  // 调动完成 - 深绿色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='completed']) {
+    background: #67c23a;
+  }
+
+  // 激活状态样式
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active {
+    background: #0082fc;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='approved']) {
+    background: #55c42a;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='rejected']) {
+    background: #f56c6c;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='cancelled']) {
+    background: #909399;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='completed']) {
+    background: #67c23a;
+  }
+}
+
+.status-count {
+  margin-left: 1px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.table-page-search-wrapper {
+  margin-bottom: 8px;
+
+  /deep/ .ant-form-item {
+    display: flex;
+  }
+
+  /deep/ .ant-form-item-control-wrapper {
+    flex: 1;
+  }
+
+  /deep/ .ant-select,
+  /deep/ .ant-cascader-picker,
+  /deep/ .ant-calendar-picker {
+    width: 100%;
+  }
+}
+
+.table-page-search-submitButtons {
+  display: inline-block;
+  margin-bottom: 24px;
+  white-space: nowrap;
+}
+
+.tdgl-btn-primary {
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tdgl-btn-primary:hover,
+.tdgl-btn-primary:focus {
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  opacity: 0.92;
+}
+
+.tdgl-btn-reset {
+  height: 34px;
+  margin-left: 8px;
+  border-color: #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}

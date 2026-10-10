@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>临时工管理 - 综合门户</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --radius: 0.5rem;
+  --background: #f8fafd;
+  --foreground: #1a2a3d;
+  --card: #ffffff;
+  --primary: #2563eb;
+  --primary-rgb: 37, 99, 235;
+  --secondary: #eff3fb;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --font-sans: 'Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',ui-sans-serif,system-ui,sans-serif;
+  --blue: #2d78ff;
+  --green: #10b981;
+  --green-bg: rgba(16,185,129,0.08);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.08);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.06);
+  --purple: #8b5cf6;
+  --purple-bg: rgba(139,92,246,0.08);
+  --gradient-blue: linear-gradient(135deg,#2d78ff 0%,#00b4d8 100%);
+  --shadow-card: 0 2px 12px rgba(45,120,255,0.06),0 1px 3px rgba(0,0,0,0.03);
+  --shadow-glow: 0 4px 24px rgba(45,120,255,0.15),0 0 40px rgba(45,120,255,0.04);
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:var(--font-sans);background:var(--background);color:var(--foreground);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(var(--primary-rgb),0.15);border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:rgba(var(--primary-rgb),0.3)}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes slide-in-left{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slide-in-right{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes wave-in{0%{opacity:0;transform:translateY(10px) scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes blink-dot{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes border-breathe{0%,100%{border-color:rgba(45,120,255,.10);box-shadow:var(--shadow-card)}50%{border-color:rgba(45,120,255,.25);box-shadow:0 2px 12px rgba(45,120,255,.10)}}
+.stagger-children>*{animation:wave-in .4s ease-out both}
+.stagger-children>:nth-child(1){animation-delay:0ms}
+.stagger-children>:nth-child(2){animation-delay:35ms}
+.stagger-children>:nth-child(3){animation-delay:70ms}
+.stagger-children>:nth-child(4){animation-delay:105ms}
+.stagger-children>:nth-child(5){animation-delay:140ms}
+.stagger-children>:nth-child(n+6){animation-delay:175ms}
+
+/* ===== App Layout ===== */
+#app{height:100vh;display:flex;align-items:stretch;background:var(--background);overflow:hidden}
+#left-panel{width:240px;height:100vh;flex-shrink:0;border-right:1px solid rgba(var(--primary-rgb),.08);background:var(--card);display:flex;flex-direction:column;animation:slide-in-left .3s ease-out both}
+.brand{padding:18px 20px 14px;display:flex;align-items:center;gap:11px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.brand-logo{width:38px;height:38px;border-radius:10px;background:var(--gradient-blue);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(45,120,255,.25);flex-shrink:0}
+.brand-logo svg{width:20px;height:20px;color:#fff}
+.brand-title{font-size:15px;font-weight:700;color:var(--foreground);line-height:1.2}
+.brand-sub{font-size:11px;color:var(--muted-foreground);font-weight:500;margin-top:2px}
+.module-nav{padding:12px 12px 6px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.module-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted-foreground);transition:all .2s ease;border:1px solid transparent}
+.module-nav-item svg{width:17px;height:17px;flex-shrink:0}
+.module-nav-item:hover{background:rgba(var(--primary-rgb),.04);color:var(--foreground)}
+.module-nav-item.active{background:linear-gradient(135deg,rgba(var(--primary-rgb),.1),rgba(var(--primary-rgb),.04));color:var(--primary);border-color:rgba(var(--primary-rgb),.18);box-shadow:inset 0 0 0 1px rgba(59,130,246,.12)}
+.module-nav-item.active svg{color:var(--primary)}
+.nav-divider{height:1px;background:var(--border);margin:8px 12px}
+.tree-scroll{flex:1;overflow-y:auto;padding:8px 8px 16px;background-image:radial-gradient(circle,rgba(var(--primary-rgb),.04) 1px,transparent 1px);background-size:20px 20px}
+.tree-node-row{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:8px;cursor:pointer;transition:all .2s ease;position:relative}
+.tree-node-row:hover{background:rgba(var(--primary-rgb),.04)}
+.tree-node-row.selected{background:rgba(var(--primary-rgb),.08);color:var(--primary);font-weight:600;box-shadow:inset 0 0 0 1px rgba(59,130,246,.2)}
+.tree-node-toggle{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;border-radius:4px;padding:2px;transition:all .2s ease;color:rgba(var(--primary-rgb),.5)}
+.tree-node-toggle:hover{background:rgba(var(--primary-rgb),.1)}
+.tree-node-toggle svg{width:14px;height:14px;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.tree-node-toggle.collapsed svg{transform:rotate(-90deg)}
+.tree-node-icon{flex-shrink:0;width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:linear-gradient(135deg,rgba(var(--primary-rgb),.08),rgba(var(--primary-rgb),.04));border:1px solid rgba(var(--primary-rgb),.12);color:var(--primary)}
+.tree-node-icon svg{width:10px!important;height:10px!important;stroke-width:2px}
+.tree-node-name{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit}
+.tree-node-row.selected .tree-node-name{color:var(--primary)}
+.tree-node-children{overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .3s ease}
+.tree-node-children.expanded{max-height:2000px;opacity:1}
+.tree-node-children.collapsed{max-height:0;opacity:0}
+
+/* ===== Right Panel ===== */
+#right-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--background);animation:slide-in-right .3s ease-out both;overflow:hidden;position:relative}
+.module-view{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+.module-view.active{display:flex;animation:fade-in .25s ease}
+
+/* ===== Stat Bar ===== */
+.stat-bar{padding:14px 24px 0;display:flex;gap:12px;flex-shrink:0;align-items:stretch;flex-wrap:wrap}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;transition:all .4s ease;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:10px;animation:border-breathe 4s ease-in-out infinite;flex:1;min-width:150px}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-blue);box-shadow:0 0 8px rgba(45,120,255,.25)}
+.stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon.blue{background:rgba(45,120,255,.1);color:#2d78ff}
+.stat-icon.green{background:var(--green-bg);color:var(--green)}
+.stat-icon.amber{background:var(--amber-bg);color:var(--amber)}
+.stat-icon.purple{background:var(--purple-bg);color:var(--purple)}
+.stat-icon svg{width:18px;height:18px}
+.stat-num{font-size:22px;font-weight:700;color:var(--foreground);line-height:1.1;font-variant-numeric:tabular-nums}
+.stat-label{font-size:11.5px;color:var(--muted-foreground);font-weight:500;margin-top:3px;display:flex;align-items:center;gap:4px}
+
+/* ===== Toolbar & Filter ===== */
+.filter-bar{padding:14px 18px;margin:14px 24px 0;display:flex;align-items:center;gap:16px;flex-shrink:0;border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow-card);position:relative;overflow:hidden}
+.filter-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-blue);box-shadow:0 0 8px rgba(45,120,255,.25);border-radius:12px 12px 0 0}
+.filter-row{display:flex;align-items:center;gap:18px;flex:1;overflow-x:auto;padding:2px 2px 4px;min-width:0}
+.filter-item{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex-shrink:0;white-space:nowrap}
+.filter-item-label{font-size:12px;font-weight:600;color:var(--muted-foreground);white-space:nowrap;flex-shrink:0;letter-spacing:.02em;padding-left:1px}
+.filter-bar-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:nowrap}
+.filter-item .form-input,.filter-item .form-select{height:34px;font-size:12.5px}
+.toolbar{padding:12px 24px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.search-box{position:relative;width:200px}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:rgba(var(--primary-rgb),.4)}
+.search-box input{width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-family:var(--font-sans);color:var(--foreground);outline:none;transition:all .2s ease}
+.search-box input::placeholder{color:rgba(var(--primary-rgb),.35)}
+.search-box input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)}
+.select{height:36px;padding:0 26px 0 10px;border:1px solid var(--border);border-radius:8px;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 8px center;font-size:13px;font-family:var(--font-sans);color:var(--foreground);outline:none;appearance:none;cursor:pointer;transition:all .2s ease}
+.select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:8px;font-size:13px;font-weight:500;font-family:var(--font-sans);cursor:pointer;border:none;transition:all .2s ease;white-space:nowrap}
+.btn svg{width:14px;height:14px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#4f7dff);color:#fff;box-shadow:0 2px 8px rgba(45,120,255,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(45,120,255,.35)}
+.btn-secondary{background:var(--muted);color:var(--foreground);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--secondary);border-color:rgba(var(--primary-rgb),.2)}
+
+/* ===== Table Card ===== */
+.content{padding:14px 24px 24px;flex:1;overflow:auto;display:flex;flex-direction:column}
+.tab-bar{display:flex;gap:6px;align-items:center;padding:0 2px 12px;flex-shrink:0;flex-wrap:wrap}
+.tab-item{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;background:#fff;border:1px solid var(--border);color:var(--muted-foreground);transition:all .2s ease;font-family:var(--font-sans)}
+.tab-item:hover{border-color:rgba(var(--primary-rgb),.3);color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.tab-item.active{background:linear-gradient(135deg,var(--primary),#4f7dff);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(45,120,255,.25)}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.tab-item:not(.active) .tab-count{background:rgba(var(--primary-rgb),.1);color:var(--primary)}
+.tab-item.active .tab-count{background:rgba(255,255,255,.25);color:#fff}
+.data-card{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-card);overflow:hidden;position:relative;display:flex;flex-direction:column;flex:1;min-height:0}
+.data-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-blue);box-shadow:0 0 8px rgba(45,120,255,.25);z-index:1}
+.data-card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(var(--primary-rgb),.02);flex-shrink:0}
+.data-card-head .ttl{font-size:13px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:8px}
+.data-card-head .ttl svg{width:16px;height:16px;color:var(--primary)}
+.data-card-head .acts{display:flex;gap:6px}
+.btn-icon-sm{height:30px;padding:0 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);background:#fff;color:var(--muted-foreground);transition:all .2s ease;font-family:var(--font-sans)}
+.btn-icon-sm svg{width:12px;height:12px}
+.btn-icon-sm:hover{border-color:rgba(var(--primary-rgb),.3);color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table thead th{background:linear-gradient(180deg,rgba(var(--primary-rgb),.04),rgba(var(--primary-rgb),.01));color:rgba(var(--primary-rgb),.7);font-weight:600;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;padding:13px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
+.data-table tbody td{padding:13px 16px;border-bottom:1px solid rgba(226,232,240,.6);color:var(--foreground);font-size:13px;vertical-align:middle;white-space:nowrap}
+.data-table tbody tr{transition:all .2s ease;animation:wave-in .4s ease-out both}
+.data-table tbody tr:hover{background:rgba(var(--primary-rgb),.025)}
+.data-table tbody tr:last-child td{border-bottom:none}
+.applicant{display:flex;align-items:center;gap:8px}
+.applicant-avatar{width:24px;height:24px;border-radius:999px;background:var(--gradient-blue);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.applicant-info{display:flex;flex-direction:column;line-height:1.3}
+.applicant-name{font-size:12.5px;font-weight:500;color:var(--foreground)}
+.applicant-code{font-size:11px;color:#94a3b8;font-weight:400}
+.action-cell{display:flex;justify-content:center;gap:6px;flex-wrap:nowrap;white-space:nowrap}
+.btn-icon{height:30px;padding:0 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);background:#fff;color:var(--muted-foreground);transition:all .2s ease;font-family:var(--font-sans)}
+.btn-icon svg{width:12px;height:12px}
+.btn-icon:hover{border-color:rgba(var(--primary-rgb),.3);color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.btn-icon.primary{background:linear-gradient(135deg,var(--primary),#4f7dff);color:#fff;border-color:transparent;box-shadow:0 2px 6px rgba(45,120,255,.2)}
+.btn-icon.primary:hover{box-shadow:0 4px 12px rgba(45,120,255,.35);color:#fff}
+
+/* 状态标签 */
+.status-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap}
+.status-tag .dot{width:6px;height:6px;border-radius:999px;background:currentColor}
+.status-tag.approved{background:rgba(16,185,129,.1);color:#059669}
+.status-tag.handled{background:rgba(16,185,129,.1);color:#059669}
+.status-tag.pending{background:rgba(245,158,11,.1);color:#d97706}
+.status-tag.cancelled{background:rgba(100,116,139,.1);color:var(--muted-foreground)}
+.status-tag.rejected{background:rgba(239,68,68,.08);color:#dc2626}
+.status-tag.review{background:rgba(45,120,255,.1);color:#2563eb}
+.status-tag .blink-dot{animation:blink-dot 1.6s ease-in-out infinite}
+.status-tag.pending .dot{animation:blink-dot 1.6s ease-in-out infinite}
+
+/* ===== Pagination ===== */
+.pagination{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:rgba(var(--primary-rgb),.015);border-top:1px solid var(--border);font-size:12.5px;color:var(--muted-foreground);flex-shrink:0;flex-wrap:wrap;gap:12px}
+.pager-info{font-weight:500;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.pager-center{display:flex;align-items:center;gap:4px}
+.pager-btn{min-width:30px;height:30px;padding:0 8px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--muted-foreground);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .2s ease;font-family:var(--font-sans);font-variant-numeric:tabular-nums}
+.pager-btn:hover:not(:disabled):not(.active){background:rgba(var(--primary-rgb),.06);color:var(--primary);border-color:rgba(var(--primary-rgb),.12)}
+.pager-btn.active{background:#fff;color:var(--primary);border:1.5px solid var(--primary);font-weight:600;box-shadow:0 2px 6px rgba(45,120,255,.18)}
+.pager-btn:disabled{opacity:.35;cursor:not-allowed}
+.pager-right{display:flex;align-items:center;gap:8px}
+.pager-size{height:30px;padding:0 26px 0 10px;border:1px solid var(--border);border-radius:6px;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 8px center;font-size:12.5px;font-family:var(--font-sans);color:var(--foreground);outline:none;appearance:none;cursor:pointer}
+.pager-jump{display:inline-flex;align-items:center;gap:6px}
+.pager-jump input{width:48px;height:30px;padding:0 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;text-align:center;outline:none}
+.pager-jump input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)}
+.pager-jump .go-btn{height:30px;padding:0 14px;border:1px solid var(--primary);background:#fff;color:var(--primary);border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer}
+.pager-jump .go-btn:hover{background:var(--primary);color:#fff}
+
+/* ===== Modal ===== */
+.modal-overlay{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;background:rgba(0,0,0,.55)!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;overflow:auto;padding:5vh 16px;z-index:1000;animation:fade-in .2s ease}
+.modal-overlay.active{display:block!important}
+.modal{position:relative;margin:0 auto;background:#fff;border-radius:12px;width:780px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:fadeSlide .25s ease;overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.modal-title{font-size:15px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:8px}
+.modal-title svg{width:16px;height:16px;color:var(--primary)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;transition:all .2s ease}
+.modal-close:hover{background:rgba(239,68,68,.1);color:var(--destructive)}
+.modal-close svg{width:16px;height:16px}
+.modal-body{padding:18px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:rgba(var(--primary-rgb),.015);flex-shrink:0}
+
+/* ===== Form ===== */
+.form-section{margin-bottom:18px}
+.form-section:last-child{margin-bottom:0}
+.section-title{font-size:12px;font-weight:600;color:rgba(var(--primary-rgb),.7);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:12px;background:var(--gradient-blue);border-radius:2px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;row-gap:10px;column-gap:14px}
+/* 录入临时工弹框：加宽 + 一行4字段 */
+#archiveModal{width:1080px;max-width:96vw}
+#archiveModal .modal-body{max-height:84vh}
+#archiveModal .form-row{grid-template-columns:repeat(4,1fr);column-gap:12px;row-gap:10px}
+#archiveModal .form-group{gap:3px}
+#archiveModal .form-label{font-size:12px}
+#archiveModal .photo-row{border-top:1px dashed var(--border);padding-top:10px;margin-top:2px}
+#archiveModal .upload-btn{width:100%;justify-content:flex-start}
+#archiveModal textarea.form-textarea{min-height:64px}
+.form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:0;min-width:0}
+.form-label{font-size:13px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:2px;line-height:1.4}
+.form-label .req{color:var(--red);margin-right:2px;line-height:1}
+.form-input,.form-select,.form-textarea{width:100%;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px;font-family:var(--font-sans);color:var(--foreground);outline:none;transition:all .2s ease}
+.form-input,.form-select{height:36px;padding:0 12px}
+.form-input::placeholder,.form-textarea::placeholder{color:#cbd5e1;font-weight:400}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)}
+.form-select{appearance:none;cursor:pointer;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 10px center;padding-right:30px}
+.form-textarea{min-height:60px;padding:8px 12px;resize:vertical;line-height:1.5}
+.person-link{color:var(--primary);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:8px 0}
+.person-link svg{width:14px;height:14px}
+
+/* ===== Demand Card ===== */
+.demand-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;animation:fade-in .25s ease;box-shadow:var(--shadow-card)}
+.demand-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed rgba(45,120,255,.18)}
+.demand-title{font-size:13px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:8px}
+.demand-title::before{content:'';width:3px;height:14px;background:var(--gradient-blue);border-radius:2px}
+.demand-actions{display:flex;gap:6px}
+
+/* Number Stepper */
+.num-stepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#fff;height:36px}
+.num-stepper button{width:30px;height:100%;border:none;background:transparent;color:var(--muted-foreground);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s ease;font-size:18px;line-height:1}
+.num-stepper button:hover:not(:disabled){background:rgba(var(--primary-rgb),.06);color:var(--primary)}
+.num-stepper button:disabled{opacity:.4;cursor:not-allowed}
+.num-stepper input{width:80px;height:100%;border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);text-align:center;font-size:13px;color:var(--foreground);outline:none;background:#fff}
+
+/* Date Input */
+.date-input-wrap{position:relative}
+.date-input-wrap input{width:100%;height:36px;padding:0 32px 0 12px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px;color:var(--foreground);outline:none;font-family:var(--font-sans);transition:all .2s ease}
+.date-input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.12)}
+.date-input-wrap .cal{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:rgba(var(--primary-rgb),.45);pointer-events:none}
+
+/* Upload */
+.upload-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--foreground);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s ease;font-family:var(--font-sans)}
+.upload-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.upload-btn svg{width:14px;height:14px}
+
+/* ===== Approval Flow ===== */
+.approval-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 20px;box-shadow:var(--shadow-card)}
+.approval-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.approval-title{font-size:13px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:6px}
+.approval-title svg{width:15px;height:15px;color:var(--primary)}
+.approval-status-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:5px;font-size:12px;font-weight:500}
+.approval-status-tag.doing{background:rgba(45,120,255,.1);color:#2563eb}
+.approver-row{display:flex;align-items:flex-start;gap:14px;padding:10px 0 4px 0}
+.approver-row:last-child{margin-bottom:0}
+.approver-row .label{font-size:13px;color:var(--foreground);display:flex;align-items:center;gap:6px;font-weight:500;width:96px;flex-shrink:0;padding-top:6px}
+.chip-stack{display:flex;flex-direction:column;gap:8px;flex:1}
+.approver-row .label svg{width:14px;height:14px;color:var(--primary)}
+.approver-row .label .sign{font-size:11px;padding:1px 7px;border-radius:4px;background:rgba(245,158,11,.12);color:#d97706;font-weight:600;margin-left:4px}
+.approver-row .label .req{color:var(--red)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);border-radius:16px;background:#fff;font-size:12.5px;color:var(--foreground);font-weight:500}
+.chip .avatar{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff}
+.chip .avatar.blue{background:#2563eb}
+.chip .avatar.purple{background:#8b5cf6}
+.chip .close-x{width:14px;height:14px;color:var(--muted-foreground);cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
+.chip .close-x:hover{background:rgba(239,68,68,.1);color:var(--destructive)}
+.chip-arrow{color:var(--muted-foreground);font-size:14px;padding:0 2px}
+.approver-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:38px}
+.add-row{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--border);border-radius:8px;color:var(--muted-foreground);font-size:12.5px;cursor:pointer;transition:all .2s ease;background:transparent;font-family:var(--font-sans)}
+.add-row:hover{border-color:var(--primary);color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.add-row svg{width:13px;height:13px}
+.add-demand{display:flex;justify-content:center;margin:14px 0}
+
+/* ===== Detail Readonly ===== */
+.detail-row{display:flex;align-items:flex-start;gap:14px;padding:9px 0;border-bottom:1px dashed rgba(226,232,240,.7)}
+.detail-row:last-child{border-bottom:none}
+.detail-row .lbl{width:90px;flex-shrink:0;color:var(--muted-foreground);font-size:13px;font-weight:500;padding-top:9px}
+.detail-row .val{flex:1}
+.detail-val{font-size:13px;color:var(--foreground);padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(var(--primary-rgb),.025);min-height:36px;display:flex;align-items:center;gap:6px;word-break:break-all}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.sub{display:flex;align-items:flex-start;gap:8px}
+.sub .lbl{color:var(--muted-foreground);font-size:13px;font-weight:500;width:84px;flex-shrink:0;padding-top:9px}
+.sub .val{flex:1}
+.sub.readonly .val input[readonly]{background:rgba(45,120,255,.04);color:var(--muted-foreground);cursor:not-allowed}
+/* 入住申请：一行 4 个字段（除入住原因/审批人/抄送人整行展示） */
+.room-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px}
+/* 所有字段：标签在上、文本框在下（换行展示） */
+.room-grid .sub{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.room-grid .sub .lbl{width:auto;padding-top:0}
+.room-grid .sub .val{width:100%}
+.room-grid .sub .multi-select{width:100%}
+/* 多选组件 */
+.multi-select{display:flex;flex-wrap:wrap;gap:8px;border:1px solid var(--input);border-radius:8px;padding:8px 10px;background:#fff;min-height:38px}
+.ms-item{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:999px;background:var(--secondary);font-size:12.5px;cursor:pointer;user-select:none;transition:all .2s ease}
+.ms-item:hover{border-color:rgba(var(--primary-rgb),.4)}
+.ms-item input{width:14px;height:14px;accent-color:var(--primary);cursor:pointer;margin:0}
+.ms-item:has(input:checked){background:rgba(var(--primary-rgb),.12);border-color:var(--primary);color:var(--primary);font-weight:600}
+
+/* ===== 附件展示 ===== */
+.attach-list{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.attach-item{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden}
+.attach-item:hover{border-color:var(--primary);background:rgba(var(--primary-rgb),.04);box-shadow:0 2px 10px rgba(45,120,255,.12);transform:translateY(-1px)}
+.attach-icon{width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.attach-icon svg{width:16px;height:16px}
+.attach-item .ext{font-size:12px;font-weight:700;letter-spacing:.3px;line-height:1}
+.attach-preview{cursor:zoom-in}
+.attach-empty{font-size:12.5px;color:#94a3b8;padding:9px 12px;border:1px dashed var(--border);border-radius:6px;background:rgba(var(--primary-rgb),.02)}
+/* 文件类型配色 */
+.f-excel{color:#1d6b3a}.bg-excel{background:rgba(29,107,58,.1)}
+.f-word{color:#1c50a0}.bg-word{background:rgba(28,80,160,.1)}
+.f-pdf{color:#d23b3b}.bg-pdf{background:rgba(210,59,59,.1)}
+.f-img{color:#ca580c}.bg-img{background:rgba(202,88,12,.1)}
+.f-ppt{color:#c2410c}.bg-ppt{background:rgba(194,65,12,.1)}
+.f-zip{color:#7c3aed}.bg-zip{background:rgba(124,58,237,.1)}
+.f-file{color:var(--muted-foreground)}.bg-file{background:rgba(100,116,139,.1)}
+
+/* ===== 审批流程时间线（图样式） ===== */
+.flow-list-wrap{border:1px solid var(--border);border-radius:10px;padding:14px 18px;background:rgba(var(--primary-rgb),.015)}
+.flow-list{position:relative;padding:8px 4px 4px}
+.flow-node{position:relative;padding:0 0 18px 0}
+.flow-node:last-child{padding-bottom:0}
+.flow-node:first-child{padding-top:4px}
+.flow-node::before{content:'';position:absolute;left:14px;top:30px;bottom:0;border-left:1px dashed #cbd5e1;z-index:0}
+.flow-node:last-child::before{display:none}
+.flow-dot{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--border);z-index:1}
+.flow-dot svg{width:15px;height:15px;color:var(--muted-foreground)}
+.flow-dot.done{border-color:#16a34a;background:#dcfce7}
+.flow-dot.done svg{color:#16a34a}
+.flow-dot.reject{border-color:#ef4444;background:#fee2e2}
+.flow-dot.reject svg{color:#dc2626}
+.flow-dot.wait{border-color:#cbd5e1;background:#fff}
+.flow-dot.wait svg{color:#64748b}
+.flow-dot.cc{border-color:#cbd5e1;background:#fff;width:30px;height:30px;top:0;left:0}
+.flow-dot.cc svg{width:14px;height:14px;color:#64748b}
+.flow-card{margin-left:44px}
+.flow-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:12px;flex-wrap:wrap}
+.flow-title{font-size:14px;font-weight:600;color:var(--foreground)}
+.flow-result{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:5px;white-space:nowrap}
+.flow-result .rdot{width:6px;height:6px;border-radius:999px;display:inline-block}
+.flow-result.pass{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.flow-result.pass .rdot{background:#16a34a}
+.flow-result.fail{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.flow-result.fail .rdot{background:#dc2626}
+.flow-result.waiting{background:rgba(45,120,255,.1);color:#2563eb}
+.flow-result.waiting .rdot{background:#2d78ff}
+.flow-result.reviewing{background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.25)}
+.flow-result.reviewing .rdot{background:#f59e0b}
+.flow-meta{font-size:12.5px;color:var(--muted-foreground);line-height:1.7;margin-bottom:6px}
+.flow-meta .name{color:var(--foreground);font-weight:500}
+.flow-meta .code{color:#64748b}
+.flow-meta .sep{padding:0 6px;color:#cbd5e1}
+.flow-comment-row{display:flex;justify-content:flex-start;margin-top:6px}
+.flow-comment{display:inline-block;font-size:12.5px;color:var(--muted-foreground);line-height:1.6;padding:7px 12px;border:1px dashed #93c5fd;border-radius:8px;background:rgba(45,120,255,.02);max-width:88%;text-align:left}
+.flow-comment .ct{color:#2563eb;font-weight:600;margin-right:4px}
+.flow-empty-comment{font-size:12px;color:#94a3b8;font-style:italic}
+
+/* ===== 附件预览弹层 ===== */
+.attach-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1100;animation:fade-in .2s ease}
+.attach-overlay.active{display:flex}
+.attach-overlay .box{background:#fff;border-radius:12px;width:560px;max-width:92vw;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:fadeSlide .25s ease}
+.attach-overlay .a-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.attach-overlay .a-title{font-size:14px;font-weight:600;color:var(--foreground);display:flex;align-items:center;gap:8px}
+.attach-overlay .a-title svg{width:16px;height:16px;color:var(--primary)}
+.attach-overlay .a-body{padding:18px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:flex-start}
+.attach-overlay .a-file-row{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s ease}
+.attach-overlay .a-file-row:hover{border-color:var(--primary);background:rgba(var(--primary-rgb),.04)}
+.attach-overlay .a-file-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.attach-overlay .a-file-icon svg{width:18px;height:18px}
+.attach-overlay .a-file-name{font-size:13px;font-weight:500;color:var(--foreground)}
+.attach-overlay .a-file-type{font-size:11px;color:var(--muted-foreground)}
+
+.btn-approve{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,.25);height:34px;padding:0 18px;border-radius:8px;font-size:13px}
+.btn-approve:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,.35)}
+.btn-reject{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 2px 8px rgba(239,68,68,.25);height:34px;padding:0 18px;border-radius:8px;font-size:13px}
+.btn-reject:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(239,68,68,.35)}
+
+.empty-row td{text-align:center;color:var(--muted-foreground);padding:40px 16px;font-size:13px}
+
+/* ===== 字段配置 ===== */
+.field-cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.field-cfg-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;transition:all .2s ease;user-select:none}
+.field-cfg-item:hover{border-color:rgba(var(--primary-rgb),.3);background:rgba(var(--primary-rgb),.04)}
+.field-cfg-item.checked{border-color:rgba(var(--primary-rgb),.4);background:rgba(var(--primary-rgb),.06)}
+.field-cfg-item input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+.field-cfg-item .lbl{font-size:13px;color:var(--foreground);font-weight:500}
+.field-cfg-item.locked{opacity:.6;cursor:not-allowed}
+
+@media(max-width:900px){
+  #left-panel{display:none}
+  .form-row,.sub-grid,.detail-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 左侧导航 -->
+  <aside id="left-panel">
+    <div class="brand">
+      <div class="brand-logo"><i data-lucide="briefcase"></i></div>
+      <div>
+        <div class="brand-title">临时工管理</div>
+        <div class="brand-sub">Temporary Worker</div>
+      </div>
+    </div>
+    <nav class="module-nav">
+      <div class="module-nav-item active" data-module="apply"><i data-lucide="file-plus"></i>临时工申请</div>
+      <div class="module-nav-item" data-module="audit"><i data-lucide="check-circle"></i>临时工审批</div>
+      <div class="module-nav-item" data-module="archive"><i data-lucide="folder-users"></i>临时工档案</div>
+    </nav>
+  </aside>
+
+  <!-- 右侧主体 -->
+  <main id="right-panel">
+
+    <!-- ============ 临时工申请模块 ============ -->
+    <section class="module-view active" id="view-apply">
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="filter-item">
+            <label class="filter-item-label">需求部门</label>
+            <select class="select" style="width:160px;min-width:160px"><option>请选择部门</option><option>总经办</option><option>综合管理部</option><option>生产部</option></select>
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">申请人</label>
+            <input type="text" class="form-input" placeholder="请输入姓名" style="width:180px;min-width:180px">
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">工号</label>
+            <input type="text" class="form-input" placeholder="请输入工号" style="width:160px;min-width:160px">
+          </div>
+        </div>
+        <div class="filter-bar-actions">
+          <button class="btn btn-primary"><i data-lucide="search"></i>搜索</button>
+          <button class="btn btn-secondary"><i data-lucide="refresh-ccw"></i>重置</button>
+          <button class="btn btn-primary" onclick="openAddModal()"><i data-lucide="plus"></i>新增临时工需求</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="tab-bar" id="applyTabs">
+          <button class="tab-item active" data-filter="all">全部 <span class="tab-count" id="cnt-apply-all">0</span></button>
+          <button class="tab-item" data-filter="reviewing">审批中 <span class="tab-count" id="cnt-apply-reviewing">0</span></button>
+          <button class="tab-item" data-filter="handled">已通过 <span class="tab-count" id="cnt-apply-handled">0</span></button>
+          <button class="tab-item" data-filter="reject">不通过 <span class="tab-count" id="cnt-apply-reject">0</span></button>
+        </div>
+        <div class="data-card">
+          <div style="flex:1;overflow:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>状态</th>
+                  <th>需求部门</th>
+                  <th>申请人</th>
+                  <th>工号</th>
+                  <th>申请日期</th>
+                  <th style="text-align:center">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-id="10" data-status="pending" data-dept="总经办" data-applicant="曹某某" data-code="4881" data-date="2026-04-08">
+                  <td>1</td>
+                  <td><span class="status-tag pending"><span class="dot"></span>审批中</span></td>
+                  <td>总经办</td>
+                  <td>曹某某</td>
+                  <td>4881</td>
+                  <td>2026-04-08</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openViewModal(10)"><i data-lucide="eye"></i>查看</button><button class="btn-icon" onclick="cancelApply(10)"><i data-lucide="x-circle"></i>取消</button></div></td>
+                </tr>
+                <tr data-id="9" data-status="handled" data-dept="总经办" data-applicant="曹某某" data-code="4881" data-date="2026-04-08">
+                  <td>2</td>
+                  <td><span class="status-tag handled"><span class="dot"></span>已通过</span></td>
+                  <td>总经办</td>
+                  <td>曹某某</td>
+                  <td>4881</td>
+                  <td>2026-04-08</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openViewModal(9)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="7" data-status="pending" data-dept="综合管理部" data-applicant="梁某某" data-code="J1616" data-date="2025-11-25">
+                  <td>3</td>
+                  <td><span class="status-tag pending"><span class="dot"></span>审批中</span></td>
+                  <td>综合管理部</td>
+                  <td>梁某某</td>
+                  <td>J1616</td>
+                  <td>2025-11-25</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openViewModal(7)"><i data-lucide="eye"></i>查看</button><button class="btn-icon" onclick="cancelApply(7)"><i data-lucide="x-circle"></i>取消</button></div></td>
+                </tr>
+                <tr data-id="6" data-status="rejected" data-dept="综合管理部" data-applicant="梁某某" data-code="J1616" data-date="2025-11-25">
+                  <td>4</td>
+                  <td><span class="status-tag rejected"><span class="dot"></span>已驳回</span></td>
+                  <td>综合管理部</td>
+                  <td>梁某某</td>
+                  <td>J1616</td>
+                  <td>2025-11-25</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openViewModal(6)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="pager-info">共 4 条数据</div>
+            <div class="pager-center">
+              <button class="pager-btn arrow" disabled><i data-lucide="chevron-left"></i></button>
+              <button class="pager-btn active">1</button>
+              <button class="pager-btn arrow"><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="pager-right">
+              <select class="pager-size"><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 临时工审核模块 ============ -->
+    <section class="module-view" id="view-audit">
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="filter-item">
+            <label class="filter-item-label">需求部门</label>
+            <select class="select" style="width:160px;min-width:160px"><option>请选择部门</option><option>总经办</option><option>综合管理部</option><option>生产部</option></select>
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">申请人</label>
+            <input type="text" class="form-input" placeholder="请输入姓名" style="width:180px;min-width:180px">
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">工号</label>
+            <input type="text" class="form-input" placeholder="请输入工号" style="width:160px;min-width:160px">
+          </div>
+        </div>
+        <div class="filter-bar-actions">
+          <button class="btn btn-primary"><i data-lucide="search"></i>搜索</button>
+          <button class="btn btn-secondary"><i data-lucide="refresh-ccw"></i>重置</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="tab-bar" id="auditTabs">
+          <button class="tab-item active" data-filter="all">全部 <span class="tab-count" id="cnt-audit-all">0</span></button>
+          <button class="tab-item" data-filter="reviewing">审批中 <span class="tab-count" id="cnt-audit-reviewing">0</span></button>
+          <button class="tab-item" data-filter="handled">已通过 <span class="tab-count" id="cnt-audit-handled">0</span></button>
+          <button class="tab-item" data-filter="reject">不通过 <span class="tab-count" id="cnt-audit-reject">0</span></button>
+        </div>
+        <div class="data-card">
+          <div style="flex:1;overflow:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>状态</th>
+                  <th>需求部门</th>
+                  <th>申请人</th>
+                  <th>工号</th>
+                  <th>申请日期</th>
+                  <th>提交人</th>
+                  <th style="text-align:center">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-id="10" data-status="pending" data-dept="总经办" data-applicant="曹某某" data-code="4881" data-date="2026-04-08" data-submitter="曹某某">
+                  <td>1</td>
+                  <td><span class="status-tag pending"><span class="dot"></span>审批中</span></td>
+                  <td>总经办</td>
+                  <td>曹某某</td>
+                  <td>4881</td>
+                  <td>2026-04-08</td>
+                  <td>曹某某</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openAuditModal(10)"><i data-lucide="check"></i>审批</button><button class="btn-icon" onclick="openViewModal(10)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="9" data-status="handled" data-dept="总经办" data-applicant="曹某某" data-code="4881" data-date="2026-04-08" data-submitter="曹某某">
+                  <td>2</td>
+                  <td><span class="status-tag handled"><span class="dot"></span>已通过</span></td>
+                  <td>总经办</td>
+                  <td>曹某某</td>
+                  <td>4881</td>
+                  <td>2026-04-08</td>
+                  <td>曹某某</td>
+                  <td><div class="action-cell"><button class="btn-icon" onclick="openViewModal(9)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="7" data-status="pending" data-dept="综合管理部" data-applicant="梁某某" data-code="J1616" data-date="2025-11-25" data-submitter="梁某某">
+                  <td>3</td>
+                  <td><span class="status-tag pending"><span class="dot"></span>审批中</span></td>
+                  <td>综合管理部</td>
+                  <td>梁某某</td>
+                  <td>J1616</td>
+                  <td>2025-11-25</td>
+                  <td>梁某某</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openAuditModal(7)"><i data-lucide="check"></i>审批</button><button class="btn-icon" onclick="openViewModal(7)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="6" data-status="rejected" data-dept="综合管理部" data-applicant="梁某某" data-code="J1616" data-date="2025-11-25" data-submitter="梁某某">
+                  <td>4</td>
+                  <td><span class="status-tag rejected"><span class="dot"></span>已驳回</span></td>
+                  <td>综合管理部</td>
+                  <td>梁某某</td>
+                  <td>J1616</td>
+                  <td>2025-11-25</td>
+                  <td>梁某某</td>
+                  <td><div class="action-cell"><button class="btn-icon" onclick="openViewModal(6)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="5" data-status="pending" data-dept="生产部" data-applicant="王某某" data-code="P0203" data-date="2026-04-02" data-submitter="王某某">
+                  <td>5</td>
+                  <td><span class="status-tag pending"><span class="dot"></span>审批中</span></td>
+                  <td>生产部</td>
+                  <td>王某某</td>
+                  <td>P0203</td>
+                  <td>2026-04-02</td>
+                  <td>王某某</td>
+                  <td><div class="action-cell"><button class="btn-icon primary" onclick="openAuditModal(5)"><i data-lucide="check"></i>审批</button><button class="btn-icon" onclick="openViewModal(5)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+                <tr data-id="4" data-status="handled" data-dept="生产部" data-applicant="王某某" data-code="P0203" data-date="2026-03-28" data-submitter="王某某">
+                  <td>6</td>
+                  <td><span class="status-tag handled"><span class="dot"></span>已通过</span></td>
+                  <td>生产部</td>
+                  <td>王某某</td>
+                  <td>P0203</td>
+                  <td>2026-03-28</td>
+                  <td>王某某</td>
+                  <td><div class="action-cell"><button class="btn-icon" onclick="openViewModal(4)"><i data-lucide="eye"></i>查看</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="pager-info">共 6 条数据</div>
+            <div class="pager-center">
+              <button class="pager-btn arrow" disabled><i data-lucide="chevron-left"></i></button>
+              <button class="pager-btn active">1</button>
+              <button class="pager-btn arrow"><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="pager-right">
+              <select class="pager-size"><option>10 条/页</option><option>20 条/页</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 临时工档案模块 ============ -->
+    <section class="module-view" id="view-archive">
+      <div class="stat-bar">
+        <div class="stat-card"><div class="stat-icon green"><i data-lucide="user-check"></i></div><div><div class="stat-num" id="stat-archive-onjob">0</div><div class="stat-label">在职员工</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><i data-lucide="user-minus"></i></div><div><div class="stat-num" id="stat-archive-offjob">0</div><div class="stat-label">离职员工</div></div></div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="filter-item">
+            <label class="filter-item-label">姓名</label>
+            <input type="text" class="form-input" placeholder="模糊搜索" style="width:150px;min-width:150px">
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">工号</label>
+            <input type="text" class="form-input" placeholder="模糊搜索" style="width:140px;min-width:140px">
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">部门</label>
+            <select class="select" style="width:150px;min-width:150px"><option>全部部门</option><option>总经办</option><option>综合管理部</option><option>生产部</option></select>
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">入职日期</label>
+            <div class="date-input-wrap" style="width:150px"><input type="text" placeholder="年-月-日"><i data-lucide="calendar" class="cal"></i></div>
+          </div>
+          <div class="filter-item">
+            <label class="filter-item-label">离职日期</label>
+            <div class="date-input-wrap" style="width:150px"><input type="text" placeholder="年-月-日"><i data-lucide="calendar" class="cal"></i></div>
+          </div>
+        </div>
+        <div class="filter-bar-actions">
+          <button class="btn btn-primary"><i data-lucide="search"></i>搜索</button>
+          <button class="btn btn-secondary"><i data-lucide="refresh-ccw"></i>重置</button>
+          <button class="btn btn-primary" onclick="openArchiveAddModal()"><i data-lucide="user-plus"></i>录入临时工</button>
+          <button class="btn btn-secondary" onclick="exportArchive()"><i data-lucide="download"></i>导出</button>
+          <button class="btn btn-secondary" onclick="openClockExport()"><i data-lucide="clock"></i>导出打卡记录</button>
+          <button class="btn btn-secondary" onclick="openFieldConfig()"><i data-lucide="sliders-horizontal"></i>字段配置</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="tab-bar" id="archiveTabs">
+          <button class="tab-item active" data-filter="onjob">在职 <span class="tab-count" id="cnt-archive-onjob">0</span></button>
+          <button class="tab-item" data-filter="offjob">离职 <span class="tab-count" id="cnt-archive-offjob">0</span></button>
+        </div>
+        <div class="data-card">
+          <div style="flex:1;overflow:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th data-field="seq">序号</th>
+                  <th data-field="status">状态</th>
+                  <th data-field="code">工号</th>
+                  <th data-field="name">姓名</th>
+                  <th data-field="gender">性别</th>
+                  <th data-field="position">入职职位</th>
+                  <th data-field="dispatch">派遣公司</th>
+                  <th data-field="nation">民族</th>
+                  <th data-field="idcard">身份证号</th>
+                  <th data-field="address">家庭地址</th>
+                  <th data-field="inroom">是否内宿</th>
+                  <th data-field="indate">入职日期</th>
+                  <th data-field="phone">联系方式</th>
+                  <th data-field="company">入职公司</th>
+                  <th data-field="dept">入职部门</th>
+                  <th data-field="price">工价</th>
+                  <th data-field="bankcard">银行卡号</th>
+                  <th data-field="bank">开户行</th>
+                  <th data-field="cardno">卡号</th>
+                  <th data-field="contractend">合同到期日期</th>
+                  <th data-field="contractstart">合同开始日期</th>
+                  <th data-field="leavedate" data-leavecol="1">离职日期</th>
+                  <th data-field="remark">备注</th>
+                  <th data-field="action" style="text-align:center">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-id="L001" data-status="onjob" data-name="张三" data-code="L001" data-dept="生产部" data-date="2026-03-01" data-leavedate="">
+                  <td data-field="seq">1</td>
+                  <td data-field="status"><span class="status-tag handled"><span class="dot"></span>在职</span></td>
+                  <td data-field="code">L001</td>
+                  <td data-field="name">张三</td>
+                  <td data-field="gender">男</td>
+                  <td data-field="position">普工</td>
+                  <td data-field="dispatch">强瑞劳务</td>
+                  <td data-field="nation">汉族</td>
+                  <td data-field="idcard">440301199003071234</td>
+                  <td data-field="address">广东省深圳市宝安区</td>
+                  <td data-field="inroom">是</td>
+                  <td data-field="indate">2026-03-01</td>
+                  <td data-field="phone">13800101234</td>
+                  <td data-field="company">强瑞技术</td>
+                  <td data-field="dept">生产部</td>
+                  <td data-field="price">200.00</td>
+                  <td data-field="bankcard">6222021234567890011</td>
+                  <td data-field="bank">工商银行</td>
+                  <td data-field="cardno">6222021234567890011</td>
+                  <td data-field="contractend">2027-03-01</td>
+                  <td data-field="contractstart">2026-03-01</td>
+                  <td data-field="leavedate" data-leavecol="1"></td>
+                  <td data-field="remark">无</td>
+                  <td data-field="action"><div class="action-cell"><button class="btn-icon" onclick="openArchiveEditModal('L001')"><i data-lucide="edit"></i>编辑</button><button class="btn-icon" onclick="openArchiveLeaveModal('L001')"><i data-lucide="log-out"></i>离职</button></div></td>
+                </tr>
+                <tr data-id="L002" data-status="onjob" data-name="李四" data-code="L002" data-dept="综合管理部" data-date="2026-02-15" data-leavedate="">
+                  <td data-field="seq">2</td>
+                  <td data-field="status"><span class="status-tag handled"><span class="dot"></span>在职</span></td>
+                  <td data-field="code">L002</td>
+                  <td data-field="name">李四</td>
+                  <td data-field="gender">女</td>
+                  <td data-field="position">保洁</td>
+                  <td data-field="dispatch">华信人力</td>
+                  <td data-field="nation">汉族</td>
+                  <td data-field="idcard">440301199205181567</td>
+                  <td data-field="address">广东省深圳市龙岗区</td>
+                  <td data-field="inroom">否</td>
+                  <td data-field="indate">2026-02-15</td>
+                  <td data-field="phone">13900115678</td>
+                  <td data-field="company">强瑞技术</td>
+                  <td data-field="dept">综合管理部</td>
+                  <td data-field="price">180.00</td>
+                  <td data-field="bankcard">6217001234567890022</td>
+                  <td data-field="bank">建设银行</td>
+                  <td data-field="cardno">6217001234567890022</td>
+                  <td data-field="contractend">2027-02-15</td>
+                  <td data-field="contractstart">2026-02-15</td>
+                  <td data-field="leavedate" data-leavecol="1"></td>
+                  <td data-field="remark">无</td>
+                  <td data-field="action"><div class="action-cell"><button class="btn-icon" onclick="openArchiveEditModal('L002')"><i data-lucide="edit"></i>编辑</button><button class="btn-icon" onclick="openArchiveLeaveModal('L002')"><i data-lucide="log-out"></i>离职</button></div></td>
+                </tr>
+                <tr data-id="L003" data-status="offjob" data-name="王五" data-code="L003" data-dept="生产部" data-date="2025-09-10" data-leavedate="2026-01-20">
+                  <td data-field="seq">3</td>
+                  <td data-field="status"><span class="status-tag cancelled"><span class="dot"></span>离职</span></td>
+                  <td data-field="code">L003</td>
+                  <td data-field="name">王五</td>
+                  <td data-field="gender">男</td>
+                  <td data-field="position">搬运</td>
+                  <td data-field="dispatch">强瑞劳务</td>
+                  <td data-field="nation">壮族</td>
+                  <td data-field="idcard">450301198810051988</td>
+                  <td data-field="address">广西南宁市</td>
+                  <td data-field="inroom">否</td>
+                  <td data-field="indate">2025-09-10</td>
+                  <td data-field="phone">13700000000</td>
+                  <td data-field="company">强瑞技术</td>
+                  <td data-field="dept">生产部</td>
+                  <td data-field="price">210.00</td>
+                  <td data-field="bankcard">6228481234567890033</td>
+                  <td data-field="bank">农业银行</td>
+                  <td data-field="cardno">6228481234567890033</td>
+                  <td data-field="contractend">2026-09-10</td>
+                  <td data-field="contractstart">2025-09-10</td>
+                  <td data-field="leavedate" data-leavecol="1">2026-01-20</td>
+                  <td data-field="remark">合同到期</td>
+                  <td data-field="action"><div class="action-cell"><button class="btn-icon" onclick="openArchiveEditModal('L003')"><i data-lucide="edit"></i>编辑</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="pager-info">共 3 条数据</div>
+            <div class="pager-center">
+              <button class="pager-btn arrow" disabled><i data-lucide="chevron-left"></i></button>
+              <button class="pager-btn active">1</button>
+              <button class="pager-btn arrow"><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="pager-right">
+              <select class="pager-size"><option>10 条/页</option><option>20 条/页</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ 新增/编辑 弹框 ============ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="file-plus-2"></i>新增临时工需求</div>
+      <button class="modal-close" onclick="closeModal('addModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body" id="addModalBody">
+      <div class="form-section">
+        <div class="section-title">基础信息</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>需求部门</label>
+            <select class="form-select"><option>请选择部门</option><option>总经办</option><option>综合管理部</option><option>生产部</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>申请人</label>
+            <a class="person-link"><i data-lucide="user-plus"></i>选择人员</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="demandList">
+        <!-- 需求项1 -->
+        <div class="demand-card" data-index="1" style="margin-bottom:12px">
+          <div class="demand-head">
+            <div class="demand-title">需求项1</div>
+            <div class="demand-actions">
+              <button class="btn-icon-sm" onclick="duplicateDemand(this)"><i data-lucide="copy"></i>复制</button>
+              <button class="btn-icon-sm" onclick="removeDemand(this)"><i data-lucide="trash-2"></i>删除</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">需求工种</label>
+              <input type="text" class="form-input" placeholder="请输入">
+            </div>
+            <div class="form-group">
+              <label class="form-label">需求性质</label>
+              <select class="form-select"><option>请选择</option><option>新增</option><option>补员</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">人数</label>
+              <div class="num-stepper">
+                <button type="button" onclick="stepNum(this,-1)">−</button>
+                <input type="number" placeholder="请输入" min="1" value="1">
+                <button type="button" onclick="stepNum(this,1)">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">工期(天)</label>
+              <div class="num-stepper">
+                <button type="button" onclick="stepNum(this,-1)">−</button>
+                <input type="number" placeholder="请输入" min="1" value="1">
+                <button type="button" onclick="stepNum(this,1)">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">开始日期</label>
+              <div class="date-input-wrap"><input type="text" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">结束日期</label>
+              <div class="date-input-wrap"><input type="text" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">服务项目</label>
+              <textarea class="form-textarea" placeholder="请输入"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">附件</label>
+              <button type="button" class="upload-btn"><i data-lucide="upload"></i>选择文件</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="add-demand">
+        <button class="btn btn-primary" onclick="addDemand()"><i data-lucide="plus"></i>新增需求项</button>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">审批</div>
+        <div class="approval-card">
+          <div style="font-size:13px;font-weight:600;color:var(--foreground);margin-bottom:10px">审批流程</div>
+          <div class="approver-row">
+            <div class="label"><i data-lucide="user-check"></i>用户会签<span class="sign">会签</span><span class="req">*</span></div>
+            <div class="chip-stack">
+              <div class="chip"><span class="avatar blue">曹</span><span>4881 - 曹某某</span><span class="close-x"><i data-lucide="x"></i></span></div>
+              <div class="chip"><span class="avatar purple">梁</span><span>J1616 - 梁某某</span><span class="close-x"><i data-lucide="x"></i></span></div>
+            </div>
+          </div>
+          <div class="add-row" style="margin-bottom:14px"><i data-lucide="plus"></i>添加审批人</div>
+          <div class="approver-row">
+            <div class="label"><i data-lucide="users"></i>抄送人</div>
+          </div>
+          <div class="add-row"><i data-lucide="plus"></i>添加抄送人</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addModal')">取消</button>
+      <button class="btn btn-primary" onclick="submitApply()">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 查看详情 弹框 ============ -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="eye"></i>临时工需求详情</div>
+      <button class="modal-close" onclick="closeModal('viewModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><div class="lbl">需求部门</div><div class="val"><div class="detail-val" id="v-dept"></div></div></div>
+      <div class="detail-row"><div class="lbl">申请日期</div><div class="val"><div class="detail-val" id="v-date"></div></div></div>
+      <div class="detail-row"><div class="lbl">申请人</div><div class="val"><div style="display:flex;align-items:center;gap:10px"><span class="applicant"><span class="applicant-avatar" id="v-avatar"></span><span class="applicant-name" id="v-applicant"></span></span><span style="font-size:13px;color:var(--muted-foreground)">状态：</span><span id="v-status"></span></div></div></div>
+      <div class="demand-card" style="margin-top:6px;box-shadow:none;border:1px dashed rgba(45,120,255,.3);background:rgba(var(--primary-rgb),.02)">
+        <div class="demand-title">需求项1</div>
+        <div class="sub-grid">
+          <div class="sub"><div class="lbl">需求工种</div><div class="val"><div class="detail-val">普工</div></div></div>
+          <div class="sub"><div class="lbl">需求性质</div><div class="val"><div class="detail-val">新增</div></div></div>
+          <div class="sub"><div class="lbl">人数</div><div class="val"><div class="detail-val">20</div></div></div>
+          <div class="sub"><div class="lbl">工期</div><div class="val"><div class="detail-val">14天</div></div></div>
+          <div class="sub"><div class="lbl">开始时间</div><div class="val"><div class="detail-val">2026/04/09</div></div></div>
+          <div class="sub"><div class="lbl">结束时间</div><div class="val"><div class="detail-val">2026/04/22</div></div></div>
+          <div class="sub" style="grid-column:span 2"><div class="lbl">服务项目</div><div class="val"><div class="detail-val">再次测试</div></div></div>
+          <div class="sub" style="grid-column:span 2"><div class="lbl">附件</div><div class="val"><div class="attach-list" id="v-attach"></div></div></div>
+        </div>
+      </div>
+
+      <div class="form-section" style="margin-top:18px">
+        <div class="section-title">审批流程</div>
+        <div class="flow-list-wrap"><div class="flow-list" id="v-flow"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 附件预览 弹层 ============ -->
+<div class="attach-overlay" id="attachOverlay">
+  <div class="box">
+    <div class="a-head">
+      <div class="a-title"><i data-lucide="paperclip"></i>附件预览</div>
+      <button class="modal-close" onclick="closeModalById('attachOverlay')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="a-body" id="attachBody"></div>
+  </div>
+</div>
+
+<!-- ============ 审核 弹框 ============ -->
+<div class="modal-overlay" id="auditModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="user-check"></i>审批临时工需求</div>
+      <button class="modal-close" onclick="closeModal('auditModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="approval-card" style="margin-bottom:14px">
+        <div class="approval-head">
+          <div class="approval-title"><i data-lucide="info"></i>申请详情</div>
+          <span class="status-tag pending" style="padding:3px 9px;border-radius:5px;font-size:12px;font-weight:500;background:rgba(245,158,11,.1);color:#d97706"><span class="dot"></span>审批中</span>
+        </div>
+        <div class="detail-row"><div class="lbl">需求部门</div><div class="val"><div class="detail-val" id="a-dept"></div></div></div>
+        <div class="detail-row"><div class="lbl">申请人</div><div class="val"><span class="applicant"><span class="applicant-avatar" id="a-avatar"></span><span class="applicant-name" id="a-applicant"></span></span></div></div>
+        <div class="detail-row"><div class="lbl">申请日期</div><div class="val"><div class="detail-val" id="a-date"></div></div></div>
+        <div class="demand-card" style="margin-top:8px;margin-bottom:0;box-shadow:none;border:1px dashed rgba(45,120,255,.3);background:rgba(var(--primary-rgb),.02)">
+          <div class="demand-title">需求项1</div>
+          <div class="sub-grid">
+            <div class="sub"><div class="lbl">需求工种</div><div class="val"><div class="detail-val">普工</div></div></div>
+            <div class="sub"><div class="lbl">需求性质</div><div class="val"><div class="detail-val">新增</div></div></div>
+            <div class="sub"><div class="lbl">人数</div><div class="val"><div class="detail-val">20</div></div></div>
+            <div class="sub"><div class="lbl">工期(天)</div><div class="val"><div class="detail-val">14</div></div></div>
+            <div class="sub"><div class="lbl">开始日期</div><div class="val"><div class="detail-val">2026/04/09</div></div></div>
+            <div class="sub"><div class="lbl">结束日期</div><div class="val"><div class="detail-val">2026/04/22</div></div></div>
+            <div class="sub" style="grid-column:span 2"><div class="lbl">服务项目</div><div class="val"><div class="detail-val">再次测试</div></div></div>
+            <div class="sub" style="grid-column:span 2"><div class="lbl">附件</div><div class="val"><div class="attach-list"><div class="attach-item"><span class="attach-icon bg-pdf"><i data-lucide="file-type-2"></i></span><span class="ext f-pdf">PDF</span></div><div class="attach-item"><span class="attach-icon bg-excel"><i data-lucide="file-spreadsheet"></i></span><span class="ext f-excel">XLS</span></div></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="approval-card">
+        <div class="approval-head">
+          <div class="approval-title"><i data-lucide="message-square"></i>审批意见</div>
+        </div>
+        <label class="form-label">审批意见</label>
+        <textarea class="form-textarea" id="auditComment" placeholder="请填写您的审批意见，例如：同意该临时工需求申请，请按规定办理入场手续..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('auditModal')"><i data-lucide="x-circle"></i>取消</button>
+      <button class="btn btn-reject" onclick="submitAudit('rejected')"><i data-lucide="thumbs-down"></i>驳回</button>
+      <button class="btn btn-approve" onclick="submitAudit('approved')"><i data-lucide="thumbs-up"></i>同意</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 录入/编辑临时工 弹框 ============ -->
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="user-plus"></i><span id="archiveModalTitle">录入临时工</span></div>
+      <button class="modal-close" onclick="closeModal('archiveModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="section-title">基本信息</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>姓名</label>
+            <input type="text" class="form-input" id="ar-name" placeholder="请输入" oninput="syncRoomAuto()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">工号</label>
+            <input type="text" class="form-input" id="ar-code" placeholder="自动生成(L开头)" disabled style="background:rgba(45,120,255,.04);color:var(--muted-foreground)" onchange="syncRoomAuto()">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>性别</label>
+            <select class="form-select" id="ar-gender"><option>男</option><option>女</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>民族</label>
+            <input type="text" class="form-input" id="ar-nation" placeholder="如：汉族">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>身份证号</label>
+            <input type="text" class="form-input" id="ar-idcard" placeholder="18位身份证号" maxlength="18" oninput="syncRoomAuto()">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>是否内宿</label>
+            <select class="form-select" id="ar-inroom" onchange="toggleArchiveRoom(this)"><option value="否">否</option><option value="是">是</option></select>
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label class="form-label"><span class="req">*</span>家庭住址</label>
+            <input type="text" class="form-input" id="ar-address" placeholder="请输入详细家庭住址">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>入职日期</label>
+            <div class="date-input-wrap"><input type="text" id="ar-indate" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>联系方式</label>
+            <input type="text" class="form-input" id="ar-phone" placeholder="11位手机号" maxlength="11" oninput="syncRoomAuto()">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>入职公司</label>
+            <input type="text" class="form-input" id="ar-company" value="强瑞技术" placeholder="请输入">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>入职部门</label>
+            <select class="form-select" id="ar-dept" onchange="syncRoomAuto()"><option>总经办</option><option>综合管理部</option><option>生产部</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>入职职位</label>
+            <input type="text" class="form-input" id="ar-position" placeholder="请输入">
+          </div>
+          <div class="form-group">
+            <label class="form-label">派遣公司</label>
+            <select class="form-select" id="ar-dispatch"><option>强瑞劳务</option><option>华信人力</option><option>众诚派遣</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>工价</label>
+            <input type="text" class="form-input" id="ar-price" placeholder="保留两位小数" oninput="this.value=this.value.replace(/[^\d.]/g,'')">
+          </div>
+          <div class="form-group">
+            <label class="form-label">银行卡号</label>
+            <input type="text" class="form-input" id="ar-bankcard" placeholder="请输入">
+          </div>
+          <div class="form-group">
+            <label class="form-label">开户行</label>
+            <input type="text" class="form-input" id="ar-bank" placeholder="如：工商银行">
+          </div>
+          <div class="form-group">
+            <label class="form-label">卡号</label>
+            <input type="text" class="form-input" id="ar-cardno" placeholder="请输入">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>合同开始日期</label>
+            <div class="date-input-wrap"><input type="text" id="ar-contractstart" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span>合同到期日期</label>
+            <div class="date-input-wrap"><input type="text" id="ar-contractend" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div>
+          </div>
+          <div class="form-group photo-row" style="grid-column:1 / -1">
+            <label class="form-label">照片</label>
+            <button type="button" class="upload-btn"><i data-lucide="image"></i>上传照片</button>
+          </div>
+          <div class="form-group" style="grid-column:1 / -1">
+            <label class="form-label">备注</label>
+            <textarea class="form-textarea" id="ar-remark" placeholder="请输入"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="demand-card" id="archiveRoomBox" style="display:none;margin-top:6px;box-shadow:none;border:1px dashed rgba(45,120,255,.3);background:rgba(var(--primary-rgb),.02)">
+        <div class="demand-title">入住申请（是否内宿=是）</div>
+        <div class="sub-grid room-grid">
+          <div class="sub"><div class="lbl"><span class="req">*</span>入住区域</div><div class="val"><select class="form-select" id="rm-area"><option>东区</option><option>西区</option><option>南区</option></select></div></div>
+          <div class="sub"><div class="lbl"><span class="req">*</span>宿舍类型</div><div class="val"><select class="form-select" id="rm-type"><option>临时工宿舍</option><option>标准宿舍</option></select></div></div>
+          <div class="sub"><div class="lbl"><span class="req">*</span>入住日期</div><div class="val"><div class="date-input-wrap"><input type="text" id="rm-date" placeholder="默认当前日期"><i data-lucide="calendar" class="cal"></i></div></div></div>
+          <div class="sub readonly"><div class="lbl">申请时间</div><div class="val"><input type="text" class="form-input" id="rm-applytime" readonly></div></div>
+          <div class="sub readonly"><div class="lbl">申请人</div><div class="val"><input type="text" class="form-input" id="rm-applicant" readonly></div></div>
+          <div class="sub readonly"><div class="lbl">工号</div><div class="val"><input type="text" class="form-input" id="rm-code" readonly></div></div>
+          <div class="sub readonly" style="grid-column:span 2"><div class="lbl">所属部门</div><div class="val"><input type="text" class="form-input" id="rm-dept" readonly></div></div>
+          <div class="sub readonly"><div class="lbl">身份证号</div><div class="val"><input type="text" class="form-input" id="rm-idcard" readonly></div></div>
+          <div class="sub readonly"><div class="lbl">手机号码</div><div class="val"><input type="text" class="form-input" id="rm-phone" readonly></div></div>
+          <div class="sub stack" style="grid-column:span 4"><div class="lbl">入住原因</div><div class="val"><input type="text" class="form-input" id="rm-reason" placeholder="必填"></div></div>
+          <div class="sub stack" style="grid-column:span 4"><div class="lbl"><span class="req">*</span>审批人</div><div class="val"><div class="approver-chips" id="rm-approver"><span class="chip"><span class="avatar blue">曹</span><span>4881 - 曹某某</span><span class="close-x" onclick="removeApprover(this,'曹某某','4881')"><i data-lucide="x"></i></span></span><span class="chip-arrow">›</span><span class="chip"><span class="avatar purple">梁</span><span>J1616 - 梁某某</span><span class="close-x" onclick="removeApprover(this,'梁某某','J1616')"><i data-lucide="x"></i></span></span></div><div class="add-row" style="margin-top:10px"><i data-lucide="plus"></i>添加审批人</div></div></div>
+          <div class="sub stack" style="grid-column:span 4"><div class="lbl">抄送人</div><div class="val"><div class="approver-chips" id="rm-cc"></div><div class="add-row" style="margin-top:10px"><i data-lucide="plus"></i>添加抄送人</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('archiveModal')"><i data-lucide="x-circle"></i>取消</button>
+      <button class="btn btn-primary" onclick="submitArchive()"><i data-lucide="check"></i>确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 离职 弹框 ============ -->
+<div class="modal-overlay" id="archiveLeaveModal">
+  <div class="modal" style="width:480px;max-width:92vw">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="log-out"></i>临时工离职</div>
+      <button class="modal-close" onclick="closeModal('archiveLeaveModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="approval-card">
+        <div class="detail-row"><div class="lbl">姓名</div><div class="val"><div class="detail-val" id="lv-name"></div></div></div>
+        <div class="detail-row"><div class="lbl">工号</div><div class="val"><div class="detail-val" id="lv-code"></div></div></div>
+        <div class="detail-row"><div class="lbl">离职日期</div><div class="val"><div class="date-input-wrap" style="width:100%"><input type="text" id="lv-date" placeholder="默认当前日期"><i data-lucide="calendar" class="cal"></i></div></div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('archiveLeaveModal')"><i data-lucide="x-circle"></i>取消</button>
+      <button class="btn btn-reject" onclick="submitLeave()"><i data-lucide="log-out"></i>确认离职</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 字段配置 弹框 ============ -->
+<div class="modal-overlay" id="fieldConfigModal">
+  <div class="modal" style="width:560px;max-width:92vw">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="sliders-horizontal"></i>字段配置</div>
+      <button class="modal-close" onclick="closeModal('fieldConfigModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:10px">勾选的字段将在列表前端页面展示，取消勾选则隐藏该列。</div>
+      <div class="field-cfg-grid" id="fieldCfgGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="resetFieldConfig()"><i data-lucide="rotate-ccw"></i>恢复默认</button>
+      <button class="btn btn-secondary" onclick="closeModal('fieldConfigModal')">取消</button>
+      <button class="btn btn-primary" onclick="applyFieldConfig()"><i data-lucide="check"></i>应用</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 导出打卡记录 弹框 ============ -->
+<div class="modal-overlay" id="clockExportModal">
+  <div class="modal" style="width:440px;max-width:92vw">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="clock"></i>导出打卡记录</div>
+      <button class="modal-close" onclick="closeModal('clockExportModal')"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:14px">选择离职日期（精确到年-月），导出对应月份的临时工打卡记录。</div>
+      <div class="form-row" style="grid-template-columns:1fr;column-gap:16px">
+        <div class="form-group">
+          <label class="form-label"><span class="req">*</span>离职日期</label>
+          <input type="month" class="form-input" id="clock-month" style="padding-right:12px">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('clockExportModal')">取消</button>
+      <button class="btn btn-primary" onclick="doClockExport()"><i data-lucide="download"></i>导出</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 提示 -->
+<div id="toast" style="position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(30,41,59,.92);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s ease;z-index:2000;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.2)"></div>
+
+<script>
+if (window.lucide) lucide.createIcons();
+
+/* ===== 模块切换 ===== */
+document.querySelectorAll('.module-nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.module-nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const mod = item.dataset.module;
+    document.querySelectorAll('.module-view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-' + mod).classList.add('active');
+  });
+});
+
+/* ===== 树形展开收起 ===== */
+document.querySelectorAll('.tree-node-toggle').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    const children = btn.parentElement.nextElementSibling;
+    if(children && children.classList.contains('tree-node-children')){
+      const expanded = children.classList.toggle('expanded');
+      children.classList.toggle('collapsed', !expanded);
+      btn.classList.toggle('collapsed', !expanded);
+    }
+  });
+});
+
+/* ===== 弹框控制 ===== */
+function openModal(id){
+  var ov = document.getElementById(id);
+  if(ov){
+    ov.style.position = 'fixed';
+    ov.style.top = '0'; ov.style.left = '0'; ov.style.right = '0'; ov.style.bottom = '0';
+    ov.style.width = '100%'; ov.style.height = '100%';
+    ov.classList.add('active');
+  }
+}
+function closeModal(id){
+  var ov = document.getElementById(id);
+  if(ov) ov.classList.remove('active');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('active'); });
+});
+
+/* 附件预览层点击遮罩关闭 */
+document.getElementById('attachOverlay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('attachOverlay')) document.getElementById('attachOverlay').classList.remove('active');
+});
+
+/* ===== 新增弹框 ===== */
+function openAddModal(){ openModal('addModal'); }
+
+function stepNum(btn, delta){
+  const input = btn.parentElement.querySelector('input');
+  const cur = parseInt(input.value)||0;
+  input.value = Math.max(0, cur + delta);
+}
+
+function getDemandHTML(index){
+  return `<div class="demand-card" data-index="${index}" style="margin-bottom:12px">
+    <div class="demand-head">
+      <div class="demand-title">需求项${index}</div>
+      <div class="demand-actions">
+        <button class="btn-icon-sm" onclick="duplicateDemand(this)"><i data-lucide="copy"></i>复制</button>
+        <button class="btn-icon-sm" onclick="removeDemand(this)"><i data-lucide="trash-2"></i>删除</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">需求工种</label><input type="text" class="form-input" placeholder="请输入"></div>
+      <div class="form-group"><label class="form-label">需求性质</label><select class="form-select"><option>请选择</option><option>新增</option><option>补员</option></select></div>
+      <div class="form-group"><label class="form-label">人数</label><div class="num-stepper"><button type="button" onclick="stepNum(this,-1)">−</button><input type="number" placeholder="请输入" min="1" value="1"><button type="button" onclick="stepNum(this,1)">+</button></div></div>
+      <div class="form-group"><label class="form-label">工期(天)</label><div class="num-stepper"><button type="button" onclick="stepNum(this,-1)">−</button><input type="number" placeholder="请输入" min="1" value="1"><button type="button" onclick="stepNum(this,1)">+</button></div></div>
+      <div class="form-group"><label class="form-label">开始日期</label><div class="date-input-wrap"><input type="text" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div></div>
+      <div class="form-group"><label class="form-label">结束日期</label><div class="date-input-wrap"><input type="text" placeholder="请选择日期"><i data-lucide="calendar" class="cal"></i></div></div>
+      <div class="form-group"><label class="form-label">服务项目</label><textarea class="form-textarea" placeholder="请输入"></textarea></div>
+      <div class="form-group"><label class="form-label">附件</label><button type="button" class="upload-btn"><i data-lucide="upload"></i>选择文件</button></div>
+    </div>
+  </div>`;
+}
+
+function addDemand(){
+  const list = document.getElementById('demandList');
+  const count = list.querySelectorAll('.demand-card').length + 1;
+  list.insertAdjacentHTML('beforeend', getDemandHTML(count));
+  lucide.createIcons();
+}
+
+function duplicateDemand(btn){
+  const card = btn.closest('.demand-card');
+  const list = document.getElementById('demandList');
+  const count = list.querySelectorAll('.demand-card').length + 1;
+  card.insertAdjacentHTML('afterend', getDemandHTML(count));
+  lucide.createIcons();
+}
+
+function removeDemand(btn){
+  const card = btn.closest('.demand-card');
+  const list = document.getElementById('demandList');
+  if(list.querySelectorAll('.demand-card').length <= 1){
+    showToast('至少保留一个需求项');
+    return;
+  }
+  card.remove();
+  // 重新编号
+  list.querySelectorAll('.demand-card').forEach((c, i)=>{
+    c.dataset.index = i+1;
+    c.querySelector('.demand-title').textContent = '需求项' + (i+1);
+  });
+}
+
+function submitApply(){
+  showToast('提交成功，已进入审批流程');
+  closeModal('addModal');
+}
+
+/* 取消申请（仅审批中可取消） */
+function cancelApply(id){
+  const row = document.querySelector(`#view-apply tr[data-id="${id}"]`);
+  if(!row) return;
+  row.dataset.status = 'cancelled';
+  row.querySelector('td:nth-child(2)').innerHTML = `<span class="status-tag cancelled"><span class="dot"></span>已取消</span>`;
+  const actCell = row.querySelector('.action-cell');
+  actCell.innerHTML = `<button class="btn-icon" onclick="openViewModal(${id})"><i data-lucide="eye"></i>查看</button>`;
+  lucide.createIcons();
+  updateTabCounts('view-apply');
+  applyTabFilter('view-apply');
+  showToast('已取消该临时工申请');
+}
+
+/* ===== 查看详情 ===== */
+const STATUS_MAP = {
+  pending: {cls:'pending', text:'审批中', dot:true},
+  handled: {cls:'handled', text:'已通过', dot:false},
+  rejected:{cls:'rejected', text:'已驳回', dot:false},
+  review:  {cls:'review', text:'审批中', dot:true}
+};
+
+function openViewModal(id){
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if(!tr) return;
+  const d = tr.dataset;
+  document.getElementById('v-dept').textContent = d.dept;
+  document.getElementById('v-date').textContent = d.date;
+  document.getElementById('v-applicant').textContent = d.applicant + '（' + d.code + '）';
+  document.getElementById('v-avatar').textContent = d.applicant.charAt(0);
+  const st = STATUS_MAP[d.status] || STATUS_MAP.pending;
+  document.getElementById('v-status').innerHTML = `<span class="status-tag ${st.cls}">${st.dot?'<span class="dot"></span>':''}${st.text}</span>`;
+  // 附件（按类型）
+  const files = [
+    {type:'excel', ext:'XLS', name:'需求清单统计.xlsx'},
+    {type:'word', ext:'DOC', name:'用工说明文档.docx'},
+    {type:'pdf', ext:'PDF', name:'临时工协议.pdf'},
+    {type:'img', ext:'JPG', name:'现场照片.jpg'},
+    {type:'file', ext:'RAR', name:'其他材料.rar'}
+  ];
+  const attachBox = document.getElementById('v-attach');
+  attachBox.innerHTML = files.map(f=>`<div class="attach-item attach-preview" onclick="openAttach('${f.type}','${f.ext}','${f.name}')"><span class="attach-icon bg-${f.type}"><i data-lucide="${FILE_ICON[f.type]}"></i></span><span class="ext f-${f.type}">${f.ext}</span></div>`).join('');
+  lucide.createIcons();
+  // 审批流程
+  renderFlow(d);
+  openModal('viewModal');
+}
+
+/* 文件类型 → 图标名 */
+const FILE_ICON = {
+  excel:'file-spreadsheet', word:'file-text', pdf:'file-type-2',
+  img:'image', ppt:'presentation', zip:'file-archive', file:'file'
+};
+
+/* 附件预览弹层 */
+function openAttach(type, ext, name){
+  const ov = document.getElementById('attachOverlay');
+  const body = document.getElementById('attachBody');
+  const ic = `<i data-lucide="${FILE_ICON[type]}" style="width:18px;height:18px"></i>`;
+  if(type === 'img'){
+    body.innerHTML = `<div style="width:100%;max-width:480px;height:260px;border-radius:10px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;color:#2d78ff;font-size:13px;border:1px solid var(--border)"><span style="display:flex;flex-direction:column;align-items:center;gap:8px">${ic}<span>【${name}】图片预览</span></span></div>`;
+  } else if(type === 'pdf'){
+    body.innerHTML = `<div style="width:100%;height:300px;border-radius:10px;background:repeating-linear-gradient(0deg,#f8fafd,#f8fafd 22px,#eef2ff 22px,#eef2ff 23px);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground);font-size:13px;border:1px solid var(--border)">${name} PDF 内容预览</div>`;
+  } else {
+    // 其他文件类型：列表点击提示预览
+    const rows = [
+      {type, ext, name},
+      {type:'excel', ext:'XLS', name:'需求清单统计.xlsx'},
+      {type:'word', ext:'DOC', name:'用工说明文档.docx'},
+      {type:'pdf', ext:'PDF', name:'临时工协议.pdf'},
+      {type:'img', ext:'JPG', name:'现场照片.jpg'}
+    ];
+    body.innerHTML = rows.map(r=>`<div class="a-file-row" onclick="openAttach('${r.type}','${r.ext}','${r.name}')"><div class="a-file-icon bg-${r.type}"><i data-lucide="${FILE_ICON[r.type]}" class="f-${r.type}"></i></div><div style="flex:1"><div class="a-file-name">${r.name}</div><div class="a-file-type">点击预览</div></div></div>`).join('');
+  }
+  ov.classList.add('active');
+  lucide.createIcons();
+}
+function closeModalById(id){ document.getElementById(id).classList.remove('active'); }
+
+/* 渲染审批流程 */
+function renderFlow(d){
+  const flow = document.getElementById('v-flow');
+  const status = d.status;
+  let nodes = [];
+  // 第一节点：审批人审批（含本人+审签人，体现图样式"J1272 ， 审签中 J1000"）
+  if(status === 'handled'){
+    nodes.push({type:'person', person:'曹某某', code:'J1272', title:'审批人审批', state:'done', result:'已通过', ccode:'黄国平', cname:'J1000', comment:'同意该临时工需求，请按规定办理入场手续。'});
+  } else if(status === 'rejected'){
+    nodes.push({type:'person', person:'曹某某', code:'J1272', title:'审批人审批', state:'reject', result:'已驳回', ccode:'黄国平', cname:'J1000', comment:'需求人数过多，请重新核定后提交。'});
+  } else {
+    // pending / review：审批中
+    nodes.push({type:'person', person:'曹某某', code:'J1272', title:'审批人审批', state:'wait', result:'审批中', ccode:'黄国平', cname:'J1000', comment:'', ccstate:'doing'});
+  }
+  // 抄送节点（所有状态均显示）
+  nodes.push({type:'cc', title:'抄送', state:'cc'});
+  flow.innerHTML = nodes.map(n=>{
+    if(n.type === 'cc'){
+      return `<div class="flow-node">
+        <div class="flow-dot cc"><i data-lucide="copy"></i></div>
+        <div class="flow-card"><div class="flow-head"><div class="flow-title">${n.title}</div></div></div>
+      </div>`;
+    }
+    const dotCls = n.state==='done'?'done':(n.state==='reject'?'reject':'wait');
+    const dotIcon = n.state==='reject'?'x':(n.state==='done'?'user-check':'user');
+    const resCls = n.state==='done'?'pass':(n.state==='reject'?'fail':'reviewing');
+    const resText = n.state==='done'?'已通过':(n.state==='reject'?'已驳回':'审批中');
+    const metaLine = `<span class="name">${n.person}</span><span style="color:#cbd5e1;margin:0 4px">·</span><span class="code">${n.code}</span><span class="sep">|</span><span class="name">${n.ccode}</span><span style="color:#cbd5e1;margin:0 4px">·</span><span class="code">${n.cname}</span>`;
+    const commentHtml = n.state === 'wait'
+      ? `<span class="flow-empty-comment">暂无审核意见</span>`
+      : `<div class="flow-comment"><span class="ct">审核意见：</span>${n.comment}</div>`;
+    return `<div class="flow-node">
+      <div class="flow-dot ${dotCls}"><i data-lucide="${dotIcon}"></i></div>
+      <div class="flow-card">
+        <div class="flow-head">
+          <div class="flow-title">${n.title}</div>
+          <div class="flow-result ${resCls}"><span class="rdot"></span>${resText}</div>
+        </div>
+        <div class="flow-meta">${metaLine}</div>
+        <div class="flow-comment-row">${commentHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+/* ===== 审核 ===== */
+function openAuditModal(id){
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if(!tr) return;
+  const d = tr.dataset;
+  document.getElementById('a-dept').textContent = d.dept;
+  document.getElementById('a-applicant').textContent = d.applicant + '（' + d.code + '）';
+  document.getElementById('a-avatar').textContent = d.applicant.charAt(0);
+  document.getElementById('a-date').textContent = d.date;
+  document.getElementById('auditComment').value = '';
+  openModal('auditModal');
+}
+
+function submitAudit(result){
+  const comment = document.getElementById('auditComment').value.trim();
+  const tr = document.querySelector('#view-audit tr[data-status="pending"]');
+  // 更新审核列表该行状态
+  const targetId = document.querySelector('#auditModal').dataset.targetId;
+  const txt = result === 'approved' ? '已通过' : '已驳回';
+  const cls = result === 'approved' ? 'handled' : 'rejected';
+  showToast(result === 'approved' ? '已同意，流程结束' : '已驳回');
+  closeModal('auditModal');
+  // 同步更新审核表对应行状态 + 操作改为查看
+  if(targetId){
+    const row = document.querySelector(`#view-audit tr[data-id="${targetId}"]`);
+    if(row){
+      row.dataset.status = cls;
+      row.querySelector('td:nth-child(2)').innerHTML = `<span class="status-tag ${cls}"><span class="dot"></span>${txt}</span>`;
+      const actCell = row.querySelector('.action-cell');
+      actCell.innerHTML = `<button class="btn-icon" onclick="openViewModal(${targetId})"><i data-lucide="eye"></i>查看</button>`;
+      lucide.createIcons();
+    }
+  }
+  // 同步更新申请列表（如果有该行）
+  if(targetId){
+    const applyRow = document.querySelector(`#view-apply tr[data-id="${targetId}"]`);
+    if(applyRow){
+      applyRow.dataset.status = cls;
+      applyRow.querySelector('td:nth-child(2)').innerHTML = `<span class="status-tag ${cls}"><span class="dot"></span>${txt}</span>`;
+    }
+  }
+  // 重新计算统计 + 应用当前TAB过滤
+  updateTabCounts('view-audit');
+  updateTabCounts('view-apply');
+  applyTabFilter('view-audit');
+  applyTabFilter('view-apply');
+}
+
+/* ===== TAB 切换与统计 ===== */
+function getFilterStatusSet(filter){
+  if(filter === 'reviewing') return ['pending','review'];
+  if(filter === 'handled') return ['handled'];
+  if(filter === 'reject') return ['rejected','cancelled'];
+  return null; // all
+}
+function applyTabFilter(viewId){
+  const view = document.getElementById(viewId);
+  const bar = document.getElementById(viewId === 'view-apply' ? 'applyTabs' : 'auditTabs');
+  const active = bar.querySelector('.tab-item.active');
+  const filter = active.dataset.filter;
+  const set = getFilterStatusSet(filter);
+  view.querySelectorAll('.data-table tbody tr').forEach(tr=>{
+    const match = !set || set.includes(tr.dataset.status);
+    tr.style.display = match ? '' : 'none';
+  });
+}
+function updateTabCounts(viewId){
+  const view = document.getElementById(viewId);
+  const prefix = viewId === 'view-apply' ? 'apply' : 'audit';
+  const rows = view.querySelectorAll('.data-table tbody tr');
+  const total = rows.length;
+  let handled = 0, reject = 0, reviewing = 0;
+  rows.forEach(tr=>{
+    const s = tr.dataset.status;
+    if(s === 'handled') handled++;
+    else if(s === 'rejected' || s === 'cancelled') reject++;
+    else if(s === 'pending' || s === 'review') reviewing++;
+  });
+  document.getElementById('cnt-' + prefix + '-all').textContent = total;
+  document.getElementById('cnt-' + prefix + '-reviewing').textContent = reviewing;
+  document.getElementById('cnt-' + prefix + '-handled').textContent = handled;
+  document.getElementById('cnt-' + prefix + '-reject').textContent = reject;
+}
+function initTabs(){
+  ['applyTabs','auditTabs'].forEach(barId=>{
+    const bar = document.getElementById(barId);
+    const viewId = barId === 'applyTabs' ? 'view-apply' : 'view-audit';
+    bar.querySelectorAll('.tab-item').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        bar.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        applyTabFilter(viewId);
+      });
+    });
+    updateTabCounts(viewId);
+    applyTabFilter(viewId);
+  });
+  // 档案模块 TAB
+  const abar = document.getElementById('archiveTabs');
+  abar.querySelectorAll('.tab-item').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      abar.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      applyArchiveFilter();
+    });
+  });
+  updateArchiveCounts();
+  applyArchiveFilter();
+}
+initTabs();
+
+/* ===== 临时工档案 ===== */
+function getArchiveFilterSet(filter){
+  if(filter === 'onjob') return ['onjob'];
+  if(filter === 'offjob') return ['offjob'];
+  return null;
+}
+function applyArchiveFilter(){
+  const bar = document.getElementById('archiveTabs');
+  const filter = bar.querySelector('.tab-item.active').dataset.filter;
+  const set = getArchiveFilterSet(filter);
+  document.querySelectorAll('#view-archive .data-table tbody tr').forEach(tr=>{
+    const match = !set || set.includes(tr.dataset.status);
+    tr.style.display = match ? '' : 'none';
+  });
+  // 离职日期列：仅离职TAB显示
+  const showLeave = (filter === 'offjob');
+  document.querySelectorAll('#view-archive .data-table [data-leavecol="1"]').forEach(cell=>{
+    cell.style.display = showLeave ? '' : 'none';
+  });
+  // 应用字段配置（控制其他列展示）
+  applyFieldVisibility();
+}
+function updateArchiveCounts(){
+  const rows = document.querySelectorAll('#view-archive .data-table tbody tr');
+  let onjob = 0, offjob = 0;
+  rows.forEach(tr=>{
+    if(tr.dataset.status === 'onjob') onjob++;
+    else if(tr.dataset.status === 'offjob') offjob++;
+  });
+  document.getElementById('cnt-archive-onjob').textContent = onjob;
+  document.getElementById('cnt-archive-offjob').textContent = offjob;
+  document.getElementById('stat-archive-onjob').textContent = onjob;
+  document.getElementById('stat-archive-offjob').textContent = offjob;
+}
+
+/* ===== 字段配置（控制前端列表字段展示） ===== */
+// 所有可配置字段（seq/status/action为基础列，默认锁定显示）
+const ARCHIVE_FIELDS = [
+  {key:'code', name:'工号'},
+  {key:'name', name:'姓名'},
+  {key:'gender', name:'性别'},
+  {key:'position', name:'入职职位'},
+  {key:'dispatch', name:'派遣公司'},
+  {key:'nation', name:'民族'},
+  {key:'idcard', name:'身份证号'},
+  {key:'address', name:'家庭地址'},
+  {key:'inroom', name:'是否内宿'},
+  {key:'indate', name:'入职日期'},
+  {key:'phone', name:'联系方式'},
+  {key:'company', name:'入职公司'},
+  {key:'dept', name:'入职部门'},
+  {key:'price', name:'工价'},
+  {key:'bankcard', name:'银行卡号'},
+  {key:'bank', name:'开户行'},
+  {key:'cardno', name:'卡号'},
+  {key:'contractend', name:'合同到期日期'},
+  {key:'contractstart', name:'合同开始日期'},
+  {key:'leavedate', name:'离职日期'},
+  {key:'remark', name:'备注'}
+];
+const FIELD_LOCKED = ['seq','status','action']; // 始终显示
+let archiveFieldVisible = {}; // key -> true/false
+ARCHIVE_FIELDS.forEach(f=>archiveFieldVisible[f.key]=true);
+
+function openFieldConfig(){
+  const grid = document.getElementById('fieldCfgGrid');
+  grid.innerHTML = ARCHIVE_FIELDS.map(f=>{
+    const checked = archiveFieldVisible[f.key] ? 'checked' : '';
+    return `<label class="field-cfg-item ${checked?'checked':''}">
+      <input type="checkbox" data-field="${f.key}" ${checked}>
+      <span class="lbl">${f.name}</span>
+    </label>`;
+  }).join('');
+  grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      cb.closest('.field-cfg-item').classList.toggle('checked', cb.checked);
+    });
+  });
+  openModal('fieldConfigModal');
+}
+function applyFieldConfig(){
+  document.querySelectorAll('#fieldCfgGrid input[type="checkbox"]').forEach(cb=>{
+    archiveFieldVisible[cb.dataset.field] = cb.checked;
+  });
+  closeModal('fieldConfigModal');
+  applyFieldVisibility();
+  showToast('字段展示已更新');
+}
+function resetFieldConfig(){
+  ARCHIVE_FIELDS.forEach(f=>archiveFieldVisible[f.key]=true);
+  openFieldConfig();
+}
+function applyFieldVisibility(){
+  // 遍历所有单元格（含thead th 与 tbody td），按字段配置显隐
+  document.querySelectorAll('#view-archive .data-table [data-field]').forEach(cell=>{
+    const f = cell.dataset.field;
+    if(FIELD_LOCKED.includes(f)) return; // 锁定列始终显示
+    if(f === 'leavedate') return;        // 离职日期由TAB控制
+    cell.style.display = archiveFieldVisible[f] ? '' : 'none';
+  });
+}
+
+/* ===== 导出打卡记录（按年/月） ===== */
+function openClockExport(){
+  const mSel = document.getElementById('clock-month');
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  mSel.value = y + '-' + m;
+  openModal('clockExportModal');
+}
+function doClockExport(){
+  const ym = document.getElementById('clock-month').value; // YYYY-MM
+  if(!ym){ showToast('请选择离职日期'); return; }
+  const [year, month] = ym.split('-');
+  // 取当前可见的临时工列表（在职/离职TAB过滤后）
+  const rows = [...document.querySelectorAll('#view-archive .data-table tbody tr')].filter(tr=>tr.style.display!=='none');
+  // 表头
+  const header = ['工号','姓名','年份','月份','应出勤天数','实际出勤','迟到次数','早退次数','缺勤天数','总工时'];
+  // 为每位临时工生成该月打卡汇总（示例数据，规则：按当月天数与在职状态推算）
+  const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+  const body = rows.map(tr=>{
+    const code = tr.querySelector('td[data-field="code"]')?.textContent.trim() || '—';
+    const name = tr.querySelector('td[data-field="name"]')?.textContent.trim() || '—';
+    const status = tr.dataset.status;
+    const leave = tr.dataset.leavedate || '';
+    // 离职人员：若离职日期早于所选月份，则无打卡记录
+    let workable = daysInMonth;
+    if(status === 'offjob' && leave){
+      const ly = parseInt(leave.slice(0,4)), lm = parseInt(leave.slice(5,7));
+      if(ly < parseInt(year) || (ly === parseInt(year) && lm < parseInt(month))) workable = 0;
+      else if(ly === parseInt(year) && lm === parseInt(month)) workable = parseInt(leave.slice(8,10));
+    }
+    const attend = workable;                       // 实际出勤≈应出勤
+    const late = workable>0 ? Math.max(0, (tr.rowIndex||0)%3) : 0;
+    const early = workable>0 ? Math.max(0, (tr.rowIndex||0)%4) : 0;
+    const absent = workable>0 ? Math.max(0, (tr.rowIndex||0)%5) : 0;
+    const hours = workable * 8;
+    return [code,name,year,month,daysInMonth,attend,late,early,absent,hours].join(',');
+  }).join('\n');
+  const csv = '﻿' + header.join(',') + '\n' + body;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '临时工打卡记录_' + ym + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  closeModal('clockExportModal');
+  showToast('已导出 '+ym+' 打卡记录，共 '+rows.length+' 人');
+}
+
+/* ===== 导出当前列表（CSV） ===== */
+function exportArchive(){
+  const table = document.querySelector('#view-archive .data-table');
+  if(!table) return;
+  const rows = [...table.querySelectorAll('tbody tr')].filter(tr=>tr.style.display!=='none');
+  // 表头：取当前可见且非操作列
+  const headCells = [...table.querySelectorAll('thead th')].filter(th=>th.style.display!=='none' && th.dataset.field!=='action');
+  const header = headCells.map(th=>th.textContent.trim()).join(',');
+  const body = rows.map(tr=>{
+    return headCells.map(th=>{
+      const f = th.dataset.field;
+      const td = tr.querySelector(`td[data-field="${f}"]`);
+      let v = td ? td.textContent.trim().replace(/\s+/g,' ') : '';
+      if(v.includes(',') || v.includes('"')) v = '"'+v.replace(/"/g,'""')+'"';
+      return v;
+    }).join(',');
+  }).join('\n');
+  const csv = '﻿' + header + '\n' + body;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '临时工档案_' + (new Date().toISOString().slice(0,10)) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('导出成功，共 '+rows.length+' 条');
+}
+
+/* 生成工号：L开头取最大值+1 */
+function genArchiveCode(){
+  const codes = [...document.querySelectorAll('#view-archive tr[data-id^="L"]')].map(tr=>tr.dataset.id);
+  let max = 0;
+  codes.forEach(c=>{ const n = parseInt(String(c).replace(/[^0-9]/g,''))||0; if(n>max) max=n; });
+  return 'L' + String(max+1).padStart(3,'0');
+}
+
+/* 审批人/抄送人候选（演示数据：姓名+工号） */
+const ROOM_APPROVERS = [
+  {name:'赵经理', code:'M001'},
+  {name:'钱主管', code:'M002'},
+  {name:'孙主任', code:'M003'},
+  {name:'李组长', code:'M004'}
+];
+function syncRoomAuto(){
+  if(document.getElementById('archiveRoomBox').style.display === 'block') fillRoomAuto();
+}
+function fillRoomAuto(){
+  // 抹灰字段：自动取录入表单对应值
+  document.getElementById('rm-applicant').value = document.getElementById('ar-name').value.trim();
+  document.getElementById('rm-code').value = document.getElementById('ar-code').value;
+  document.getElementById('rm-dept').value = document.getElementById('ar-dept').value;
+  document.getElementById('rm-idcard').value = document.getElementById('ar-idcard').value.trim();
+  document.getElementById('rm-phone').value = document.getElementById('ar-phone').value.trim();
+  // 申请时间：当前时间精确到时分
+  const n = new Date();
+  const p = x=>String(x).padStart(2,'0');
+  document.getElementById('rm-applytime').value = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}`;
+  // 入住日期默认值
+  const rmDate = document.getElementById('rm-date');
+  if(!rmDate.value){ rmDate.value = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}`; }
+  // 多选：审批人 / 抄送人
+  renderMultiSelect('rm-approver', ROOM_APPROVERS);
+  renderMultiSelect('rm-cc', ROOM_APPROVERS);
+}
+function renderMultiSelect(containerId, list){
+  const box = document.getElementById(containerId);
+  box.innerHTML = list.map(p=>`<label class="ms-item"><input type="checkbox" value="${p.code}" data-name="${p.name}"><span>${p.name}（${p.code}）</span></label>`).join('');
+}
+function getMultiValues(containerId){
+  return [...document.querySelectorAll(`#${containerId} input:checked`)].map(cb=>`${cb.dataset.name}(${cb.value})`);
+}
+// 移除审批人/抄送人 chip
+function removeApprover(btn, name, code){
+  const chip = btn.closest('.chip');
+  if(!chip) return;
+  const box = chip.parentElement;
+  const arrow = chip.nextElementSibling;
+  chip.remove();
+  if(arrow && arrow.classList.contains('chip-arrow')) arrow.remove();
+  // 如果是最后一个 chip，也移除其后可能残留的箭头
+  const last = box.lastElementChild;
+  if(last && last.classList.contains('chip-arrow')) last.remove();
+}
+function toggleArchiveRoom(sel){
+  const show = sel.value==='是';
+  document.getElementById('archiveRoomBox').style.display = show?'block':'none';
+  if(show) fillRoomAuto();
+}
+function openArchiveAddModal(){
+  document.getElementById('archiveModalTitle').textContent = '录入临时工';
+  document.getElementById('archiveModal').dataset.mode = 'add';
+  ['ar-name','ar-nation','ar-idcard','ar-address','ar-phone','ar-position','ar-price','ar-bankcard','ar-bank','ar-cardno','ar-remark'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ar-code').value = genArchiveCode();
+  document.getElementById('ar-gender').value='男';
+  document.getElementById('ar-inroom').value='否';
+  document.getElementById('ar-dispatch').value='强瑞劳务';
+  document.getElementById('ar-dept').value='生产部';
+  document.getElementById('ar-company').value='强瑞技术';
+  document.getElementById('ar-indate').value='';
+  document.getElementById('ar-contractstart').value='';
+  document.getElementById('ar-contractend').value='';
+  document.getElementById('archiveRoomBox').style.display='none';
+  openModal('archiveModal');
+}
+function openArchiveEditModal(id){
+  const tr = document.querySelector(`#view-archive tr[data-id="${id}"]`);
+  if(!tr) return;
+  const d = tr.dataset;
+  document.getElementById('archiveModalTitle').textContent = '编辑临时工';
+  document.getElementById('archiveModal').dataset.mode = 'edit';
+  document.getElementById('archiveModal').dataset.targetId = id;
+  document.getElementById('ar-name').value = d.name;
+  document.getElementById('ar-code').value = d.code;
+  document.getElementById('ar-inroom').value = tr.children[10].textContent.trim();
+  document.getElementById('ar-dept').value = d.dept;
+  const showRoom = tr.children[10].textContent.trim()==='是';
+  document.getElementById('archiveRoomBox').style.display = showRoom?'block':'none';
+  if(showRoom) fillRoomAuto();
+  openModal('archiveModal');
+}
+function submitArchive(){
+  const mode = document.getElementById('archiveModal').dataset.mode;
+  const name = document.getElementById('ar-name').value.trim();
+  if(!name){ showToast('请填写姓名'); return; }
+  const code = document.getElementById('ar-code').value || genArchiveCode();
+  if(mode === 'add'){
+    const tbody = document.querySelector('#view-archive .data-table tbody');
+    const seq = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.dataset.id = code; tr.dataset.status='onjob'; tr.dataset.name=name; tr.dataset.code=code;
+    tr.dataset.dept=document.getElementById('ar-dept').value;
+    tr.dataset.date=document.getElementById('ar-indate').value||'—'; tr.dataset.leavedate='';
+    tr.innerHTML = `<td data-field="seq">${seq}</td>
+      <td data-field="status"><span class="status-tag handled"><span class="dot"></span>在职</span></td>
+      <td data-field="code">${code}</td><td data-field="name">${name}</td>
+      <td data-field="gender">${document.getElementById('ar-gender').value}</td>
+      <td data-field="position">${document.getElementById('ar-position').value||'—'}</td>
+      <td data-field="dispatch">${document.getElementById('ar-dispatch').value}</td>
+      <td data-field="nation">${document.getElementById('ar-nation').value||'—'}</td>
+      <td data-field="idcard">${document.getElementById('ar-idcard').value||'—'}</td>
+      <td data-field="address">${document.getElementById('ar-address').value||'—'}</td>
+      <td data-field="inroom">${document.getElementById('ar-inroom').value}</td>
+      <td data-field="indate">${document.getElementById('ar-indate').value||'—'}</td>
+      <td data-field="phone">${document.getElementById('ar-phone').value||'—'}</td>
+      <td data-field="company">${document.getElementById('ar-company').value}</td>
+      <td data-field="dept">${document.getElementById('ar-dept').value}</td>
+      <td data-field="price">${document.getElementById('ar-price').value||'—'}</td>
+      <td data-field="bankcard">${document.getElementById('ar-bankcard').value||'—'}</td>
+      <td data-field="bank">${document.getElementById('ar-bank').value||'—'}</td>
+      <td data-field="cardno">${document.getElementById('ar-cardno').value||'—'}</td>
+      <td data-field="contractend">${document.getElementById('ar-contractend').value||'—'}</td>
+      <td data-field="contractstart">${document.getElementById('ar-contractstart').value||'—'}</td>
+      <td data-field="leavedate" data-leavecol="1"></td>
+      <td data-field="remark">${document.getElementById('ar-remark').value||'无'}</td>
+      <td data-field="action"><div class="action-cell"><button class="btn-icon" onclick="openArchiveEditModal('${code}')"><i data-lucide="edit"></i>编辑</button><button class="btn-icon" onclick="openArchiveLeaveModal('${code}')"><i data-lucide="log-out"></i>离职</button></div>`;
+    tbody.appendChild(tr);
+    lucide.createIcons();
+    showToast('录入成功，工号 '+code+' 已生成，状态【在职】');
+  } else {
+    const id = document.getElementById('archiveModal').dataset.targetId;
+    const tr = document.querySelector(`#view-archive tr[data-id="${id}"]`);
+    if(tr){ tr.dataset.name = name; tr.children[3].textContent = name; }
+    showToast('修改成功');
+  }
+  updateArchiveCounts();
+  applyArchiveFilter();
+  closeModal('archiveModal');
+}
+
+function openArchiveLeaveModal(id){
+  const tr = document.querySelector(`#view-archive tr[data-id="${id}"]`);
+  if(!tr) return;
+  const d = tr.dataset;
+  document.getElementById('lv-name').textContent = d.name + '（' + d.code + '）';
+  document.getElementById('lv-code').textContent = d.code;
+  const now = new Date();
+  document.getElementById('lv-date').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  document.getElementById('archiveLeaveModal').dataset.targetId = id;
+  openModal('archiveLeaveModal');
+}
+function submitLeave(){
+  const id = document.getElementById('archiveLeaveModal').dataset.targetId;
+  const tr = document.querySelector(`#view-archive tr[data-id="${id}"]`);
+  if(tr){
+    tr.dataset.status='offjob';
+    tr.dataset.leavedate = document.getElementById('lv-date').value;
+    tr.children[1].innerHTML = `<span class="status-tag cancelled"><span class="dot"></span>离职</span>`;
+    const lvCell = tr.querySelector('td[data-field="leavedate"]');
+    if(lvCell){ lvCell.textContent = document.getElementById('lv-date').value; }
+    const actCell = tr.querySelector('.action-cell');
+    actCell.innerHTML = `<button class="btn-icon" onclick="openArchiveEditModal('${id}')"><i data-lucide="edit"></i>编辑</button>`;
+    lucide.createIcons();
+  }
+  updateArchiveCounts();
+  applyArchiveFilter();
+  closeModal('archiveLeaveModal');
+  showToast('已离职，状态变更为【离职】');
+}
+
+/* ===== Toast ===== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(-20px)';
+  }, 1800);
+}
+
+// 记录审核弹框目标ID
+const auditModal = document.getElementById('auditModal');
+const origOpenAudit = openAuditModal;
+openAuditModal = function(id){
+  auditModal.dataset.targetId = id;
+  origOpenAudit(id);
+};
+</script>
+</body>
+</html>

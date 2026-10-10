@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤规则配置</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fc 50%, #f5fbff 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            text-align: center;
+            padding: 15px 0 22px;
+            position: relative;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a5fb4;
+            letter-spacing: 3px;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4a9eff, transparent);
+        }
+
+        /* 面板通用样式 */
+        .panel {
+            background: #fff;
+            border: 1px solid #d0e3f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 12px rgba(74, 158, 255, 0.08);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8f1f8;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            color: #1a5fb4;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(180deg, #4a9eff, #1a5fb4);
+            border-radius: 2px;
+        }
+
+        /* 搜索和工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            background: #f5fbff;
+            border: 1px solid #c5e0f5;
+            border-radius: 4px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .search-box input::placeholder {
+            color: #8fa8c0;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a9eff, #1a5fb4);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5aa8ff, #2a6fc4);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #42d392, #2ba584);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #52dda2, #3bb594);
+            box-shadow: 0 4px 12px rgba(66, 211, 146, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #dc4444);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #ff7b7b, #ec5454);
+        }
+
+        .btn-secondary {
+            background: #f0f4f8;
+            color: #5a6c7d;
+            border: 1px solid #d0dce8;
+        }
+
+        .btn-secondary:hover {
+            background: #e4ebf2;
+            color: #4a5a6a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .btn-outline-info {
+            background: transparent;
+            color: #4a9eff;
+            border: 1px solid #4a9eff;
+        }
+
+        .btn-outline-info:hover {
+            background: #e3f2fd;
+        }
+
+        .btn-outline-warning {
+            background: transparent;
+            color: #e67e22;
+            border: 1px solid #e67e22;
+        }
+
+        .btn-outline-warning:hover {
+            background: #fef5e7;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .btn-outline-danger:hover {
+            background: #fdedec;
+        }
+
+        /* 表单行表格 */
+        .rule-table-wrapper {
+            overflow-x: auto;
+            margin: 0 -4px;
+        }
+
+        .rule-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .rule-table thead th {
+            padding: 12px 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5a6c7d;
+            background: #f8fbff;
+            border-bottom: 2px solid #d0e3f0;
+            white-space: nowrap;
+        }
+
+        .rule-table thead th:nth-child(1) { width: 16%; }
+        .rule-table thead th:nth-child(2) { width: 18%; }
+        .rule-table thead th:nth-child(3) { width: 12%; }
+        .rule-table thead th:nth-child(4) { width: 8%; }
+        .rule-table thead th:nth-child(5) { width: 8%; }
+        .rule-table thead th:nth-child(6) { width: 8%; }
+        .rule-table thead th:nth-child(7) { width: 16%; }
+        .rule-table thead th:nth-child(8) { width: 14%; }
+
+        .rule-table tbody tr {
+            border-bottom: 1px solid #e8f1f8;
+            transition: background 0.2s;
+        }
+
+        .rule-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .rule-table tbody td {
+            padding: 12px 12px;
+            font-size: 13px;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        .rule-table .rule-name-cell {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .rule-table .rule-desc-cell {
+            color: #7f8c9d;
+            font-size: 12px;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rule-status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .rule-status-tag.enabled {
+            background: #d4f5e9;
+            color: #27ae60;
+        }
+
+        .rule-status-tag.disabled {
+            background: #ffe0e0;
+            color: #e74c3c;
+        }
+
+        .rule-version-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        .rule-type-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f0f4f8;
+            border: 1px solid #d0dce8;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #5a6c7d;
+        }
+
+        .rule-priority-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .rule-priority-tag.high {
+            background: #fde8e8;
+            color: #c0392b;
+            border: 1px solid #f5c6cb;
+        }
+
+        .rule-priority-tag.medium {
+            background: #fef5e7;
+            color: #e67e22;
+            border: 1px solid #fad7a0;
+        }
+
+        .rule-priority-tag.low {
+            background: #eaf2f8;
+            color: #5dade2;
+            border: 1px solid #aed6f1;
+        }
+
+        .rule-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .rule-actions .btn {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* 绑定标签 */
+        .binding-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-width: 180px;
+        }
+
+        .binding-tag {
+            padding: 2px 8px;
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #1976d2;
+            white-space: nowrap;
+        }
+
+        .binding-tag.more {
+            background: #f0f4f8;
+            border-color: #d0dce8;
+            color: #7f8c9d;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8fa8c0;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* 弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 1px solid #d0e3f0;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            color: #1a5fb4;
+            margin-bottom: 20px;
+        }
+
+        .modal-text {
+            color: #5a6c7d;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* ==================== 大型弹窗模态框（详情/编辑） ==================== */
+        .config-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .config-modal.active {
+            display: flex;
+        }
+
+        .config-modal-dialog {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fc 50%, #f5fbff 100%);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 60px);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .config-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #fff;
+            border-bottom: 1px solid #d0e3f0;
+            border-radius: 12px 12px 0 0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(74, 158, 255, 0.08);
+            flex-shrink: 0;
+        }
+
+        .config-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .config-header h2 {
+            font-size: 20px;
+            color: #1a5fb4;
+            font-weight: 600;
+        }
+
+        .config-mode-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .config-mode-badge.edit {
+            background: #fef5e7;
+            color: #e67e22;
+            border: 1px solid #fad7a0;
+        }
+
+        .config-mode-badge.view {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+
+        .config-header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .config-close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f0f4f8;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            color: #7f8c9d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .config-close-btn:hover {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .config-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px 30px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* 表单样式 */
+        .form-section {
+            background: #fff;
+            border: 1px solid #d0e3f0;
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(74, 158, 255, 0.05);
+        }
+
+        .form-section-title {
+            font-size: 14px;
+            color: #1a5fb4;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-left: 10px;
+            border-left: 3px solid #4a9eff;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: #5a6c7d;
+        }
+
+        .form-label .required {
+            color: #e74c3c;
+            margin-right: 3px;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 12px;
+            background: #f8fbff;
+            border: 1px solid #d0e3f0;
+            border-radius: 4px;
+            color: #333;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+        }
+
+        .form-input:read-only,
+        .form-select:disabled {
+            background: #f5f7fa;
+            color: #5a6c7d;
+            cursor: default;
+        }
+
+        .form-input::placeholder {
+            color: #a0b4c8;
+        }
+
+        .form-select option {
+            background: #fff;
+            color: #333;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #8fa8c0;
+            line-height: 1.6;
+        }
+
+        /* 上下班时间段 */
+        .time-periods {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .time-period {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8fbff;
+            border: 1px solid #e0edf7;
+            border-radius: 6px;
+        }
+
+        .time-period-label {
+            font-size: 13px;
+            color: #1a5fb4;
+            min-width: 60px;
+        }
+
+        .time-input {
+            width: 100px;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #d0e3f0;
+            border-radius: 4px;
+            color: #333;
+            text-align: center;
+        }
+
+        .time-input:read-only {
+            background: #f5f7fa;
+        }
+
+        .time-separator {
+            color: #8fa8c0;
+        }
+
+        .btn-add-period {
+            padding: 8px 15px;
+            background: #f0f7ff;
+            border: 1px dashed #4a9eff;
+            border-radius: 4px;
+            color: #1a5fb4;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-add-period:hover {
+            background: #e0efff;
+        }
+
+        .btn-remove-period {
+            padding: 5px 10px;
+            background: #fff0f0;
+            border: 1px solid #ffcdd2;
+            border-radius: 4px;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* 绑定选择器 */
+        .binding-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .binding-section {
+            background: #f8fbff;
+            border: 1px solid #e8f1f8;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .binding-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .binding-section-title {
+            font-size: 13px;
+            color: #5a6c7d;
+        }
+
+        .binding-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-text {
+            padding: 4px 10px;
+            background: transparent;
+            border: none;
+            color: #4a9eff;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .btn-text:hover {
+            background: #e3f2fd;
+            color: #1a5fb4;
+        }
+
+        /* 树形结构样式 */
+        .tree-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .tree-node {
+            position: relative;
+        }
+
+        .tree-node-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .tree-node-content:hover {
+            background: #f0f7ff;
+        }
+
+        .tree-node-content.selected {
+            background: #e3f2fd;
+        }
+
+        .tree-node-content.selected .tree-node-label {
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #8fa8c0;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .tree-toggle:hover {
+            color: #4a9eff;
+        }
+
+        .tree-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-toggle.leaf {
+            visibility: hidden;
+        }
+
+        .tree-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #c5d5e8;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .tree-checkbox:hover {
+            border-color: #4a9eff;
+        }
+
+        .tree-checkbox.checked {
+            background: #4a9eff;
+            border-color: #4a9eff;
+        }
+
+        .tree-checkbox.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .tree-checkbox.indeterminate {
+            background: #4a9eff;
+            border-color: #4a9eff;
+        }
+
+        .tree-checkbox.indeterminate::after {
+            content: '';
+            width: 8px;
+            height: 2px;
+            background: #fff;
+        }
+
+        .tree-node-icon {
+            font-size: 14px;
+            margin-right: 4px;
+        }
+
+        .tree-node-label {
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .tree-node-label.company {
+            font-weight: 600;
+            color: #1a5fb4;
+        }
+
+        .tree-children {
+            margin-left: 24px;
+            position: relative;
+        }
+
+        .tree-children::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 0;
+            bottom: 12px;
+            width: 1px;
+            background: #e0edf7;
+        }
+
+        /* 岗位分组样式 */
+        .position-groups {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .position-group {
+            margin-bottom: 12px;
+        }
+
+        .position-group-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: #f0f7ff;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1a5fb4;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .position-group-title:hover {
+            background: #e3f2fd;
+        }
+
+        .position-group-toggle {
+            font-size: 10px;
+            color: #8fa8c0;
+            transition: transform 0.2s;
+        }
+
+        .position-group-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .position-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 0 5px 20px;
+        }
+
+        .position-list.collapsed {
+            display: none;
+        }
+
+        .binding-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #fff;
+            border: 1px solid #d0e3f0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #5a6c7d;
+            transition: all 0.3s;
+        }
+
+        .binding-checkbox:hover {
+            background: #f0f7ff;
+            border-color: #4a9eff;
+        }
+
+        .binding-checkbox.selected {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+
+        .binding-checkbox input {
+            display: none;
+        }
+
+        /* 判定规则配置 */
+        .judgment-config {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .judgment-item {
+            background: #f8fbff;
+            border: 1px solid #e8f1f8;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .judgment-item-title {
+            font-size: 13px;
+            color: #1a5fb4;
+            margin-bottom: 8px;
+        }
+
+        .judgment-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .judgment-input-group .form-input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .judgment-unit {
+            font-size: 12px;
+            color: #7f8c9d;
+        }
+
+        /* 特殊打卡模式 */
+        .special-mode-config {
+            background: #f8fbff;
+            border: 1px solid #e8f1f8;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .special-mode-item {
+            margin-bottom: 12px;
+        }
+
+        .special-mode-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 操作按钮 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #e8f1f8;
+            margin-top: 16px;
+        }
+
+        /* 版本历史面板 */
+        .version-panel {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e8f1f8;
+        }
+
+        .version-panel-title {
+            font-size: 13px;
+            color: #1a5fb4;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #4a9eff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .version-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8fbff;
+            border: 1px solid #e0edf7;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .version-item:hover {
+            background: #f0f7ff;
+            border-color: #4a9eff;
+        }
+
+        .version-item.active {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+
+        .version-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4a9eff, #1a5fb4);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .version-item.active .version-number {
+            background: linear-gradient(135deg, #42d392, #2ba584);
+        }
+
+        .version-info {
+            flex: 1;
+        }
+
+        .version-time {
+            font-size: 12px;
+            color: #5a6c7d;
+        }
+
+        .version-type {
+            font-size: 11px;
+            color: #8fa8c0;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* 只读表单的覆盖样式 */
+        .readonly-overlay {
+            position: relative;
+        }
+
+        .readonly-overlay .form-input,
+        .readonly-overlay .form-select {
+            background: #f5f7fa;
+            color: #5a6c7d;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f4f8;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c5d5e8;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a5bcd8;
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .rule-table {
+                font-size: 12px;
+            }
+
+            .rule-table thead th,
+            .rule-table tbody td {
+                padding: 10px 8px;
+            }
+
+            .rule-actions {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .judgment-config {
+                grid-template-columns: 1fr;
+            }
+
+            .config-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .config-body {
+                padding: 15px;
+            }
+
+            .config-modal {
+                padding: 10px;
+            }
+
+            .config-modal-dialog {
+                max-height: calc(100vh - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainPage">
+        <div class="page-header">
+            <h1>考勤规则配置</h1>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">规则列表</div>
+                <button class="btn btn-primary" onclick="ruleManager.createNewRule()">
+                    新建规则
+                </button>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索规则名称..." oninput="ruleManager.searchRules(this.value)">
+                </div>
+                <span style="font-size: 13px; color: #8fa8c0;">共 <strong id="ruleCount" style="color: #1a5fb4;">0</strong> 条规则</span>
+            </div>
+
+            <div class="rule-table-wrapper">
+                <table class="rule-table">
+                    <thead>
+                        <tr>
+                            <th>规则名称</th>
+                            <th>规则说明</th>
+                            <th>打卡方式</th>
+                            <th>优先级</th>
+                            <th>状态</th>
+                            <th>版本</th>
+                            <th>绑定信息</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ruleTableBody">
+                        <!-- 规则行将动态生成 -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">---</div>
+                    <div>暂无匹配的规则，请创建新规则</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 弹窗配置页面 ==================== -->
+    <div class="config-modal" id="fullscreenConfig">
+        <div class="config-modal-dialog">
+            <div class="config-header">
+                <div class="config-header-left">
+                    <h2 id="configPageTitle">规则配置</h2>
+                    <span class="config-mode-badge" id="configModeBadge">编辑模式</span>
+                </div>
+                <div class="config-header-right">
+                    <div id="configHeaderActions">
+                        <!-- 动态生成操作按钮 -->
+                    </div>
+                    <button class="config-close-btn" onclick="ruleManager.closeFullscreenConfig()" title="关闭">&#x2715;</button>
+                </div>
+            </div>
+
+        <div class="config-body" id="configBody">
+            <form id="ruleForm">
+                <!-- 基础信息 -->
+                <div class="form-section">
+                    <div class="form-section-title">基础信息</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><span class="required">*</span>规则名称</label>
+                            <input type="text" class="form-input" id="ruleName" placeholder="请输入规则名称" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">规则状态</label>
+                            <select class="form-select" id="ruleStatus">
+                                <option value="enabled">启用</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label">规则说明</label>
+                            <input type="text" class="form-input" id="ruleDescription" placeholder="请输入规则说明（可选）">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 打卡方式 -->
+                <div class="form-section">
+                    <div class="form-section-title">打卡方式</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><span class="required">*</span>打卡方式</label>
+                            <select class="form-select" id="checkinType" onchange="ruleManager.onCheckinTypeChange()">
+                                <option value="fixed">固定时间打卡</option>
+                                <option value="free">自由打卡</option>
+                                <option value="duration">总时长打卡</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">优先级</label>
+                            <select class="form-select" id="priority">
+                                <option value="high">高（岗位规则）</option>
+                                <option value="medium" selected>中（部门规则）</option>
+                                <option value="low">低（默认规则）</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 固定时间打卡配置 -->
+                <div class="form-section" id="fixedTimeConfig">
+                    <div class="form-section-title">上下班时间配置</div>
+                    <div class="form-hint" style="margin-bottom: 15px;">支持多段配置，时间段不可重叠</div>
+                    <div class="time-periods" id="timePeriods">
+                        <!-- 时间段将动态生成 -->
+                    </div>
+                    <button type="button" class="btn-add-period" id="btnAddPeriod" onclick="ruleManager.addTimePeriod()">
+                        + 添加时间段
+                    </button>
+                </div>
+
+                <!-- 有效打卡时间 -->
+                <div class="form-section" id="validTimeConfig">
+                    <div class="form-section-title">有效打卡时间</div>
+                    <div class="judgment-config">
+                        <div class="judgment-item">
+                            <div class="judgment-item-title">上班前有效时长</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="validBeforeWork" value="60" min="0">
+                                <span class="judgment-unit">分钟</span>
+                            </div>
+                        </div>
+                        <div class="judgment-item">
+                            <div class="judgment-item-title">下班后有效时长</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="validAfterWork" value="60" min="0">
+                                <span class="judgment-unit">分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 判定规则配置 -->
+                <div class="form-section" id="judgmentConfig">
+                    <div class="form-section-title">判定规则配置</div>
+                    <div class="judgment-config">
+                        <div class="judgment-item">
+                            <div class="judgment-item-title">迟到判定（宽限期）</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="lateThreshold" value="1" min="0">
+                                <span class="judgment-unit">分钟后算迟到</span>
+                            </div>
+                        </div>
+                        <div class="judgment-item">
+                            <div class="judgment-item-title">早退判定（提前量）</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="earlyThreshold" value="1" min="0">
+                                <span class="judgment-unit">分钟前算早退</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 自由打卡配置 -->
+                <div class="form-section" id="freeModeConfig" style="display: none;">
+                    <div class="form-section-title">自由打卡规则配置</div>
+                    <div class="special-mode-config">
+                        <div class="special-mode-item">
+                            <div class="judgment-item-title">最少打卡次数</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="freeMinCheckins" value="2" min="2">
+                                <span class="judgment-unit">次</span>
+                            </div>
+                        </div>
+                        <div class="special-mode-item">
+                            <div class="judgment-item-title">打卡间隔要求</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="freeMinInterval" value="4" min="0" step="0.5">
+                                <span class="judgment-unit">小时</span>
+                            </div>
+                        </div>
+                        <div class="special-mode-item">
+                            <div class="judgment-item-title">当日最低打卡时长</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="freeMinDuration" value="8" min="0" step="0.5">
+                                <span class="judgment-unit">小时</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 总时长打卡配置 -->
+                <div class="form-section" id="durationModeConfig" style="display: none;">
+                    <div class="form-section-title">总时长打卡规则配置</div>
+                    <div class="special-mode-config">
+                        <div class="special-mode-item">
+                            <div class="judgment-item-title">当日最低工作时长</div>
+                            <div class="judgment-input-group">
+                                <input type="number" class="form-input" id="durationMinHours" value="8" min="0" step="0.5">
+                                <span class="judgment-unit">小时</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 部门/岗位绑定 -->
+                <div class="form-section">
+                    <div class="form-section-title">规则绑定</div>
+                    <div class="binding-selector">
+                        <div class="binding-section">
+                            <div class="binding-section-header">
+                                <div class="binding-section-title">绑定部门（多选）支持多级组织架构</div>
+                                <div class="binding-actions">
+                                    <button type="button" class="btn-text" onclick="ruleManager.expandAllNodes()">展开全部</button>
+                                    <button type="button" class="btn-text" onclick="ruleManager.collapseAllNodes()">收起全部</button>
+                                    <button type="button" class="btn-text" onclick="ruleManager.clearDeptSelection()">清空选择</button>
+                                </div>
+                            </div>
+                            <div class="tree-container" id="departmentTree">
+                                <!-- 部门树将动态生成 -->
+                            </div>
+                        </div>
+                        <div class="binding-section">
+                            <div class="binding-section-header">
+                                <div class="binding-section-title">绑定岗位（多选）按岗位分组</div>
+                                <button type="button" class="btn-text" onclick="ruleManager.clearPosSelection()">清空选择</button>
+                            </div>
+                            <div class="position-groups" id="positionGroups">
+                                <!-- 岗位分组将动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-hint" style="margin-top: 10px;">
+                        <strong>优先级说明：</strong>岗位规则 > 部门规则 > 默认规则。若员工同时命中多个规则，按优先级最高执行。<br>
+                        <strong>部门选择说明：</strong>选择父节点会自动包含所有子部门；取消父节点会同时取消所有子部门。
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="form-actions" id="formActions">
+                    <button type="button" class="btn btn-secondary" onclick="ruleManager.closeFullscreenConfig()">关闭</button>
+                    <button type="button" class="btn btn-danger" id="btnDeleteConfig" onclick="ruleManager.deleteCurrentRule()">删除</button>
+                    <button type="submit" class="btn btn-success" id="btnSave">保存规则</button>
+                </div>
+
+                <!-- 版本历史 -->
+                <div class="version-panel" id="versionPanel">
+                    <div class="version-panel-title">
+                        <span>版本历史</span>
+                        <span class="form-hint">共 <span id="versionCount">0</span> 个版本</span>
+                    </div>
+                    <div class="version-list" id="versionList">
+                        <!-- 版本列表将动态生成 -->
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">确认操作</div>
+            <div class="modal-text" id="modalText">确定要执行此操作吗？</div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="ruleManager.closeModal()">取消</button>
+                <button class="btn btn-primary" id="modalConfirmBtn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 考勤规则管理器
+         * 重构版：表单行展示 + 全屏配置页
+         * 所有原始数据保持不变
+         */
+        class AttendanceRuleManager {
+            constructor() {
+                this.rules = [];
+                this.currentRule = null;
+                this.currentVersion = null;
+                this.configMode = 'edit'; // 'edit' | 'view'
+
+                // 多级组织架构数据（保持不变）
+                this.orgTree = [
+                    {
+                        id: 'comp_1',
+                        name: '集团总部',
+                        type: 'company',
+                        children: [
+                            {
+                                id: 'dept_1',
+                                name: '技术研发中心',
+                                type: 'department',
+                                children: [
+                                    { id: 'dept_1_1', name: '前端开发部', type: 'department', children: [] },
+                                    { id: 'dept_1_2', name: '后端开发部', type: 'department', children: [] },
+                                    { id: 'dept_1_3', name: '测试部', type: 'department', children: [] },
+                                    { id: 'dept_1_4', name: '运维部', type: 'department', children: [] }
+                                ]
+                            },
+                            {
+                                id: 'dept_2',
+                                name: '市场营销中心',
+                                type: 'department',
+                                children: [
+                                    { id: 'dept_2_1', name: '品牌部', type: 'department', children: [] },
+                                    { id: 'dept_2_2', name: '推广部', type: 'department', children: [] },
+                                    { id: 'dept_2_3', name: '销售一部', type: 'department', children: [] },
+                                    { id: 'dept_2_4', name: '销售二部', type: 'department', children: [] }
+                                ]
+                            },
+                            { id: 'dept_3', name: '人力资源部', type: 'department', children: [] },
+                            { id: 'dept_4', name: '财务部', type: 'department', children: [] },
+                            { id: 'dept_5', name: '行政部', type: 'department', children: [] }
+                        ]
+                    },
+                    {
+                        id: 'comp_2',
+                        name: '北京分公司',
+                        type: 'company',
+                        children: [
+                            {
+                                id: 'bj_dept_1',
+                                name: '北京技术部',
+                                type: 'department',
+                                children: [
+                                    { id: 'bj_dept_1_1', name: '北京前端组', type: 'department', children: [] },
+                                    { id: 'bj_dept_1_2', name: '北京后端组', type: 'department', children: [] }
+                                ]
+                            },
+                            { id: 'bj_dept_2', name: '北京销售部', type: 'department', children: [] },
+                            { id: 'bj_dept_3', name: '北京人事部', type: 'department', children: [] }
+                        ]
+                    },
+                    {
+                        id: 'comp_3',
+                        name: '上海分公司',
+                        type: 'company',
+                        children: [
+                            { id: 'sh_dept_1', name: '上海技术部', type: 'department', children: [] },
+                            { id: 'sh_dept_2', name: '上海市场部', type: 'department', children: [] },
+                            {
+                                id: 'sh_dept_3',
+                                name: '上海运营中心',
+                                type: 'department',
+                                children: [
+                                    { id: 'sh_dept_3_1', name: '内容运营', type: 'department', children: [] },
+                                    { id: 'sh_dept_3_2', name: '用户运营', type: 'department', children: [] },
+                                    { id: 'sh_dept_3_3', name: '活动运营', type: 'department', children: [] }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'comp_4',
+                        name: '广州分公司',
+                        type: 'company',
+                        children: [
+                            { id: 'gz_dept_1', name: '广州研发部', type: 'department', children: [] },
+                            { id: 'gz_dept_2', name: '广州销售部', type: 'department', children: [] }
+                        ]
+                    }
+                ];
+
+                // 岗位按部门分组（保持不变）
+                this.positionGroups = [
+                    {
+                        id: 'group_mgmt',
+                        name: '管理岗位',
+                        positions: [
+                            { id: 'pos_ceo', name: 'CEO/总经理' },
+                            { id: 'pos_vp', name: '副总裁/副总' },
+                            { id: 'pos_director', name: '总监' },
+                            { id: 'pos_manager', name: '部门经理' },
+                            { id: 'pos_supervisor', name: '主管' }
+                        ]
+                    },
+                    {
+                        id: 'group_tech',
+                        name: '技术岗位',
+                        positions: [
+                            { id: 'pos_architect', name: '架构师' },
+                            { id: 'pos_senior_dev', name: '高级开发工程师' },
+                            { id: 'pos_dev', name: '开发工程师' },
+                            { id: 'pos_junior_dev', name: '初级开发工程师' },
+                            { id: 'pos_tester', name: '测试工程师' },
+                            { id: 'pos_ops', name: '运维工程师' }
+                        ]
+                    },
+                    {
+                        id: 'group_sales',
+                        name: '销售岗位',
+                        positions: [
+                            { id: 'pos_sales_director', name: '销售总监' },
+                            { id: 'pos_sales_manager', name: '销售经理' },
+                            { id: 'pos_sales', name: '销售代表' },
+                            { id: 'pos_sales_support', name: '销售支持' }
+                        ]
+                    },
+                    {
+                        id: 'group_market',
+                        name: '市场岗位',
+                        positions: [
+                            { id: 'pos_market_manager', name: '市场经理' },
+                            { id: 'pos_brand', name: '品牌专员' },
+                            { id: 'pos_promotion', name: '推广专员' },
+                            { id: 'pos_content', name: '内容运营' }
+                        ]
+                    },
+                    {
+                        id: 'group_hr',
+                        name: '职能岗位',
+                        positions: [
+                            { id: 'pos_hr_manager', name: '人事经理' },
+                            { id: 'pos_hr', name: '人事专员' },
+                            { id: 'pos_finance', name: '财务专员' },
+                            { id: 'pos_admin', name: '行政专员' },
+                            { id: 'pos_assistant', name: '助理' }
+                        ]
+                    },
+                    {
+                        id: 'group_other',
+                        name: '其他岗位',
+                        positions: [
+                            { id: 'pos_intern', name: '实习生' },
+                            { id: 'pos_parttime', name: '兼职人员' },
+                            { id: 'pos_outsource', name: '外包人员' }
+                        ]
+                    }
+                ];
+
+                this.expandedNodes = new Set();
+                this.init();
+            }
+
+            init() {
+                this.loadMockData();
+                this.renderRuleTable();
+                this.bindFormSubmit();
+
+                // 点击弹窗背景关闭弹窗
+                document.getElementById('fullscreenConfig').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        this.closeFullscreenConfig();
+                    }
+                });
+            }
+
+            // 加载模拟数据（完全保持不变）
+            loadMockData() {
+                this.rules = [
+                    {
+                        id: 'rule_1',
+                        name: '标准考勤规则',
+                        description: '适用于办公室职员的正常考勤',
+                        status: 'enabled',
+                        checkinType: 'fixed',
+                        priority: 'medium',
+                        timePeriods: [
+                            { start: '08:00', end: '12:00' },
+                            { start: '13:30', end: '17:30' }
+                        ],
+                        validBeforeWork: 60,
+                        validAfterWork: 60,
+                        lateThreshold: 1,
+                        earlyThreshold: 1,
+                        freeMinCheckins: 2,
+                        freeMinInterval: 4,
+                        freeMinDuration: 8,
+                        durationMinHours: 8,
+                        departments: ['dept_1', 'dept_3', 'dept_4', 'dept_5'],
+                        positions: ['pos_manager', 'pos_hr_manager', 'pos_finance', 'pos_admin'],
+                        createTime: '2024-01-15 10:30:00',
+                        updateTime: '2024-06-10 14:20:00',
+                        version: 3,
+                        history: [
+                            {
+                                version: 1,
+                                updateTime: '2024-01-15 10:30:00',
+                                updateType: 'create',
+                                description: '创建规则',
+                                data: { /* v1数据 */ }
+                            },
+                            {
+                                version: 2,
+                                updateTime: '2024-03-20 09:15:00',
+                                updateType: 'update',
+                                description: '调整午休时间为13:30-17:30',
+                                data: { /* v2数据 */ }
+                            },
+                            {
+                                version: 3,
+                                updateTime: '2024-06-10 14:20:00',
+                                updateType: 'update',
+                                description: '增加部门绑定',
+                                data: { /* v3数据 */ }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'rule_2',
+                        name: '销售人员自由打卡',
+                        description: '适用于外出销售人员',
+                        status: 'enabled',
+                        checkinType: 'free',
+                        priority: 'high',
+                        timePeriods: [],
+                        validBeforeWork: 60,
+                        validAfterWork: 60,
+                        lateThreshold: 5,
+                        earlyThreshold: 5,
+                        freeMinCheckins: 2,
+                        freeMinInterval: 4,
+                        freeMinDuration: 6,
+                        durationMinHours: 6,
+                        departments: ['dept_2', 'dept_2_3', 'dept_2_4'],
+                        positions: ['pos_sales_director', 'pos_sales_manager', 'pos_sales'],
+                        createTime: '2024-01-16 09:00:00',
+                        updateTime: '2024-05-08 11:30:00',
+                        version: 2,
+                        history: [
+                            {
+                                version: 1,
+                                updateTime: '2024-01-16 09:00:00',
+                                updateType: 'create',
+                                description: '创建规则',
+                                data: {}
+                            },
+                            {
+                                version: 2,
+                                updateTime: '2024-05-08 11:30:00',
+                                updateType: 'update',
+                                description: '调整最低打卡时长为6小时',
+                                data: {}
+                            }
+                        ]
+                    },
+                    {
+                        id: 'rule_3',
+                        name: '实习生弹性工时',
+                        description: '适用于实习生，按总时长计算',
+                        status: 'enabled',
+                        checkinType: 'duration',
+                        priority: 'high',
+                        timePeriods: [],
+                        validBeforeWork: 120,
+                        validAfterWork: 120,
+                        lateThreshold: 5,
+                        earlyThreshold: 5,
+                        freeMinCheckins: 2,
+                        freeMinInterval: 4,
+                        freeMinDuration: 6,
+                        durationMinHours: 6,
+                        departments: ['dept_1_1', 'dept_1_2', 'dept_1_3', 'dept_2_1', 'dept_2_2'],
+                        positions: ['pos_intern'],
+                        createTime: '2024-01-20 10:00:00',
+                        updateTime: '2024-01-20 10:00:00',
+                        version: 1,
+                        history: [
+                            {
+                                version: 1,
+                                updateTime: '2024-01-20 10:00:00',
+                                updateType: 'create',
+                                description: '创建规则',
+                                data: {}
+                            }
+                        ]
+                    },
+                    {
+                        id: 'rule_4',
+                        name: '北京分公司考勤',
+                        description: '适用于北京分公司全体员工',
+                        status: 'disabled',
+                        checkinType: 'fixed',
+                        priority: 'medium',
+                        timePeriods: [
+                            { start: '09:00', end: '18:00' }
+                        ],
+                        validBeforeWork: 30,
+                        validAfterWork: 30,
+                        lateThreshold: 1,
+                        earlyThreshold: 1,
+                        freeMinCheckins: 2,
+                        freeMinInterval: 4,
+                        freeMinDuration: 8,
+                        durationMinHours: 8,
+                        departments: ['comp_2'],
+                        positions: [],
+                        createTime: '2024-01-22 08:00:00',
+                        updateTime: '2024-04-15 16:45:00',
+                        version: 2,
+                        history: [
+                            {
+                                version: 1,
+                                updateTime: '2024-01-22 08:00:00',
+                                updateType: 'create',
+                                description: '创建规则',
+                                data: {}
+                            },
+                            {
+                                version: 2,
+                                updateTime: '2024-04-15 16:45:00',
+                                updateType: 'update',
+                                description: '禁用规则并调整上班时间',
+                                data: {}
+                            }
+                        ]
+                    }
+                ];
+            }
+
+            // ==================== 规则表单行表格渲染 ====================
+            renderRuleTable(filterText = '') {
+                const tbody = document.getElementById('ruleTableBody');
+                const emptyState = document.getElementById('emptyState');
+                const ruleCount = document.getElementById('ruleCount');
+
+                const filteredRules = this.rules.filter(rule =>
+                    rule.name.toLowerCase().includes(filterText.toLowerCase())
+                );
+
+                ruleCount.textContent = this.rules.length;
+
+                if (filteredRules.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                tbody.innerHTML = filteredRules.map(rule => {
+                    const bindingTags = this.getBindingTags(rule);
+                    return `
+                        <tr data-rule-id="${rule.id}">
+                            <td class="rule-name-cell">${this.escapeHtml(rule.name)}</td>
+                            <td class="rule-desc-cell" title="${this.escapeHtml(rule.description || '')}">${this.escapeHtml(rule.description || '-')}</td>
+                            <td><span class="rule-type-tag">${this.getCheckinTypeName(rule.checkinType)}</span></td>
+                            <td><span class="rule-priority-tag ${rule.priority}">${this.getPriorityName(rule.priority)}</span></td>
+                            <td><span class="rule-status-tag ${rule.status}">${rule.status === 'enabled' ? '启用' : '禁用'}</span></td>
+                            <td><span class="rule-version-tag">v${rule.version || 1}</span></td>
+                            <td><div class="binding-tags">${bindingTags}</div></td>
+                            <td>
+                                <div class="rule-actions">
+                                    <button class="btn btn-outline-info btn-sm" onclick="ruleManager.openDetail('${rule.id}')" title="查看详情">
+                                        详情
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="ruleManager.openEdit('${rule.id}')" title="编辑规则">
+                                        编辑
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="ruleManager.confirmDelete('${rule.id}')" title="删除规则">
+                                        删除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // 获取绑定标签HTML
+            getBindingTags(rule) {
+                const deptNames = rule.departments.map(id => this.findDeptNameInTree(id)).filter(Boolean);
+                const posNames = rule.positions.map(id => this.findPosNameInGroups(id)).filter(Boolean);
+                const allBindings = [...deptNames, ...posNames];
+
+                if (allBindings.length === 0) {
+                    return '<span class="binding-tag" style="background:#f0f4f8;border-color:#d0dce8;color:#7f8c9d;">未绑定</span>';
+                }
+
+                let html = allBindings.slice(0, 3).map(name =>
+                    `<span class="binding-tag">${this.escapeHtml(name)}</span>`
+                ).join('');
+
+                if (allBindings.length > 3) {
+                    html += `<span class="binding-tag more">+${allBindings.length - 3}</span>`;
+                }
+
+                return html;
+            }
+
+            // 搜索规则
+            searchRules(keyword) {
+                this.renderRuleTable(keyword);
+            }
+
+            // ==================== 全屏配置页面 ====================
+            openDetail(ruleId) {
+                this.currentRule = this.rules.find(r => r.id === ruleId);
+                if (!this.currentRule) return;
+                this.currentVersion = null;
+                this.configMode = 'view';
+                this.openFullscreenConfig();
+            }
+
+            openEdit(ruleId) {
+                this.currentRule = this.rules.find(r => r.id === ruleId);
+                if (!this.currentRule) return;
+                this.currentVersion = null;
+                this.configMode = 'edit';
+                this.openFullscreenConfig();
+            }
+
+            createNewRule() {
+                this.currentRule = null;
+                this.currentVersion = null;
+                this.configMode = 'edit';
+                this.openFullscreenConfig();
+            }
+
+            confirmDelete(ruleId) {
+                const rule = this.rules.find(r => r.id === ruleId);
+                if (!rule) return;
+
+                this.showModal('删除确认', `确定要删除规则"${rule.name}"吗？此操作不可恢复。`, () => {
+                    this.rules = this.rules.filter(r => r.id !== ruleId);
+                    this.currentRule = null;
+                    this.renderRuleTable(document.getElementById('searchInput').value);
+                    this.showToast('规则已删除');
+                });
+            }
+
+            openFullscreenConfig() {
+                const configPanel = document.getElementById('fullscreenConfig');
+                configPanel.classList.add('active');
+                // 弹窗模式下不需要隐藏body滚动，背景可以滚动
+
+                // 设置标题
+                const title = document.getElementById('configPageTitle');
+                const badge = document.getElementById('configModeBadge');
+                const headerActions = document.getElementById('configHeaderActions');
+
+                if (this.configMode === 'view') {
+                    title.textContent = `查看规则 - ${this.currentRule.name}`;
+                    badge.textContent = '查看模式';
+                    badge.className = 'config-mode-badge view';
+                } else if (this.currentRule) {
+                    title.textContent = `编辑规则 - ${this.currentRule.name}`;
+                    badge.textContent = '编辑模式';
+                    badge.className = 'config-mode-badge edit';
+                } else {
+                    title.textContent = '新建规则';
+                    badge.textContent = '编辑模式';
+                    badge.className = 'config-mode-badge edit';
+                }
+
+                // 渲染组织架构树和岗位分组
+                this.renderOrgTree();
+                this.renderPositionGroups();
+
+                if (this.currentRule) {
+                    this.showRuleDetail();
+                } else {
+                    this.resetForm();
+                }
+
+                // 设置表单只读/可编辑状态
+                this.setFormReadonly(this.configMode === 'view');
+
+                // 更新顶部操作按钮
+                this.renderHeaderActions();
+
+                // 滚动到弹窗顶部
+                document.querySelector('.config-modal-dialog .config-body').scrollTop = 0;
+            }
+
+            closeFullscreenConfig() {
+                const configPanel = document.getElementById('fullscreenConfig');
+                configPanel.classList.remove('active');
+                this.currentRule = null;
+                this.currentVersion = null;
+                this.hideRollbackButton();
+                this.renderRuleTable(document.getElementById('searchInput').value);
+            }
+
+            renderHeaderActions() {
+                const container = document.getElementById('configHeaderActions');
+                if (this.configMode === 'view') {
+                    container.innerHTML = `
+                        <button class="btn btn-outline-warning" onclick="ruleManager.configMode='edit'; ruleManager.openFullscreenConfig();">
+                            切换为编辑
+                        </button>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <button class="btn btn-success" id="btnHeaderSave" onclick="document.getElementById('ruleForm').dispatchEvent(new Event('submit'))">
+                            保存规则
+                        </button>
+                    `;
+                }
+            }
+
+            setFormReadonly(readonly) {
+                const inputs = document.querySelectorAll('#configBody .form-input:not(#btnAddPeriod *)');
+                const selects = document.querySelectorAll('#configBody .form-select');
+                const addPeriodBtn = document.getElementById('btnAddPeriod');
+                const btnDeleteConfig = document.getElementById('btnDeleteConfig');
+                const btnSave = document.getElementById('btnSave');
+                const formActions = document.getElementById('formActions');
+
+                inputs.forEach(input => {
+                    if (readonly) {
+                        input.setAttribute('readonly', 'readonly');
+                    } else {
+                        input.removeAttribute('readonly');
+                    }
+                });
+
+                selects.forEach(select => {
+                    select.disabled = readonly;
+                });
+
+                // 隐藏/显示添加时间段按钮和删除按钮
+                if (addPeriodBtn) addPeriodBtn.style.display = readonly ? 'none' : '';
+                if (btnDeleteConfig) btnDeleteConfig.style.display = readonly ? 'none' : '';
+                if (btnSave) btnSave.style.display = readonly ? 'none' : '';
+
+                // 隐藏/显示删除时间段按钮
+                document.querySelectorAll('.btn-remove-period').forEach(btn => {
+                    btn.style.display = readonly ? 'none' : '';
+                });
+
+                // 部门树和岗位选择的交互
+                if (readonly) {
+                    document.querySelectorAll('.tree-checkbox, .tree-toggle, .binding-checkbox, .position-group-title').forEach(el => {
+                        el.style.pointerEvents = 'none';
+                        el.style.opacity = '0.7';
+                    });
+                    document.querySelectorAll('.btn-text').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                } else {
+                    document.querySelectorAll('.tree-checkbox, .tree-toggle, .binding-checkbox, .position-group-title').forEach(el => {
+                        el.style.pointerEvents = '';
+                        el.style.opacity = '';
+                    });
+                    document.querySelectorAll('.btn-text').forEach(el => {
+                        el.style.display = '';
+                    });
+                }
+            }
+
+            // ==================== 表单渲染 ====================
+            showRuleDetail() {
+                const rule = this.currentRule;
+
+                document.getElementById('ruleName').value = rule.name;
+                document.getElementById('ruleDescription').value = rule.description || '';
+                document.getElementById('ruleStatus').value = rule.status;
+                document.getElementById('checkinType').value = rule.checkinType;
+                document.getElementById('priority').value = rule.priority;
+
+                this.renderTimePeriods(rule.timePeriods);
+
+                document.getElementById('validBeforeWork').value = rule.validBeforeWork;
+                document.getElementById('validAfterWork').value = rule.validAfterWork;
+                document.getElementById('lateThreshold').value = rule.lateThreshold;
+                document.getElementById('earlyThreshold').value = rule.earlyThreshold;
+                document.getElementById('freeMinCheckins').value = rule.freeMinCheckins;
+                document.getElementById('freeMinInterval').value = rule.freeMinInterval;
+                document.getElementById('freeMinDuration').value = rule.freeMinDuration;
+                document.getElementById('durationMinHours').value = rule.durationMinHours;
+
+                this.updateOrgTreeSelection(rule.departments);
+                this.updatePositionSelection(rule.positions);
+
+                this.onCheckinTypeChange();
+                this.renderVersionHistory();
+
+                // 显示删除按钮
+                document.getElementById('btnDeleteConfig').style.display = 'inline-flex';
+            }
+
+            resetForm() {
+                document.getElementById('ruleForm').reset();
+                this.renderTimePeriods([{ start: '08:00', end: '12:00' }]);
+                this.clearDeptSelection();
+                this.clearPosSelection();
+                this.onCheckinTypeChange();
+                document.getElementById('versionPanel').style.display = 'none';
+                document.getElementById('btnDeleteConfig').style.display = 'none';
+            }
+
+            // ==================== 打卡方式切换 ====================
+            onCheckinTypeChange() {
+                const type = document.getElementById('checkinType').value;
+                const fixedConfig = document.getElementById('fixedTimeConfig');
+                const validTimeConfig = document.getElementById('validTimeConfig');
+                const judgmentConfig = document.getElementById('judgmentConfig');
+                const freeModeConfig = document.getElementById('freeModeConfig');
+                const durationModeConfig = document.getElementById('durationModeConfig');
+
+                switch (type) {
+                    case 'fixed':
+                        fixedConfig.style.display = 'block';
+                        validTimeConfig.style.display = 'block';
+                        judgmentConfig.style.display = 'block';
+                        freeModeConfig.style.display = 'none';
+                        durationModeConfig.style.display = 'none';
+                        break;
+                    case 'free':
+                        fixedConfig.style.display = 'none';
+                        validTimeConfig.style.display = 'none';
+                        judgmentConfig.style.display = 'none';
+                        freeModeConfig.style.display = 'block';
+                        durationModeConfig.style.display = 'none';
+                        break;
+                    case 'duration':
+                        fixedConfig.style.display = 'none';
+                        validTimeConfig.style.display = 'block';
+                        judgmentConfig.style.display = 'none';
+                        freeModeConfig.style.display = 'none';
+                        durationModeConfig.style.display = 'block';
+                        break;
+                }
+            }
+
+            // ==================== 时间段管理 ====================
+            renderTimePeriods(periods) {
+                const container = document.getElementById('timePeriods');
+
+                if (!periods || periods.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = periods.map((period, index) => `
+                    <div class="time-period" data-index="${index}">
+                        <span class="time-period-label">时间段 ${index + 1}</span>
+                        <input type="time" class="time-input" value="${period.start}">
+                        <span class="time-separator">至</span>
+                        <input type="time" class="time-input" value="${period.end}">
+                        ${index > 0 ? `<button type="button" class="btn-remove-period" onclick="ruleManager.removeTimePeriod(${index})">删除</button>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            addTimePeriod() {
+                const container = document.getElementById('timePeriods');
+                const index = container.children.length;
+
+                const periodDiv = document.createElement('div');
+                periodDiv.className = 'time-period';
+                periodDiv.dataset.index = index;
+                periodDiv.innerHTML = `
+                    <span class="time-period-label">时间段 ${index + 1}</span>
+                    <input type="time" class="time-input" value="09:00">
+                    <span class="time-separator">至</span>
+                    <input type="time" class="time-input" value="18:00">
+                    <button type="button" class="btn-remove-period" onclick="ruleManager.removeTimePeriod(${index})">删除</button>
+                `;
+
+                container.appendChild(periodDiv);
+            }
+
+            removeTimePeriod(index) {
+                const periods = document.querySelectorAll('.time-period');
+                if (periods[index]) {
+                    periods[index].remove();
+                    document.querySelectorAll('.time-period').forEach((el, i) => {
+                        el.dataset.index = i;
+                        el.querySelector('.time-period-label').textContent = `时间段 ${i + 1}`;
+                        const removeBtn = el.querySelector('.btn-remove-period');
+                        if (removeBtn) {
+                            removeBtn.setAttribute('onclick', `ruleManager.removeTimePeriod(${i})`);
+                        }
+                    });
+                }
+            }
+
+            // ==================== 表单数据获取与保存 ====================
+            getFormData() {
+                const timePeriods = [];
+                document.querySelectorAll('.time-period').forEach(el => {
+                    const inputs = el.querySelectorAll('.time-input');
+                    timePeriods.push({
+                        start: inputs[0].value,
+                        end: inputs[1].value
+                    });
+                });
+
+                const departments = [];
+                document.querySelectorAll('.tree-checkbox').forEach(cb => {
+                    if (cb.classList.contains('checked') || cb.classList.contains('indeterminate')) {
+                        departments.push(cb.dataset.id);
+                    }
+                });
+
+                const positions = [];
+                document.querySelectorAll('#positionGroups .binding-checkbox.selected').forEach(el => {
+                    positions.push(el.dataset.id);
+                });
+
+                return {
+                    name: document.getElementById('ruleName').value.trim(),
+                    description: document.getElementById('ruleDescription').value.trim(),
+                    status: document.getElementById('ruleStatus').value,
+                    checkinType: document.getElementById('checkinType').value,
+                    priority: document.getElementById('priority').value,
+                    timePeriods,
+                    validBeforeWork: parseInt(document.getElementById('validBeforeWork').value) || 60,
+                    validAfterWork: parseInt(document.getElementById('validAfterWork').value) || 60,
+                    lateThreshold: parseInt(document.getElementById('lateThreshold').value) || 1,
+                    earlyThreshold: parseInt(document.getElementById('earlyThreshold').value) || 1,
+                    freeMinCheckins: parseInt(document.getElementById('freeMinCheckins').value) || 2,
+                    freeMinInterval: parseFloat(document.getElementById('freeMinInterval').value) || 4,
+                    freeMinDuration: parseFloat(document.getElementById('freeMinDuration').value) || 8,
+                    durationMinHours: parseFloat(document.getElementById('durationMinHours').value) || 8,
+                    departments,
+                    positions
+                };
+            }
+
+            saveRule(data) {
+                const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+                if (this.currentRule) {
+                    const index = this.rules.findIndex(r => r.id === this.currentRule.id);
+                    if (index !== -1) {
+                        const oldRule = this.rules[index];
+                        const newVersion = (oldRule.version || 1) + 1;
+
+                        const history = oldRule.history || [];
+                        const historyEntry = {
+                            version: oldRule.version || 1,
+                            updateTime: oldRule.updateTime,
+                            updateType: 'update',
+                            description: this.generateChangeDescription(oldRule, data),
+                            data: { ...oldRule }
+                        };
+                        history.push(historyEntry);
+
+                        this.rules[index] = {
+                            ...oldRule,
+                            ...data,
+                            version: newVersion,
+                            updateTime: now,
+                            history: history
+                        };
+                        this.currentRule = this.rules[index];
+                        this.currentVersion = null;
+                    }
+                } else {
+                    const newRule = {
+                        id: 'rule_' + Date.now(),
+                        ...data,
+                        version: 1,
+                        createTime: now,
+                        updateTime: now,
+                        history: [{
+                            version: 1,
+                            updateTime: now,
+                            updateType: 'create',
+                            description: '创建规则',
+                            data: null
+                        }]
+                    };
+                    this.rules.push(newRule);
+                    this.currentRule = newRule;
+                }
+
+                this.renderRuleTable(document.getElementById('searchInput').value);
+                this.renderVersionHistory();
+                this.showToast(`规则保存成功 (v${this.currentRule.version})`);
+
+                // 更新标题
+                document.getElementById('configPageTitle').textContent = `编辑规则 - ${this.currentRule.name}`;
+            }
+
+            generateChangeDescription(oldRule, newData) {
+                const changes = [];
+                if (oldRule.name !== newData.name) changes.push('规则名称');
+                if (oldRule.status !== newData.status) changes.push('规则状态');
+                if (oldRule.checkinType !== newData.checkinType) changes.push('打卡方式');
+                if (oldRule.priority !== newData.priority) changes.push('优先级');
+                if (JSON.stringify(oldRule.timePeriods) !== JSON.stringify(newData.timePeriods)) changes.push('时间段');
+                if (JSON.stringify(oldRule.departments) !== JSON.stringify(newData.departments)) changes.push('部门绑定');
+                if (JSON.stringify(oldRule.positions) !== JSON.stringify(newData.positions)) changes.push('岗位绑定');
+
+                if (changes.length === 0) return '更新规则配置';
+                if (changes.length <= 3) return `修改：${changes.join('、')}`;
+                return `修改：${changes.slice(0, 3).join('、')}等${changes.length}项`;
+            }
+
+            bindFormSubmit() {
+                document.getElementById('ruleForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const data = this.getFormData();
+
+                    if (!data.name) {
+                        this.showToast('请输入规则名称', 'error');
+                        return;
+                    }
+
+                    if (data.checkinType === 'fixed' && data.timePeriods.length > 1) {
+                        if (!this.validateTimePeriods(data.timePeriods)) {
+                            this.showToast('时间段不能重叠', 'error');
+                            return;
+                        }
+                    }
+
+                    if (data.checkinType === 'fixed') {
+                        for (const period of data.timePeriods) {
+                            if (!this.isValidTimePeriod(period.start, period.end)) {
+                                this.showToast(`时间段 ${period.start}-${period.end} 格式有误，请检查跨天设置`, 'error');
+                                return;
+                            }
+                        }
+                    }
+
+                    this.saveRule(data);
+                });
+            }
+
+            validateTimePeriods(periods) {
+                const toMinutes = (time) => {
+                    const [h, m] = time.split(':').map(Number);
+                    return h * 60 + m;
+                };
+
+                for (let i = 0; i < periods.length; i++) {
+                    const start1 = toMinutes(periods[i].start);
+                    const end1 = toMinutes(periods[i].end);
+
+                    for (let j = i + 1; j < periods.length; j++) {
+                        const start2 = toMinutes(periods[j].start);
+                        const end2 = toMinutes(periods[j].end);
+
+                        const normalize = (s, e) => {
+                            if (e < s) e += 24 * 60;
+                            return [s, e];
+                        };
+
+                        const [ns1, ne1] = normalize(start1, end1);
+                        const [ns2, ne2] = normalize(start2, end2);
+
+                        if (ns1 < ne2 && ne1 > ns2) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            isValidTimePeriod(start, end) {
+                const timeRegex = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+                return timeRegex.test(start) && timeRegex.test(end);
+            }
+
+            // ==================== 版本历史 ====================
+            renderVersionHistory() {
+                const panel = document.getElementById('versionPanel');
+                const list = document.getElementById('versionList');
+                const count = document.getElementById('versionCount');
+
+                if (!this.currentRule || !this.currentRule.history) {
+                    panel.style.display = 'none';
+                    return;
+                }
+
+                panel.style.display = 'block';
+                const currentVersion = this.currentVersion || this.currentRule.version;
+                const history = this.currentRule.history || [];
+                count.textContent = history.length;
+
+                const allVersions = [...history].reverse();
+
+                list.innerHTML = allVersions.map((item, index) => {
+                    const isCurrent = item.version === currentVersion ||
+                                     (currentVersion === this.currentRule.version && index === 0);
+                    const typeLabel = item.updateType === 'create' ? '创建' :
+                                     item.updateType === 'rollback' ? '回滚' : '更新';
+                    const typeColor = item.updateType === 'create' ? '#42d392' :
+                                     item.updateType === 'rollback' ? '#ff9800' : '#4a9eff';
+
+                    return `
+                        <div class="version-item ${isCurrent ? 'active' : ''}" data-version="${item.version}">
+                            <div class="version-number">v${item.version}</div>
+                            <div class="version-info">
+                                <div style="font-size: 13px; color: #2c3e50; font-weight: 500;">
+                                    ${this.escapeHtml(item.description)}
+                                    <span style="color: ${typeColor}; font-size: 11px; margin-left: 8px;">${typeLabel}</span>
+                                </div>
+                                <div class="version-time">${item.updateTime}</div>
+                            </div>
+                            <div class="version-actions">
+                                ${!isCurrent ? `<button type="button" class="btn btn-primary btn-xs" onclick="ruleManager.viewVersion(${item.version})">查看</button>` : '<span style="font-size: 11px; color: #27ae60;">当前生效</span>'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            viewVersion(version) {
+                if (!this.currentRule || !this.currentRule.history) return;
+
+                const historyItem = this.currentRule.history.find(h => h.version === version);
+                if (!historyItem || !historyItem.data) {
+                    this.showToast('无法加载该版本数据', 'error');
+                    return;
+                }
+
+                this.currentVersion = version;
+
+                const data = historyItem.data;
+                document.getElementById('ruleName').value = data.name || '';
+                document.getElementById('ruleDescription').value = data.description || '';
+                document.getElementById('ruleStatus').value = data.status || 'enabled';
+                document.getElementById('checkinType').value = data.checkinType || 'fixed';
+                document.getElementById('priority').value = data.priority || 'medium';
+
+                this.renderTimePeriods(data.timePeriods || []);
+
+                document.getElementById('validBeforeWork').value = data.validBeforeWork || 60;
+                document.getElementById('validAfterWork').value = data.validAfterWork || 60;
+                document.getElementById('lateThreshold').value = data.lateThreshold || 1;
+                document.getElementById('earlyThreshold').value = data.earlyThreshold || 1;
+                document.getElementById('freeMinCheckins').value = data.freeMinCheckins || 2;
+                document.getElementById('freeMinInterval').value = data.freeMinInterval || 4;
+                document.getElementById('freeMinDuration').value = data.freeMinDuration || 8;
+                document.getElementById('durationMinHours').value = data.durationMinHours || 8;
+
+                this.updateOrgTreeSelection(data.departments || []);
+                this.updatePositionSelection(data.positions || []);
+
+                this.onCheckinTypeChange();
+                this.renderVersionHistory();
+                this.showToast(`正在查看 v${version} 版本（只读模式）`);
+
+                this.showRollbackButton(version);
+            }
+
+            showRollbackButton(version) {
+                const formActions = document.getElementById('formActions');
+                const existingRollback = formActions.querySelector('.btn-rollback');
+                if (existingRollback) existingRollback.remove();
+
+                const rollbackBtn = document.createElement('button');
+                rollbackBtn.type = 'button';
+                rollbackBtn.className = 'btn btn-primary btn-rollback';
+                rollbackBtn.innerHTML = `恢复为 v${version}`;
+                rollbackBtn.onclick = () => this.rollbackToVersion(version);
+
+                formActions.insertBefore(rollbackBtn, formActions.firstChild);
+            }
+
+            hideRollbackButton() {
+                const rollbackBtn = document.querySelector('.btn-rollback');
+                if (rollbackBtn) rollbackBtn.remove();
+            }
+
+            rollbackToVersion(version) {
+                if (!this.currentRule || !this.currentRule.history) return;
+
+                const historyItem = this.currentRule.history.find(h => h.version === version);
+                if (!historyItem || !historyItem.data) return;
+
+                const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                const oldVersion = this.currentRule.version;
+                const newVersion = oldVersion + 1;
+
+                this.showModal('确认回滚', `确定要将规则回滚到 v${version} 版本吗？这将创建一个新版本 v${newVersion}。`, () => {
+                    const currentHistory = {
+                        version: oldVersion,
+                        updateTime: this.currentRule.updateTime,
+                        updateType: 'rollback',
+                        description: `回滚到 v${version} 之前的版本`,
+                        data: { ...this.currentRule }
+                    };
+
+                    const restoredData = { ...historyItem.data };
+
+                    const index = this.rules.findIndex(r => r.id === this.currentRule.id);
+                    if (index !== -1) {
+                        this.rules[index] = {
+                            ...this.rules[index],
+                            ...restoredData,
+                            version: newVersion,
+                            updateTime: now,
+                            history: [...(this.currentRule.history || []), currentHistory]
+                        };
+                        this.currentRule = this.rules[index];
+                        this.currentVersion = null;
+                    }
+
+                    this.hideRollbackButton();
+                    this.showRuleDetail();
+                    this.renderRuleTable(document.getElementById('searchInput').value);
+                    this.showToast(`已成功回滚到 v${version}（新版本 v${newVersion}）`);
+                });
+            }
+
+            deleteCurrentRule() {
+                if (!this.currentRule) return;
+
+                this.showModal('删除确认', `确定要删除规则"${this.currentRule.name}"吗？此操作不可恢复。`, () => {
+                    const ruleId = this.currentRule.id;
+                    this.rules = this.rules.filter(r => r.id !== ruleId);
+                    this.currentRule = null;
+                    this.closeFullscreenConfig();
+                    this.showToast('规则已删除');
+                });
+            }
+
+            // ==================== 组织架构树 ====================
+            renderOrgTree() {
+                const container = document.getElementById('departmentTree');
+                container.innerHTML = this.renderTreeNodes(this.orgTree);
+            }
+
+            renderTreeNodes(nodes, level = 0) {
+                return nodes.map(node => {
+                    const hasChildren = node.children && node.children.length > 0;
+                    const isExpanded = this.expandedNodes.has(node.id);
+                    const icon = node.type === 'company' ? '<span style="font-size:14px;">&#x1F3E2;</span>' : '<span style="font-size:14px;">&#x1F4C1;</span>';
+
+                    return `
+                        <div class="tree-node" data-id="${node.id}">
+                            <div class="tree-node-content" style="padding-left: ${level * 20}px">
+                                <span class="tree-toggle ${hasChildren ? '' : 'leaf'} ${isExpanded ? 'expanded' : ''}"
+                                      onclick="event.stopPropagation(); ruleManager.toggleNode('${node.id}')">&#x25B6;</span>
+                                <span class="tree-checkbox" onclick="event.stopPropagation(); ruleManager.toggleDeptCheckbox('${node.id}')" data-id="${node.id}"></span>
+                                <span class="tree-node-icon">${icon}</span>
+                                <span class="tree-node-label ${node.type}">${this.escapeHtml(node.name)}</span>
+                            </div>
+                            ${hasChildren && isExpanded ? `
+                                <div class="tree-children">
+                                    ${this.renderTreeNodes(node.children, level + 1)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            toggleNode(nodeId) {
+                if (this.expandedNodes.has(nodeId)) {
+                    this.expandedNodes.delete(nodeId);
+                } else {
+                    this.expandedNodes.add(nodeId);
+                }
+                this.renderOrgTree();
+            }
+
+            expandAllNodes() {
+                const addAllIds = (nodes) => {
+                    nodes.forEach(node => {
+                        if (node.children && node.children.length > 0) {
+                            this.expandedNodes.add(node.id);
+                            addAllIds(node.children);
+                        }
+                    });
+                };
+                addAllIds(this.orgTree);
+                this.renderOrgTree();
+            }
+
+            collapseAllNodes() {
+                this.expandedNodes.clear();
+                this.renderOrgTree();
+            }
+
+            clearDeptSelection() {
+                document.querySelectorAll('.tree-checkbox').forEach(cb => {
+                    cb.classList.remove('checked', 'indeterminate');
+                });
+            }
+
+            getAllChildIds(nodeId, nodes = this.orgTree) {
+                for (const node of nodes) {
+                    if (node.id === nodeId) {
+                        const ids = [node.id];
+                        const collectChildren = (children) => {
+                            children.forEach(child => {
+                                ids.push(child.id);
+                                if (child.children) {
+                                    collectChildren(child.children);
+                                }
+                            });
+                        };
+                        if (node.children) {
+                            collectChildren(node.children);
+                        }
+                        return ids;
+                    }
+                    if (node.children) {
+                        const found = this.getAllChildIds(nodeId, node.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            toggleDeptCheckbox(nodeId) {
+                const checkbox = document.querySelector(`.tree-checkbox[data-id="${nodeId}"]`);
+                const isChecked = checkbox.classList.contains('checked');
+
+                const allIds = this.getAllChildIds(nodeId);
+
+                allIds.forEach(id => {
+                    const cb = document.querySelector(`.tree-checkbox[data-id="${id}"]`);
+                    if (cb) {
+                        if (isChecked) {
+                            cb.classList.remove('checked', 'indeterminate');
+                        } else {
+                            cb.classList.add('checked');
+                            cb.classList.remove('indeterminate');
+                        }
+                    }
+                });
+
+                this.updateParentCheckboxState(nodeId);
+            }
+
+            updateParentCheckboxState(nodeId) {
+                const findParent = (targetId, nodes, parent = null) => {
+                    for (const node of nodes) {
+                        if (node.id === targetId) {
+                            return parent;
+                        }
+                        if (node.children) {
+                            const found = findParent(targetId, node.children, node);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+
+                const parent = findParent(nodeId, this.orgTree);
+                if (!parent) return;
+
+                const parentCb = document.querySelector(`.tree-checkbox[data-id="${parent.id}"]`);
+                if (!parentCb) return;
+
+                const childrenAllChecked = parent.children.every(child => {
+                    const cb = document.querySelector(`.tree-checkbox[data-id="${child.id}"]`);
+                    return cb && cb.classList.contains('checked');
+                });
+
+                const childrenSomeChecked = parent.children.some(child => {
+                    const cb = document.querySelector(`.tree-checkbox[data-id="${child.id}"]`);
+                    return cb && (cb.classList.contains('checked') || cb.classList.contains('indeterminate'));
+                });
+
+                parentCb.classList.remove('checked', 'indeterminate');
+                if (childrenAllChecked) {
+                    parentCb.classList.add('checked');
+                } else if (childrenSomeChecked) {
+                    parentCb.classList.add('indeterminate');
+                }
+
+                this.updateParentCheckboxState(parent.id);
+            }
+
+            updateOrgTreeSelection(selectedIds) {
+                this.clearDeptSelection();
+                selectedIds.forEach(id => {
+                    const checkbox = document.querySelector(`.tree-checkbox[data-id="${id}"]`);
+                    if (checkbox && !checkbox.classList.contains('checked')) {
+                        checkbox.classList.add('checked');
+                        this.updateParentCheckboxState(id);
+                    }
+                });
+            }
+
+            // ==================== 岗位分组 ====================
+            renderPositionGroups() {
+                const container = document.getElementById('positionGroups');
+                container.innerHTML = this.positionGroups.map(group => `
+                    <div class="position-group">
+                        <div class="position-group-title" onclick="ruleManager.togglePositionGroup(this)">
+                            <span class="position-group-toggle">&#x25B6;</span>
+                            <span>${this.escapeHtml(group.name)} (${group.positions.length})</span>
+                        </div>
+                        <div class="position-list collapsed" data-group="${group.id}">
+                            ${group.positions.map(pos => `
+                                <label class="binding-checkbox" data-id="${pos.id}" onclick="ruleManager.togglePosition(this)">
+                                    <input type="checkbox" value="${pos.id}">
+                                    <span>${this.escapeHtml(pos.name)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            togglePositionGroup(header) {
+                const toggle = header.querySelector('.position-group-toggle');
+                const list = header.nextElementSibling;
+                toggle.classList.toggle('expanded');
+                list.classList.toggle('collapsed');
+            }
+
+            togglePosition(element) {
+                element.classList.toggle('selected');
+                const checkbox = element.querySelector('input');
+                checkbox.checked = element.classList.contains('selected');
+            }
+
+            updatePositionSelection(selectedIds) {
+                document.querySelectorAll('#positionGroups .binding-checkbox').forEach(el => {
+                    el.classList.remove('selected');
+                    el.querySelector('input').checked = false;
+                });
+
+                selectedIds.forEach(id => {
+                    const el = document.querySelector(`#positionGroups .binding-checkbox[data-id="${id}"]`);
+                    if (el) {
+                        el.classList.add('selected');
+                        el.querySelector('input').checked = true;
+                    }
+                });
+            }
+
+            clearPosSelection() {
+                document.querySelectorAll('#positionGroups .binding-checkbox').forEach(el => {
+                    el.classList.remove('selected');
+                    el.querySelector('input').checked = false;
+                });
+            }
+
+            // ==================== 辅助方法 ====================
+            findDeptNameInTree(nodeId, nodes = this.orgTree) {
+                for (const node of nodes) {
+                    if (node.id === nodeId) {
+                        return node.name;
+                    }
+                    if (node.children && node.children.length > 0) {
+                        const found = this.findDeptNameInTree(nodeId, node.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            findPosNameInGroups(posId) {
+                for (const group of this.positionGroups) {
+                    const pos = group.positions.find(p => p.id === posId);
+                    if (pos) return pos.name;
+                }
+                return null;
+            }
+
+            escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            getCheckinTypeName(type) {
+                const names = {
+                    'fixed': '固定时间打卡',
+                    'free': '自由打卡',
+                    'duration': '总时长打卡'
+                };
+                return names[type] || type;
+            }
+
+            getPriorityName(priority) {
+                const names = {
+                    'high': '高',
+                    'medium': '中',
+                    'low': '低'
+                };
+                return names[priority] || priority;
+            }
+
+            // ==================== 弹窗 ====================
+            showModal(title, text, onConfirm) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalText').textContent = text;
+
+                const modal = document.getElementById('confirmModal');
+                modal.classList.add('active');
+
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+                confirmBtn.onclick = () => {
+                    this.closeModal();
+                    if (onConfirm) onConfirm();
+                };
+            }
+
+            closeModal() {
+                document.getElementById('confirmModal').classList.remove('active');
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 25px;
+                    background: ${type === 'success' ? '#42d392' : '#ff6b6b'};
+                    color: #fff;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    z-index: 9999;
+                    animation: slideIn 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 初始化
+        const ruleManager = new AttendanceRuleManager();
+    </script>
+</body>
+</html>

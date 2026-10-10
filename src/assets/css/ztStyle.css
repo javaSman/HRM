@@ -1,0 +1,218 @@
+.xfCard .ant-tooltip-inner {
+  background-color: #fff;
+  color: #000c17;
+}
+
+.xfCard .ant-tooltip-arrow::before {
+  background-color: #fff;
+}
+
+
+.fz12 {
+  font-size: 12px;
+}
+
+.fz14 {
+  font-size: 14px;
+}
+
+.fz16 {
+  font-size: 16px;
+}
+
+.fz18 {
+  font-size: 18px;
+}
+
+.fz20 {
+  font-size: 20px;
+}
+
+.fz22 {
+  font-size: 22px;
+}
+
+.fz24 {
+  font-size: 24px;
+}
+
+.fz26 {
+  font-size: 26px;
+}
+
+.fz28 {
+  font-size: 28px;
+}
+
+.fz30 {
+  font-size: 30px;
+}
+
+.ml10 {
+  margin-left: 10px;
+}
+
+.mr10 {
+  margin-right: 10px;
+}
+
+.whiteCor {
+  color: #fff;
+}
+
+.mt10 {
+  margin-top: 10px !important;
+}
+
+.mt20 {
+  margin-top: 20px !important;
+}
+
+.ml20 {
+  margin-left: 20px;
+}
+
+.fw700 {
+  font-weight: 700;
+}
+
+.mb10 {
+  margin-bottom: 10px;
+}
+
+.tac {
+  text-align: center;
+}
+
+.tar {
+  text-align: right;
+}
+
+.whiteBgc {
+  background-color: #fff;
+}
+
+.fuzzyCor {
+  color: rgba(201, 201, 201, 1);
+}
+
+/* p {
+  margin: 0 !important;
+  padding: 0 !important;
+} */
+ 
+.cursor {
+  cursor: pointer;
+  user-select: none;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.flex-3 {
+  flex: 3;
+}
+
+.flex-4 {
+  flex: 4;
+}
+
+.flex-5 {
+  flex: 5;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-none {
+  flex: none !important;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex-justify-end {
+  justify-content: flex-end;
+}
+
+.flex-items-end {
+  align-items: flex-end;
+}
+
+.gap-10 {
+  gap: 10px;
+}
+
+.cursor {
+  cursor: pointer;
+}
+.pointer{
+  cursor: pointer;
+}
+.not-allowed{
+    cursor: not-allowed;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.position-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 单行省略 */
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

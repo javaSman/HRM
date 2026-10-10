@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>门禁人员接口调试台 (A4 直连闸机)</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --fg:#e2e8f0; --muted:#94a3b8;
+          --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+         background:var(--bg); color:var(--fg); font-size:14px; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); background:#0b1220; }
+  header h1 { margin:0; font-size:17px; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+  main { display:grid; grid-template-columns: 1fr 1fr; gap:16px; padding:16px; max-width:1280px; margin:0 auto; }
+  .full { grid-column: 1 / -1; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+  .card h2 { margin:0 0 10px; font-size:14px; color:var(--accent); border-bottom:1px solid var(--line); padding-bottom:8px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:8px 0 3px; }
+  input, select, textarea { width:100%; padding:7px 9px; background:#0b1220; border:1px solid var(--line);
+         border-radius:5px; color:var(--fg); font-size:13px; font-family:inherit; }
+  textarea { resize:vertical; min-height:60px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:120px; }
+  button { cursor:pointer; padding:7px 12px; border:1px solid var(--line); border-radius:5px;
+           background:#0b1220; color:var(--fg); font-size:13px; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); color:#04222e; border-color:var(--accent); font-weight:600; }
+  button.danger { color:#fecaca; border-color:#7f1d1d; }
+  button.danger:hover { background:#7f1d1d; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { border:1px solid var(--line); padding:5px 7px; text-align:left; white-space:nowrap; }
+  th { background:#0b1220; color:var(--muted); position:sticky; top:0; }
+  .tablewrap { max-height:300px; overflow:auto; border:1px solid var(--line); border-radius:6px; }
+  .log { background:#000; border:1px solid var(--line); border-radius:6px; padding:10px;
+         height:340px; overflow:auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12px; }
+  .log .req { color:var(--accent); }
+  .log .ok { color:var(--ok); }
+  .log .err { color:var(--err); }
+  .log .meta { color:var(--muted); }
+  .log pre { margin:4px 0 12px; white-space:pre-wrap; word-break:break-all; color:#cbd5e1; }
+  .pill { display:inline-block; padding:1px 7px; border-radius:10px; font-size:11px; border:1px solid var(--line); color:var(--muted); }
+  .hint { color:var(--muted); font-size:12px; line-height:1.6; }
+  .hint code { background:#0b1220; padding:1px 5px; border-radius:4px; color:#fbbf24; }
+  a { color:var(--accent); }
+  .mini { font-size:11px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>门禁人员接口调试台 <span class="pill">PUSH 默认 · A4 兼容</span></h1>
+  <p>调试 <code>/attendance/hrmGuardMember</code> 增删改查；默认通过熵基 PUSH 队列由设备轮询下发，配置为 A4 时才由平台直连设备。仅用于联调，正式页面后续按业务实现。</p>
+</header>
+
+<main>
+  <!-- 配置 -->
+  <section class="card">
+    <h2>① 连接配置</h2>
+    <label>后端 Base URL</label>
+    <div class="row">
+      <div style="flex:3"><input id="baseUrl" value="/qr-hrm" /></div>
+      <div><button onclick="setBase('/qr-hrm')">同源代理</button></div>
+      <div><button onclick="setBase('http://localhost:8180/qr-hrm')">本地直连</button></div>
+    </div>
+    <p class="mini">推荐：把本文件放在前端 <code>public/</code> 下，<code>npm run dev</code> 后访问 <code>http://localhost:3000/access-control-debug.html</code>，用「同源代理 /qr-hrm」走 dev 代理，免 CORS、复用登录态。直连后端需后端开启 CORS。</p>
+
+    <label>X-Access-Token</label>
+    <div class="row">
+      <div style="flex:3"><input id="token" placeholder="粘贴 token，或点右侧读取当前登录态" /></div>
+      <div><button onclick="readToken()">读取登录态Token</button></div>
+    </div>
+
+    <label>tenant-id（可选）</label>
+    <input id="tenant" placeholder="多租户时填，通常留空" />
+    <p class="mini">Token 获取：在已登录的系统页面打开浏览器 DevTools → Application → Local Storage → 找 <code>pro__Access-Token</code> 的 value；或任意接口请求头里的 <code>X-Access-Token</code>。</p>
+  </section>
+
+  <!-- 设备检查 -->
+  <section class="card">
+    <h2>② 门禁设备检查（下发前提）</h2>
+    <p class="hint">只有 <code>hr_kq_device</code> 中 <code>sbyt='门禁'</code> 且 <code>macAddress</code> 填了设备 URL 的记录才会被下发。没有则增删改时日志打 <code>未找到门禁闸机设备，跳过下发</code>，不会真正连接闸机。</p>
+    <div class="btns">
+      <button onclick="checkDevices()">查询门禁设备 (/hrm/hrKqDevice/list?sbyt=门禁)</button>
+    </div>
+    <div id="deviceResult" class="mini" style="margin-top:8px"></div>
+    <details style="margin-top:10px">
+      <summary class="mini" style="cursor:pointer">没有设备？用 SQL 插一条测试设备</summary>
+<pre class="mini" style="white-space:pre-wrap">INSERT INTO hr_kq_device (id, sbmc, sbyt, mac_address, create_time)
+VALUES ('test-gate-1', '测试闸机1', '门禁', 'http://192.168.1.135:8091', now());</pre>
+    </details>
+  </section>
+
+  <!-- 列表 -->
+  <section class="card full">
+    <h2>③ 门禁人员列表</h2>
+    <div class="row">
+      <div><label>工号 no</label><input id="q_no" /></div>
+      <div><label>姓名 name</label><input id="q_name" /></div>
+      <div><label>pageNo</label><input id="q_pageNo" value="1" /></div>
+      <div><label>pageSize</label><input id="q_pageSize" value="10" /></div>
+      <div style="display:flex; align-items:flex-end"><button class="primary" onclick="queryList()">查询列表</button></div>
+    </div>
+    <div class="tablewrap" style="margin-top:10px">
+      <table id="listTable">
+        <thead><tr><th>操作</th><th>id</th><th>no</th><th>name</th><th>cardNumber</th><th>type</th><th>status</th><th>photo</th></tr></thead>
+        <tbody><tr><td colspan="8" class="mini">点「查询列表」加载</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 表单 -->
+  <section class="card">
+    <h2>④ 新增 / 编辑门禁人员</h2>
+    <p class="hint">提交后会保存并<strong>异步</strong>下发到所有门禁闸机。<code>no</code>（工号）必填，作为下发的 employee_number；<code>photo</code> 填可访问的图片 URL（服务端会下载转 base64 落库 + 下发人脸）。</p>
+    <input type="hidden" id="f_id" />
+    <div class="row">
+      <div><label>工号 no *</label><input id="f_no" /></div>
+      <div><label>姓名 name</label><input id="f_name" /></div>
+    </div>
+    <div class="row">
+      <div><label>卡号 cardNumber</label><input id="f_cardNumber" /></div>
+      <div><label>电话 phoneNumber</label><input id="f_phoneNumber" /></div>
+    </div>
+    <div class="row">
+      <div><label>类型 type</label>
+        <select id="f_type"><option value="">(空)</option><option value="formal">formal 正式</option><option value="temporary">temporary 临时</option><option value="outside">outside 外部</option></select>
+      </div>
+      <div><label>状态 status</label>
+        <select id="f_status"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option><option value="">(空)</option></select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>地址 addressId</label><input id="f_addressId" /></div>
+      <div><label>所属公司 createByCompany</label><input id="f_createByCompany" /></div>
+    </div>
+    <label>照片 URL photo</label>
+    <input id="f_photo" placeholder="http(s)://... 的图片地址" />
+    <div class="btns">
+      <button class="primary" onclick="submitForm('add')">新增 (POST /add)</button>
+      <button onclick="submitForm('edit')">编辑 (POST /edit)</button>
+      <button onclick="clearForm()">清空表单</button>
+    </div>
+  </section>
+
+  <!-- 删除 / 单查 -->
+  <section class="card">
+    <h2>⑤ 单条查询 / 删除</h2>
+    <label>id</label>
+    <input id="op_id" placeholder="门禁人员 id" />
+    <div class="btns">
+      <button onclick="queryById()">查询 (GET /queryById)</button>
+      <button onclick="loadToForm()">载入到表单编辑</button>
+      <button class="danger" onclick="deleteById()">删除 (DELETE /delete)</button>
+    </div>
+    <p class="hint">删除会异步从所有门禁闸机清除该工号白名单，并把本地人脸置 status=1。</p>
+  </section>
+
+  <!-- 日志 -->
+  <section class="card full">
+    <h2>⑥ 请求 / 响应日志 <button style="float:right" onclick="document.getElementById('log').innerHTML=''">清空</button></h2>
+    <div id="log" class="log"></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+function setBase(v){ $('baseUrl').value = v; }
+function base(){ return $('baseUrl').value.replace(/\/+$/, ''); }
+
+function readToken(){
+  const keys = ['pro__Access-Token','Access-Token','token','X-Access-Token'];
+  for (const k of keys){
+    const raw = localStorage.getItem(k);
+    if (!raw) continue;
+    let val = raw;
+    try { const o = JSON.parse(raw); if (o && o.value) val = o.value; } catch(e){}
+    if (val){ $('token').value = val; logMeta('已从 localStorage["'+k+'"] 读取 Token'); return; }
+  }
+  logErr('未在 localStorage 找到 Token，请确认本页与系统同源(:3000)且已登录，或手动粘贴。');
+}
+
+function headers(json){
+  const h = {};
+  if (json) h['Content-Type'] = 'application/json';
+  const t = $('token').value.trim(); if (t) h['X-Access-Token'] = t;
+  const tn = $('tenant').value.trim(); if (tn) h['tenant-id'] = tn;
+  return h;
+}
+
+// ---- 通用请求 + 日志 ----
+async function call(method, path, {query, body} = {}){
+  let url = base() + path;
+  if (query){ const qs = new URLSearchParams(Object.entries(query).filter(([,v])=>v!=='' && v!=null)).toString(); if (qs) url += '?' + qs; }
+  const opt = { method, headers: headers(!!body) };
+  if (body) opt.body = JSON.stringify(body);
+  logReq(method, url, body);
+  try {
+    const res = await fetch(url, opt);
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(e){ data = text; }
+    if (res.ok) logOk(res.status, data); else logErr('HTTP '+res.status, data);
+    return { ok: res.ok, status: res.status, data };
+  } catch (e){
+    logErr('网络/CORS 错误: ' + e.message + ' （直连后端需开启 CORS；建议放 public/ 走同源代理）');
+    return { ok:false, error:e };
+  }
+}
+
+// ---- 业务动作 ----
+async function checkDevices(){
+  const r = await call('GET', '/hrm/hrKqDevice/list', { query:{ sbyt:'门禁', pageNo:1, pageSize:100 } });
+  const el = $('deviceResult');
+  const records = r.data && r.data.result && (r.data.result.records || r.data.result);
+  if (!Array.isArray(records)){ el.innerHTML = '<span class="err">查询失败或无数据，详见日志</span>'; return; }
+  if (!records.length){ el.innerHTML = '<span style="color:var(--warn)">⚠ 没有 sbyt=门禁 的设备 → 下发会被跳过</span>'; return; }
+  const withUrl = records.filter(d => (d.macAddress||'').trim());
+  el.innerHTML = '共 '+records.length+' 台门禁设备，其中 '+withUrl.length+' 台填了 macAddress：<br>' +
+    records.map(d => '• '+(d.sbmc||'?')+' → <code>'+(d.macAddress||'(空, 不会下发)')+'</code>').join('<br>');
+}
+
+async function queryList(){
+  const r = await call('GET', '/attendance/hrmGuardMember/list', { query:{
+    no:$('q_no').value.trim(), name:$('q_name').value.trim(),
+    pageNo:$('q_pageNo').value||1, pageSize:$('q_pageSize').value||10 } });
+  const tb = $('listTable').querySelector('tbody');
+  const records = r.data && r.data.result && r.data.result.records;
+  if (!Array.isArray(records)){ tb.innerHTML = '<tr><td colspan="8" class="err">无数据/失败，详见日志</td></tr>'; return; }
+  if (!records.length){ tb.innerHTML = '<tr><td colspan="8" class="mini">空</td></tr>'; return; }
+  tb.innerHTML = records.map(d => {
+    const id = d.id||'';
+    return '<tr><td>'+
+      '<button onclick="fillId(\''+id+'\')">选中</button> '+
+      '<button class="danger" onclick="quickDelete(\''+id+'\')">删</button>'+
+      '</td><td>'+id+'</td><td>'+(d.no||'')+'</td><td>'+(d.name||'')+'</td><td>'+(d.cardNumber||'')+
+      '</td><td>'+(d.type||'')+'</td><td>'+(d.status||'')+'</td><td class="mini">'+(d.photo||'')+'</td></tr>';
+  }).join('');
+}
+
+function fillId(id){ $('op_id').value = id; $('f_id').value = id; logMeta('已选中 id='+id); }
+
+function formBody(){
+  const b = {};
+  const map = { id:'f_id', no:'f_no', name:'f_name', cardNumber:'f_cardNumber', phoneNumber:'f_phoneNumber',
+    type:'f_type', status:'f_status', addressId:'f_addressId', createByCompany:'f_createByCompany', photo:'f_photo' };
+  for (const [k,el] of Object.entries(map)){ const v = $(el).value.trim(); if (v!=='') b[k]=v; }
+  return b;
+}
+
+async function submitForm(mode){
+  const b = formBody();
+  if (!b.no){ logErr('工号 no 必填'); return; }
+  if (mode==='edit' && !b.id){ logErr('编辑需要 id（先「选中」或填 id）'); return; }
+  if (mode==='add') delete b.id;
+  const r = await call('POST', '/attendance/hrmGuardMember/'+mode, { body: b });
+  if (r.ok) logMeta('✓ 已'+(mode==='add'?'新增':'编辑')+'，门禁下发为异步执行，请看后端日志「发送门禁请求: url=...」');
+}
+
+function clearForm(){ ['f_id','f_no','f_name','f_cardNumber','f_phoneNumber','f_addressId','f_createByCompany','f_photo'].forEach(i=>$(i).value=''); $('f_type').value=''; $('f_status').value='ACTIVE'; }
+
+async function queryById(){
+  const id = $('op_id').value.trim(); if(!id){ logErr('填 id'); return; }
+  await call('GET', '/attendance/hrmGuardMember/queryById', { query:{ id } });
+}
+
+async function loadToForm(){
+  const id = $('op_id').value.trim(); if(!id){ logErr('填 id'); return; }
+  const r = await call('GET', '/attendance/hrmGuardMember/queryById', { query:{ id } });
+  const d = r.data && r.data.result;
+  if (!d){ logErr('未查到'); return; }
+  $('f_id').value=d.id||''; $('f_no').value=d.no||''; $('f_name').value=d.name||''; $('f_cardNumber').value=d.cardNumber||'';
+  $('f_phoneNumber').value=d.phoneNumber||''; $('f_type').value=d.type||''; $('f_status').value=d.status||'';
+  $('f_addressId').value=d.addressId||''; $('f_createByCompany').value=d.createByCompany||''; $('f_photo').value=d.photo||'';
+  logMeta('已载入 id='+id+' 到表单');
+}
+
+async function deleteById(){
+  const id = $('op_id').value.trim(); if(!id){ logErr('填 id'); return; }
+  if (!confirm('确认删除门禁人员 '+id+'？将异步从闸机清除白名单')) return;
+  await call('DELETE', '/attendance/hrmGuardMember/delete', { query:{ id } });
+}
+async function quickDelete(id){
+  if (!confirm('删除 '+id+'？')) return;
+  await call('DELETE', '/attendance/hrmGuardMember/delete', { query:{ id } });
+  queryList();
+}
+
+// ---- 日志渲染 ----
+function ts(){ return new Date().toLocaleTimeString(); }
+function append(html){ const l=$('log'); l.innerHTML += html; l.scrollTop = l.scrollHeight; }
+function logReq(m,u,b){ append('<div class="req">▶ ['+ts()+'] '+m+' '+u+'</div>' + (b?'<pre>'+esc(JSON.stringify(b,null,2))+'</pre>':'')); }
+function logOk(s,d){ append('<div class="ok">◀ '+s+' OK</div><pre>'+esc(typeof d==='string'?d:JSON.stringify(d,null,2))+'</pre>'); }
+function logErr(s,d){ append('<div class="err">✖ '+s+'</div>'+(d?'<pre>'+esc(typeof d==='string'?d:JSON.stringify(d,null,2))+'</pre>':'')); }
+function logMeta(s){ append('<div class="meta">· '+esc(s)+'</div>'); }
+function esc(s){ return String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+// 自动尝试读取登录态 token
+window.addEventListener('load', () => { try { readToken(); } catch(e){} });
+</script>
+</body>
+</html>

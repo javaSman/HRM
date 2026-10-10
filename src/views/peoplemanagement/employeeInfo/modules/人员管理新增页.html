@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人员管理 — 新增员工</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8fafd;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --primary-rgb: 37,99,235;
+  --primary-light: #eef2ff;
+  --foreground: #1a2a3d;
+  --muted: #f1f5f9;
+  --muted-fg: #64748b;
+  --green: #10b981;
+  --green-bg: rgba(16,185,129,.08);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,.08);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,.06);
+  --purple: #8b5cf6;
+  --purple-bg: rgba(139,92,246,.08);
+  --gradient-blue: linear-gradient(135deg,#2563eb,#06b6d4);
+  --shadow-card: 0 2px 12px rgba(45,120,255,.06), 0 1px 3px rgba(0,0,0,.03);
+  --shadow-lg: 0 8px 32px rgba(45,120,255,.08), 0 2px 8px rgba(0,0,0,.04);
+  --radius: 10px;
+  --radius-sm: 7px;
+  --font: 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+html, body { height:100%; font-family:var(--font); background:var(--bg); color:var(--foreground); -webkit-font-smoothing:antialiased }
+::-webkit-scrollbar { width:6px }
+::-webkit-scrollbar-track { background:transparent }
+::-webkit-scrollbar-thumb { background:rgba(var(--primary-rgb),.12); border-radius:99px }
+::-webkit-scrollbar-thumb:hover { background:rgba(var(--primary-rgb),.25) }
+
+/* ── Header ── */
+.top-bar {
+  background:var(--card); border-bottom:1px solid var(--border);
+  height:52px; display:flex; align-items:center; gap:12px; padding:0 28px;
+  position:sticky; top:0; z-index:100; box-shadow:0 1px 3px rgba(0,0,0,.03)
+}
+.top-bar .back-btn {
+  width:32px; height:32px; border-radius:8px; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:var(--muted-fg); transition:.2s; text-decoration:none
+}
+.top-bar .back-btn:hover { border-color:rgba(var(--primary-rgb),.3); color:var(--primary); background:var(--primary-light) }
+.top-bar .back-btn svg { width:16px; height:16px }
+.top-bar .crumbs { font-size:12.5px; color:var(--muted-fg); display:flex; align-items:center; gap:6px }
+.top-bar .crumbs .current { color:var(--foreground); font-weight:600 }
+.top-bar h1 { font-size:15px; font-weight:700; margin-left:6px }
+
+/* ── Section Nav ── */
+.section-nav {
+  display:flex; gap:0; padding:0 4px;
+  overflow-x:auto; white-space:nowrap;
+  border-bottom:1px solid var(--border);
+  margin-bottom:20px;
+}
+.section-nav::-webkit-scrollbar { height:0 }
+.section-nav .nav-item {
+  display:inline-flex; align-items:center; padding:10px 16px;
+  font-size:12px; font-weight:600; color:var(--muted-fg);
+  text-decoration:none; border-bottom:3px solid transparent;
+  transition:.2s; cursor:pointer; white-space:nowrap; flex-shrink:0;
+  margin-bottom:-1px
+}
+.section-nav .nav-item:hover { color:var(--primary); background:rgba(var(--primary-rgb),.02) }
+.section-nav .nav-item.active {
+  color:var(--primary); border-bottom-color:var(--primary); background:rgba(var(--primary-rgb),.03)
+}
+
+/* ── Layout ── */
+.page { max-width:1080px; margin:0 auto; padding:24px 28px 80px }
+
+/* ── Form Card ── */
+.form-card {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:28px 32px; box-shadow:var(--shadow-card);
+  position:relative; overflow:hidden
+}
+.form-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--gradient-blue)
+}
+
+/* ── Section ── */
+.section { margin-bottom:28px; scroll-margin-top:64px }
+.section:last-child { margin-bottom:0 }
+.section-title {
+  font-size:11px; font-weight:700; color:var(--primary);
+  text-transform:uppercase; letter-spacing:1px; padding:6px 0;
+  border-bottom:2px solid rgba(var(--primary-rgb),.1);
+  margin-bottom:16px; display:flex; align-items:center; gap:8px
+}
+.section-title svg { width:14px; height:14px; color:rgba(var(--primary-rgb),.4) }
+
+/* ── Photo Upload ── */
+.photo-section {
+  display:flex; align-items:center; gap:24px; margin-bottom:24px;
+  padding:20px; background:var(--bg); border-radius:var(--radius-sm);
+  border:1px dashed var(--border)
+}
+.photo-upload-wrap { position:relative; flex-shrink:0 }
+.photo-preview {
+  width:100px; height:100px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(var(--primary-rgb),.08),rgba(var(--primary-rgb),.02));
+  display:flex; align-items:center; justify-content:center;
+  border:2px dashed rgba(var(--primary-rgb),.2); cursor:pointer;
+  transition:.2s; overflow:hidden; position:relative
+}
+.photo-preview:hover { border-color:var(--primary); background:rgba(var(--primary-rgb),.04) }
+.photo-preview img { width:100%; height:100%; object-fit:cover; border-radius:14px }
+.photo-preview .photo-placeholder {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  color:var(--muted-fg); font-size:11px; font-weight:500
+}
+.photo-preview .photo-placeholder svg { width:28px; height:28px; opacity:.4 }
+.photo-hint { font-size:11px; color:var(--muted-fg); line-height:1.6 }
+.photo-hint strong { color:var(--foreground); font-weight:600 }
+#photoInput { display:none }
+
+/* ── Field Grid ── */
+.field-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px 20px }
+.field-grid.cols-3 { grid-template-columns:repeat(3,1fr) }
+.field-item {
+  display:flex; flex-direction:column; gap:4px
+}
+.field-item.full { grid-column:1/-1 }
+.field-label {
+  font-size:10.5px; font-weight:600; color:var(--muted-fg);
+  text-transform:uppercase; letter-spacing:.5px
+}
+.field-label .required { color:var(--red); margin-left:2px }
+.field-input, .field-select {
+  height:38px; padding:0 12px; border:1px solid var(--border); border-radius:8px;
+  font-family:var(--font); font-size:13px; color:var(--foreground); background:var(--card);
+  outline:none; transition:.2s; width:100%
+}
+.field-input:focus, .field-select:focus {
+  border-color:var(--primary); box-shadow:0 0 0 3px rgba(var(--primary-rgb),.08)
+}
+.field-input::placeholder { color:rgba(var(--primary-rgb),.2); font-weight:400 }
+.field-select {
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center; padding-right:32px;
+  cursor:pointer
+}
+.field-select option[disabled] { color:rgba(var(--primary-rgb),.2) }
+.field-input[type="date"] {
+  color-scheme:light
+}
+
+/* ── Sub Divider ── */
+.sub-divider {
+  grid-column:1/-1; display:flex; align-items:center; gap:10px;
+  padding:4px 0; margin:4px 0
+}
+.sub-divider .line { flex:1; height:1px; background:linear-gradient(to right,rgba(var(--primary-rgb),.1),rgba(var(--primary-rgb),.04)) }
+.sub-divider .label {
+  font-size:10px; font-weight:700; color:rgba(var(--primary-rgb),.4);
+  text-transform:uppercase; letter-spacing:.8px; white-space:nowrap
+}
+
+/* ── Action Bar ── */
+.action-bar {
+  display:flex; justify-content:flex-end; gap:12px;
+  padding-top:20px; border-top:1px solid var(--border); margin-top:8px
+}
+.btn-cancel {
+  padding:9px 24px; border-radius:8px; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; font-family:var(--font);
+  font-size:13px; font-weight:600; color:var(--muted-fg); transition:.2s;
+  text-decoration:none; display:inline-flex; align-items:center; gap:6px
+}
+.btn-cancel:hover { border-color:rgba(var(--primary-rgb),.3); color:var(--primary) }
+.btn-submit {
+  padding:9px 28px; border-radius:8px; border:none;
+  background:linear-gradient(135deg,var(--primary),#4f7dff);
+  color:#fff; cursor:pointer; font-family:var(--font);
+  font-size:13px; font-weight:600; transition:.2s;
+  box-shadow:0 2px 8px rgba(var(--primary-rgb),.25);
+  display:inline-flex; align-items:center; gap:6px
+}
+.btn-submit:hover { box-shadow:0 4px 14px rgba(var(--primary-rgb),.35); transform:translateY(-1px) }
+.btn-submit:active { transform:translateY(0) }
+.btn-submit svg { width:15px; height:15px }
+
+/* ── Status Badge (preview) ── */
+.status-badge {
+  display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600;
+  padding:3px 10px; border-radius:5px
+}
+.status-badge .dot { width:6px; height:6px; border-radius:50% }
+.status-badge.yes { background:var(--green-bg); color:var(--green) }
+.status-badge.yes .dot { background:var(--green) }
+.status-badge.no { background:var(--red-bg); color:var(--red) }
+.status-badge.no .dot { background:var(--red) }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; top:24px; left:50%; transform:translateX(-50%);
+  padding:10px 24px; border-radius:8px; font-size:13px; font-weight:600;
+  z-index:300; opacity:0; pointer-events:none; transition:opacity .3s,transform .3s;
+  background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-lg)
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(4px) }
+.toast.success { border-color:rgba(16,185,129,.3); color:var(--green) }
+.toast.error { border-color:rgba(239,68,68,.3); color:var(--red) }
+
+/* ── Animations ── */
+@keyframes fadeInUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.form-card { animation:fadeInUp .4s ease }
+
+/* ── Responsive ── */
+@media (max-width:1200px) {
+  .field-grid { grid-template-columns:repeat(3,1fr) }
+  .field-grid.cols-3 { grid-template-columns:repeat(2,1fr) }
+}
+@media (max-width:900px) {
+  .field-grid { grid-template-columns:repeat(2,1fr) }
+  .field-grid.cols-3 { grid-template-columns:1fr }
+  .page { padding:16px }
+  .form-card { padding:20px }
+  .photo-section { flex-direction:column; align-items:center; text-align:center }
+}
+@media (max-width:600px) {
+  .action-bar { flex-direction:column-reverse; gap:8px }
+  .btn-cancel, .btn-submit { width:100%; justify-content:center }
+  .photo-preview { width:88px; height:88px }
+}
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a class="back-btn" href="人员管理优化(3).html" aria-label="返回列表">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  </a>
+  <div class="crumbs">
+    <span>员工管理</span><span>/</span>
+    <span>员工列表</span><span>/</span>
+    <span class="current">新增员工</span>
+  </div>
+  <h1>新增员工信息</h1>
+</header>
+
+<main class="page">
+
+  <form class="form-card" id="addForm" onsubmit="handleSubmit(event)">
+
+    <!-- 定位导航栏 -->
+    <nav class="section-nav" id="sectionNav">
+      <a href="#section-photo" class="nav-item active" data-target="section-photo">员工照片</a>
+      <a href="#section-basic" class="nav-item" data-target="section-basic">基本身份信息</a>
+      <a href="#section-job" class="nav-item" data-target="section-job">工作岗位信息</a>
+      <a href="#section-contract" class="nav-item" data-target="section-contract">入职合同信息</a>
+      <a href="#section-edu" class="nav-item" data-target="section-edu">学历教育 & 联系方式</a>
+    </nav>
+
+    <!-- 1. 照片上传 -->
+    <div class="section" id="section-photo">
+      <div class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        员工照片
+      </div>
+      <div class="photo-section">
+        <div class="photo-upload-wrap">
+          <div class="photo-preview" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+            <div class="photo-placeholder" id="photoPlaceholder">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>点击上传</span>
+            </div>
+            <img id="photoImg" src="" alt="员工照片" style="display:none">
+          </div>
+        </div>
+        <div class="photo-hint">
+          <strong>上传员工照片</strong><br>
+          支持 JPG / PNG 格式，建议尺寸 300×300 像素以上，大小不超过 5MB
+        </div>
+        <input type="file" id="photoInput" accept="image/jpeg,image/png" onchange="handlePhotoUpload(this)">
+      </div>
+    </div>
+
+    <!-- 2. 基本身份信息 -->
+    <div class="section" id="section-basic">
+      <div class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        基本身份信息
+      </div>
+      <div class="field-grid">
+        <div class="field-item">
+          <label class="field-label">身份证号 <span class="required">*</span></label>
+          <input class="field-input" type="text" name="idCard" placeholder="请输入身份证号" maxlength="18" required>
+        </div>
+        <div class="field-item">
+          <label class="field-label">性别 <span class="required">*</span></label>
+          <select class="field-select" name="gender" required>
+            <option value="" disabled selected>请选择性别</option>
+            <option value="男">男</option>
+            <option value="女">女</option>
+          </select>
+        </div>
+        <div class="field-item">
+          <label class="field-label">民族</label>
+          <select class="field-select" name="ethnicity">
+            <option value="" disabled selected>请选择民族</option>
+            <option value="汉族">汉族</option>
+            <option value="蒙古族">蒙古族</option>
+            <option value="回族">回族</option>
+            <option value="藏族">藏族</option>
+            <option value="维吾尔族">维吾尔族</option>
+            <option value="苗族">苗族</option>
+            <option value="彝族">彝族</option>
+            <option value="壮族">壮族</option>
+            <option value="布依族">布依族</option>
+            <option value="朝鲜族">朝鲜族</option>
+            <option value="满族">满族</option>
+            <option value="侗族">侗族</option>
+            <option value="瑶族">瑶族</option>
+            <option value="白族">白族</option>
+            <option value="土家族">土家族</option>
+            <option value="哈尼族">哈尼族</option>
+            <option value="哈萨克族">哈萨克族</option>
+            <option value="傣族">傣族</option>
+            <option value="黎族">黎族</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="field-item">
+          <label class="field-label">籍贯</label>
+          <input class="field-input" type="text" name="nativePlace" placeholder="请输入籍贯">
+        </div>
+        <div class="field-item">
+          <label class="field-label">出生年月</label>
+          <input class="field-input" type="month" name="birthDate">
+        </div>
+        <div class="field-item">
+          <label class="field-label">婚姻状况</label>
+          <select class="field-select" name="maritalStatus">
+            <option value="" disabled selected>请选择婚姻状况</option>
+            <option value="未婚">未婚</option>
+            <option value="已婚">已婚</option>
+            <option value="离异">离异</option>
+            <option value="丧偶">丧偶</option>
+          </select>
+        </div>
+        <div class="field-item">
+          <label class="field-label">政治面貌</label>
+          <select class="field-select" name="politicalStatus">
+            <option value="" disabled selected>请选择政治面貌</option>
+            <option value="中共党员">中共党员</option>
+            <option value="中共预备党员">中共预备党员</option>
+            <option value="共青团员">共青团员</option>
+            <option value="民主党派">民主党派</option>
+            <option value="群众">群众</option>
+          </select>
+        </div>
+        <div class="field-item">
+          <label class="field-label">户籍性质</label>
+          <select class="field-select" name="householdType">
+            <option value="" disabled selected>请选择户籍性质</option>
+            <option value="城镇户口">城镇户口</option>
+            <option value="农村户口">农村户口</option>
+          </select>
+        </div>
+        <div class="field-item full">
+          <label class="field-label">户籍地址</label>
+          <input class="field-input" type="text" name="householdAddress" placeholder="请输入户籍地址">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 工作岗位信息 -->
+    <div class="section" id="section-job">
+    <div class="sub-divider"><span class="line"></span><span class="label">工作岗位信息</span><span class="line"></span></div>
+    <div class="field-grid">
+      <div class="field-item">
+        <label class="field-label">部门 <span class="required">*</span></label>
+        <select class="field-select" name="department" required>
+          <option value="" disabled selected>请选择部门</option>
+          <option value="公司总部">公司总部</option>
+          <option value="技术研发部">技术研发部</option>
+          <option value="产品设计部">产品设计部</option>
+          <option value="市场运营部">市场运营部</option>
+          <option value="销售部">销售部</option>
+          <option value="财务部">财务部</option>
+          <option value="人力资源部">人力资源部</option>
+          <option value="行政部">行政部</option>
+          <option value="法务部">法务部</option>
+          <option value="客户服务部">客户服务部</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">岗位 <span class="required">*</span></label>
+        <input class="field-input" type="text" name="position" placeholder="请输入岗位名称" required>
+      </div>
+      <div class="field-item">
+        <label class="field-label">姓名 <span class="required">*</span></label>
+        <input class="field-input" type="text" name="name" placeholder="请输入员工姓名" required>
+      </div>
+      <div class="field-item">
+        <label class="field-label">工号 <span class="required">*</span></label>
+        <input class="field-input" type="text" name="employeeNo" placeholder="请输入工号" required>
+      </div>
+      <div class="field-item">
+        <label class="field-label">职级</label>
+        <select class="field-select" name="jobLevel">
+          <option value="" disabled selected>请选择职级</option>
+          <option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option>
+          <option value="P4">P4</option><option value="P5">P5</option><option value="P6">P6</option>
+          <option value="P7">P7</option><option value="P8">P8</option>
+          <option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option>
+          <option value="M4">M4</option><option value="M5">M5</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">员工状态 <span class="required">*</span></label>
+        <select class="field-select" name="employeeStatus" required>
+          <option value="" disabled selected>请选择员工状态</option>
+          <option value="在职">在职</option>
+          <option value="试用期">试用期</option>
+          <option value="离职">离职</option>
+          <option value="停薪留职">停薪留职</option>
+          <option value="退休">退休</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">员工类型 <span class="required">*</span></label>
+        <select class="field-select" name="employeeType" required>
+          <option value="" disabled selected>请选择员工类型</option>
+          <option value="正式">正式</option>
+          <option value="试用">试用</option>
+          <option value="实习">实习</option>
+          <option value="兼职">兼职</option>
+          <option value="劳务派遣">劳务派遣</option>
+          <option value="顾问">顾问</option>
+          <option value="外包">外包</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">是否存在竞业限制协议</label>
+        <select class="field-select" name="nonCompete">
+          <option value="" disabled selected>请选择</option>
+          <option value="否">否</option>
+          <option value="是">是</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 4. 入职合同信息 -->
+    <div class="section" id="section-contract">
+    <div class="sub-divider"><span class="line"></span><span class="label">入职合同信息</span><span class="line"></span></div>
+    <div class="field-grid">
+      <div class="field-item">
+        <label class="field-label">入职日期 <span class="required">*</span></label>
+        <input class="field-input" type="date" name="entryDate" required>
+      </div>
+      <div class="field-item">
+        <label class="field-label">试用期</label>
+        <select class="field-select" name="probationPeriod">
+          <option value="" disabled selected>请选择试用期</option>
+          <option value="无试用期">无试用期</option>
+          <option value="1个月">1个月</option>
+          <option value="2个月">2个月</option>
+          <option value="3个月">3个月</option>
+          <option value="6个月">6个月</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">实际转正日期</label>
+        <input class="field-input" type="date" name="regularDate">
+      </div>
+      <div class="field-item">
+        <label class="field-label">是否存在竞业限制协议</label>
+        <select class="field-select" name="nonCompete2">
+          <option value="" disabled selected>请选择</option>
+          <option value="否">否</option>
+          <option value="是">是</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">合同类型</label>
+        <select class="field-select" name="contractType">
+          <option value="" disabled selected>请选择合同类型</option>
+          <option value="固定期限">固定期限</option>
+          <option value="无固定期限">无固定期限</option>
+          <option value="以完成一定工作任务为期限">以完成一定工作任务为期限</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">合同开始日期</label>
+        <input class="field-input" type="date" name="contractStartDate">
+      </div>
+      <div class="field-item">
+        <label class="field-label">合同到期日期</label>
+        <input class="field-input" type="date" name="contractEndDate">
+      </div>
+    </div>
+    </div><!-- /section-contract -->
+
+    <!-- 5. 学历教育 & 联系方式信息 -->
+    <div class="section" id="section-edu">
+    <div class="section-title">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg>
+      学历教育 & 联系方式
+    </div>
+    <div class="sub-divider"><span class="line"></span><span class="label">学历教育信息</span><span class="line"></span></div>
+    <div class="field-grid">
+      <div class="field-item">
+        <label class="field-label">学历</label>
+        <select class="field-select" name="education">
+          <option value="" disabled selected>请选择学历</option>
+          <option value="博士">博士</option>
+          <option value="硕士">硕士</option>
+          <option value="本科">本科</option>
+          <option value="大专">大专</option>
+          <option value="高中">高中</option>
+          <option value="中专">中专</option>
+          <option value="初中及以下">初中及以下</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <label class="field-label">学位</label>
+        <input class="field-input" type="text" name="degree" placeholder="请输入学位">
+      </div>
+      <div class="field-item">
+        <label class="field-label">毕业院校</label>
+        <input class="field-input" type="text" name="school" placeholder="请输入毕业院校">
+      </div>
+      <div class="field-item">
+        <label class="field-label">专业</label>
+        <input class="field-input" type="text" name="major" placeholder="请输入专业">
+      </div>
+      <div class="field-item">
+        <label class="field-label">健康状况</label>
+        <select class="field-select" name="healthStatus">
+          <option value="" disabled selected>请选择健康状况</option>
+          <option value="良好">良好</option>
+          <option value="一般">一般</option>
+          <option value="较差">较差</option>
+        </select>
+      </div>
+      <div class="field-item full">
+        <label class="field-label">以往病史</label>
+        <input class="field-input" type="text" name="medicalHistory" placeholder="如无请留空">
+      </div>
+    </div>
+    <!-- 联系方式信息（子板块） -->
+    <div class="sub-divider"><span class="line"></span><span class="label">联系方式信息</span><span class="line"></span></div>
+    <div class="field-grid">
+      <div class="field-item">
+        <label class="field-label">手机号码 <span class="required">*</span></label>
+        <input class="field-input" type="tel" name="phone" placeholder="请输入手机号码" maxlength="13" required>
+      </div>
+      <div class="field-item">
+        <label class="field-label">电子邮箱</label>
+        <input class="field-input" type="email" name="email" placeholder="请输入电子邮箱">
+      </div>
+      <div class="field-item full">
+        <label class="field-label">联系地址</label>
+        <input class="field-input" type="text" name="contactAddress" placeholder="请输入联系地址">
+      </div>
+      <div class="field-item">
+        <label class="field-label">居住地</label>
+        <input class="field-input" type="text" name="residence" placeholder="请输入居住地">
+      </div>
+      <div class="field-item">
+        <label class="field-label">暂住地址</label>
+        <input class="field-input" type="text" name="tempAddress" placeholder="请输入暂住地址">
+      </div>
+    </div>
+    </div><!-- /section-edu -->
+
+    <!-- Action Buttons -->
+    <div class="action-bar">
+      <a class="btn-cancel" href="人员管理优化(3).html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        取消
+      </a>
+      <button type="button" class="btn-cancel" onclick="handleDraft()" style="border-style:dashed">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        存草稿
+      </a>
+      <button type="submit" class="btn-submit">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        提交新增
+      </button>
+    </div>
+
+  </form>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Section Nav Scroll Spy =====
+(function() {
+  var navItems = document.querySelectorAll('.section-nav .nav-item');
+  var sections = [];
+  navItems.forEach(function(item) {
+    var el = document.getElementById(item.dataset.target);
+    if (el) sections.push({ el: el, nav: item });
+  });
+
+  // Click to scroll
+  navItems.forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.getElementById(this.dataset.target);
+      if (target) {
+        var topBarH = 52;
+        var offset = target.getBoundingClientRect().top + window.pageYOffset - topBarH - 16;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Scroll spy
+  var ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateActiveNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  function updateActiveNav() {
+    var topBarH = 52;
+    var scrollTop = window.pageYOffset + topBarH + 60;
+
+    var active = null;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].el.offsetTop <= scrollTop) {
+        active = sections[i].nav;
+        break;
+      }
+    }
+    navItems.forEach(function(item) { item.classList.remove('active'); });
+    if (active) active.classList.add('active');
+  }
+})();
+
+// ===== Photo Upload =====
+function handlePhotoUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('照片大小不能超过 5MB', 'error');
+    input.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('photoPlaceholder').style.display = 'none';
+    var img = document.getElementById('photoImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== Toast =====
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + type + ' show';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function() {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+// ===== Form Submit =====
+function handleSubmit(e) {
+  e.preventDefault();
+  var form = e.target;
+  var data = new FormData(form);
+  var obj = {};
+  data.forEach(function(v, k) { obj[k] = v; });
+
+  // Validate required fields
+  var requiredFields = [
+    { name: 'name', label: '姓名' },
+    { name: 'employeeNo', label: '工号' },
+    { name: 'department', label: '部门' },
+    { name: 'position', label: '岗位' },
+    { name: 'employeeStatus', label: '员工状态' },
+    { name: 'employeeType', label: '员工类型' },
+    { name: 'entryDate', label: '入职日期' },
+    { name: 'idCard', label: '身份证号' },
+    { name: 'gender', label: '性别' },
+    { name: 'phone', label: '手机号码' }
+  ];
+
+  for (var i = 0; i < requiredFields.length; i++) {
+    var f = requiredFields[i];
+    if (!obj[f.name]) {
+      showToast('请填写必填项：' + f.label, 'error');
+      var el = form.querySelector('[name="' + f.name + '"]');
+      if (el) el.focus();
+      return;
+    }
+  }
+
+  // ID card basic validation
+  if (obj.idCard && !/^\d{17}[\dXx]$/.test(obj.idCard)) {
+    showToast('身份证号格式不正确，应为18位', 'error');
+    form.querySelector('[name="idCard"]').focus();
+    return;
+  }
+
+  // Phone validation
+  if (obj.phone && !/^1\d{10}$/.test(obj.phone.replace(/-/g, ''))) {
+    showToast('手机号码格式不正确', 'error');
+    form.querySelector('[name="phone"]').focus();
+    return;
+  }
+
+  console.log('提交数据:', obj);
+  showToast('员工信息新增成功！', 'success');
+
+  // Reset form after delay
+  setTimeout(function() {
+    form.reset();
+    document.getElementById('photoPlaceholder').style.display = 'flex';
+    document.getElementById('photoImg').style.display = 'none';
+    document.getElementById('photoImg').src = '';
+  }, 1500);
+}
+
+// ===== Save Draft =====
+function handleDraft() {
+  var form = document.getElementById('addForm');
+  var data = new FormData(form);
+  var obj = {};
+  data.forEach(function(v, k) { obj[k] = v; });
+  console.log('草稿数据:', obj);
+  showToast('草稿已保存', 'success');
+}
+</script>
+
+</body>
+</html>

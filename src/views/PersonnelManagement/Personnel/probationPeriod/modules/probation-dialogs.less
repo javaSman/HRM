@@ -1,0 +1,85 @@
+.probation-section-title {
+  margin: 2px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid #1890ff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.probation-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.probation-summary-item,
+.probation-info-item {
+  min-width: 0;
+}
+
+.probation-summary-label,
+.probation-info-label {
+  margin-bottom: 4px;
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
+.probation-summary-value,
+.probation-info-value {
+  overflow: hidden;
+  color: #333;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.probation-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 20px;
+}
+
+.probation-table-empty {
+  padding: 28px 0;
+  color: #999;
+  text-align: center;
+}
+
+.probation-file-link {
+  margin-right: 10px;
+}
+
+.probation-approver-row {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.probation-approver-label {
+  color: #333;
+}
+
+@media (max-width: 992px) {
+  .probation-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .probation-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .probation-summary,
+  .probation-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

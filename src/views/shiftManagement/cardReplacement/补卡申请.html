@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>补卡申请管理</title>
+    <style>
+        /* ============================================
+           CSS Variables — Blue-White Theme
+           ============================================ */
+        :root {
+            --radius: 0.5rem;
+            --background: #f8fafd;
+            --foreground: #1a2a3d;
+            --card: #ffffff;
+            --card-foreground: #1a2a3d;
+            --primary: #2563eb;
+            --primary-rgb: 37, 99, 235;
+            --primary-foreground: #ffffff;
+            --secondary: #eff3fb;
+            --secondary-foreground: #1e3a5f;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --accent: #eef2ff;
+            --accent-foreground: #1e3a5f;
+            --destructive: #ef4444;
+            --border: #e2e8f0;
+            --input: #e2e8f0;
+            --ring: #2563eb;
+            --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--foreground);
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.15); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), 0.3); }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(var(--primary-rgb), 0.04);
+            overflow: hidden;
+        }
+
+        /* 头部标题 */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            background-size: 200% 200%;
+            animation: gradient-shift 6s ease infinite;
+            color: #fff;
+            padding: 28px 32px;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .header p {
+            margin-top: 6px;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* 规则说明区 */
+        .rule-section {
+            padding: 20px 32px;
+            background: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .rule-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 12px;
+        }
+        .rule-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+        }
+        .rule-item {
+            background: var(--card);
+            padding: 12px 16px;
+            border-left: 4px solid var(--primary);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--muted-foreground);
+            box-shadow: 0 1px 2px rgba(var(--primary-rgb), 0.03);
+        }
+        .rule-item strong {
+            color: var(--foreground);
+        }
+
+        /* 状态标签页 */
+        .tab-wrap {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin: 0 32px 20px;
+        }
+        .tab-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tab-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-item:hover {
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.03);
+        }
+
+        /* 筛选栏 */
+        .filter-section {
+            padding: 0 32px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .search-box {
+            width: 200px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid var(--input);
+            border-radius: 8px;
+            background: var(--card);
+            font-size: 13px;
+            color: var(--foreground);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-box input::placeholder { color: rgba(var(--primary-rgb), 0.25); }
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+        }
+
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .date-filter label {
+            font-size: 13px;
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+        .date-filter input {
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid var(--input);
+            border-radius: 8px;
+            background: var(--card);
+            font-size: 13px;
+            color: var(--foreground);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .date-filter input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+        }
+
+        /* 通用按钮 */
+        .apply-btn {
+            height: 34px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.15);
+        }
+        .apply-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.25);
+        }
+        .apply-btn:active { transform: scale(0.97); }
+        .filter-btn {
+            height: 34px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.15);
+        }
+        .filter-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.25);
+        }
+        .filter-btn:active { transform: scale(0.97); }
+        .reset-btn {
+            height: 34px;
+            padding: 0 14px;
+            background: var(--card);
+            color: var(--foreground);
+            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .reset-btn:hover {
+            background: rgba(var(--primary-rgb), 0.05);
+            border-color: rgba(var(--primary-rgb), 0.25);
+        }
+        .reset-btn:active { transform: scale(0.98); }
+        .export-btn {
+            height: 34px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.15);
+        }
+        .export-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.25);
+        }
+        .export-btn:active { transform: scale(0.97); }
+
+        /* 表格 */
+        .table-section {
+            padding: 0 32px 32px;
+            overflow-x: auto;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 12px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .table thead {
+            background: var(--muted);
+        }
+        .table th {
+            color: var(--muted-foreground);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .table td {
+            color: var(--foreground);
+        }
+        .table tbody tr {
+            transition: background 0.15s ease;
+        }
+        .table tbody tr:hover {
+            background: rgba(var(--primary-rgb), 0.02);
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .status-pending {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .status-approved {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+        }
+        .status-canceled {
+            background: var(--muted);
+            color: var(--muted-foreground);
+        }
+
+        /* 操作按钮 */
+        .op-btn {
+            height: 28px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 4px;
+            transition: all 0.2s ease;
+        }
+        .op-btn:active { transform: scale(0.95); }
+        .op-btn.view {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+        .op-btn.view:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .op-btn.cancel {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--destructive);
+        }
+        .op-btn.cancel:hover {
+            background: var(--destructive);
+            color: #fff;
+        }
+        .op-btn.process {
+            background: rgba(var(--primary-rgb), 0.06);
+            color: var(--muted-foreground);
+        }
+        .op-btn.process:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* 分页 */
+        .pagination-section {
+            padding: 20px 32px 32px;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        .page-btn {
+            height: 32px;
+            padding: 0 12px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--foreground);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.03);
+        }
+        .page-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.2);
+        }
+        .page-btn:disabled {
+            color: var(--muted-foreground);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 弹窗通用样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 92%;
+            max-width: 680px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(var(--primary-rgb), 0.06);
+            overflow: hidden;
+            animation: scale-in 0.2s ease-out both;
+        }
+        @keyframes scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+        /* 弹窗头部 */
+        .modal-header {
+            padding: 20px 24px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h3 {
+            font-size: 17px;
+            color: var(--foreground);
+            font-weight: 600;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+        }
+        .modal-close:active { transform: scale(0.9); }
+
+        /* 弹窗底部 */
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: var(--muted);
+        }
+        .modal-btn {
+            height: 36px;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .modal-btn:active { transform: scale(0.97); }
+        .btn-cancel {
+            background: var(--card);
+            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            color: var(--foreground);
+        }
+        .btn-cancel:hover {
+            background: rgba(var(--primary-rgb), 0.04);
+            border-color: rgba(var(--primary-rgb), 0.25);
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+        }
+        .btn-submit:hover {
+            opacity: 0.92;
+            box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* 双列网格布局（统一两个弹窗） */
+        .modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 20px;
+        }
+        .grid-full {
+            grid-column: 1 / -1;
+        }
+        .form-item {
+            margin-bottom: 0;
+        }
+        .form-item label {
+            display: block;
+            font-size: 13px;
+            color: var(--foreground);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-item label .required {
+            color: var(--destructive);
+            margin-left: 2px;
+        }
+        .form-item input,
+        .form-item select,
+        .form-item textarea {
+            width: 100%;
+            height: 38px;
+            padding: 0 12px;
+            border: 1px solid var(--input);
+            border-radius: 8px;
+            background: var(--card);
+            font-size: 13px;
+            color: var(--foreground);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .form-item textarea {
+            height: 90px;
+            padding: 10px 12px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .form-item input:focus,
+        .form-item select:focus,
+        .form-item textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
+        }
+        .form-item input:disabled,
+        .form-item textarea:disabled {
+            background: var(--muted);
+            color: var(--muted-foreground);
+            cursor: not-allowed;
+        }
+        .form-item input::placeholder,
+        .form-item textarea::placeholder {
+            color: rgba(var(--primary-rgb), 0.25);
+        }
+
+        /* 补卡时间 - 快捷选择 + 手动添加 */
+        .quick-time-row {
+            margin-bottom: 10px;
+        }
+        .quick-time-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .quick-time-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .quick-tag {
+            padding: 4px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--foreground);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .quick-tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.04);
+        }
+        .quick-tag.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(var(--primary-rgb), 0.2);
+        }
+        .selected-time-list {
+            min-height: 36px;
+            max-height: 160px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border);
+            padding: 6px 0;
+        }
+        .time-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            margin-bottom: 2px;
+            border-radius: 6px;
+            background: rgba(var(--primary-rgb), 0.02);
+            font-size: 13px;
+            transition: background 0.15s ease;
+        }
+        .time-item:hover {
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+        .time-item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .time-item-date {
+            color: var(--muted-foreground);
+            font-size: 12px;
+        }
+        .time-item-val {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+        .time-item-remove {
+            background: none;
+            border: none;
+            color: var(--muted-foreground);
+            font-size: 16px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .time-item-remove:hover {
+            color: var(--destructive);
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .manual-add-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .manual-time-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--input);
+            border-radius: 8px;
+            background: var(--card);
+            font-size: 13px;
+            color: var(--foreground);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .manual-time-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
+        }
+        .add-time-btn {
+            height: 36px;
+            padding: 0 14px;
+            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--foreground);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .add-time-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+        .add-time-btn:active { transform: scale(0.97); }
+
+        /* ===== 详情弹窗 - 左右分板块 ===== */
+        .detail-modal-box {
+            width: 92%;
+            max-width: 1160px;
+        }
+        .detail-body {
+            display: flex;
+            gap: 0;
+            padding: 0;
+            max-height: 60vh;
+            overflow: hidden;
+        }
+        .detail-left {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+        .detail-right {
+            width: 460px;
+            min-width: 460px;
+            padding: 28px 28px;
+            overflow-y: auto;
+            background: var(--muted);
+        }
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ===== 审批流程新样式 ===== */
+        .flow-wrap {
+            position: relative;
+        }
+        .flow-node {
+            position: relative;
+            padding-left: 32px;
+            padding-bottom: 20px;
+        }
+        .flow-node:last-child {
+            padding-bottom: 0;
+        }
+        /* 左侧竖线 */
+        .flow-node-line {
+            position: absolute;
+            left: 9px;
+            top: 26px;
+            width: 2px;
+            height: calc(100% - 6px);
+            background: var(--border);
+        }
+        .flow-node:last-child .flow-node-line {
+            display: none;
+        }
+        /* 节点圆点 */
+        .flow-node-dot {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+        .flow-node-dot.done {
+            background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+        }
+        .flow-node-dot.pending {
+            background: var(--muted-foreground);
+            box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+        }
+        /* 节点主体卡片 */
+        .flow-node-body {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            transition: box-shadow 0.2s ease;
+        }
+        .flow-node-body:hover {
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.06);
+        }
+        .flow-node-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .flow-node-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+        /* 标签 */
+        .flow-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .flow-tag-sign {
+            background: rgba(234, 88, 12, 0.08);
+            color: #ea580c;
+        }
+        /* 状态 */
+        .flow-status {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .flow-status-done {
+            background: rgba(34, 197, 94, 0.08);
+            color: #16a34a;
+        }
+        /* 审批人 */
+        .flow-approver {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flow-approver-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .flow-approver-info {
+            flex: 1;
+        }
+        .flow-approver-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--foreground);
+        }
+        .flow-approver-id {
+            font-size: 11px;
+            color: var(--muted-foreground);
+            margin-top: 1px;
+        }
+        .flow-approver-result {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .flow-result-agree {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        .flow-result-time {
+            display: block;
+            font-size: 11px;
+            color: var(--muted-foreground);
+            margin-top: 2px;
+        }
+
+        /* ===== 新增弹窗审批流程 - 左右分板块 ===== */
+        .apply-body {
+            display: flex;
+            gap: 0;
+            padding: 0;
+            max-height: 60vh;
+            overflow: hidden;
+        }
+        .apply-left {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+        .apply-right {
+            width: 460px;
+            min-width: 460px;
+            padding: 28px 28px;
+            overflow-y: auto;
+            background: var(--muted);
+        }
+
+        /* ===== 新增弹窗审批流程 - 可编辑样式 ===== */
+        .flow-added-approvers {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+        }
+        .flow-added-approver {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px 4px 6px;
+            background: rgba(var(--primary-rgb), 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+        .flow-added-approver .flow-approver-avatar {
+            width: 22px;
+            height: 22px;
+            font-size: 10px;
+        }
+        .flow-added-approver .flow-approver-name {
+            font-size: 12px;
+        }
+        .flow-remove-approver {
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: transparent;
+            color: var(--muted-foreground);
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .flow-remove-approver:hover {
+            background: var(--destructive);
+            color: #fff;
+        }
+        .flow-add-picker {
+            display: inline-flex;
+            vertical-align: top;
+            margin-left: 6px;
+        }
+        .flow-picker-btn {
+            height: 30px;
+            padding: 0 14px;
+            background: rgba(var(--primary-rgb), 0.08);
+            color: var(--primary);
+            border: 1px dashed rgba(var(--primary-rgb), 0.3);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .flow-picker-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-style: solid;
+            border-color: var(--primary);
+        }
+        /* 多人审批单选 */
+        .multi-approve-toggle {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 10px;
+            background: rgba(var(--primary-rgb), 0.02);
+            border-radius: 6px;
+        }
+        .multi-approve-toggle .toggle-label {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+        .radio-group {
+            display: flex;
+            gap: 14px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--foreground);
+            cursor: pointer;
+            font-weight: 400;
+        }
+        .radio-group input[type="radio"] {
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ===== 选择审批人弹窗 ===== */
+        .picker-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .picker-modal.active { display: flex; }
+        .picker-box {
+            width: 880px;
+            max-width: 92vw;
+            height: 560px;
+            max-height: 80vh;
+            background: var(--card);
+            border-radius: 14px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: scale-in 0.2s ease-out both;
+            display: flex;
+            flex-direction: column;
+        }
+        .picker-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .picker-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+        .picker-header .picker-count {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .picker-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .picker-org {
+            width: 300px;
+            min-width: 280px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #fafbfc;
+        }
+        .picker-org-title {
+            padding: 14px 16px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .picker-org-search {
+            padding: 0 12px 10px;
+            flex-shrink: 0;
+        }
+        .picker-org-search input {
+            width: 100%;
+            height: 32px;
+            padding: 0 10px 0 30px;
+            border: 1px solid var(--input);
+            border-radius: 6px;
+            font-size: 12px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' stroke='%2394a3b8' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat 9px center;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .picker-org-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.08);
+        }
+        .picker-org-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        .org-item { user-select: none; }
+        .org-row {
+            display: flex;
+            align-items: center;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            gap: 6px;
+        }
+        .org-row:hover { background: rgba(var(--primary-rgb), 0.06); }
+        .org-row.active { background: rgba(var(--primary-rgb), 0.1); color: var(--primary); }
+        .org-arrow {
+            width: 16px; height: 16px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+            color: var(--muted-foreground);
+            font-size: 10px;
+        }
+        .org-icon {
+            width: 18px; height: 18px;
+            border-radius: 4px;
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .org-label {
+            font-size: 13px; color: var(--foreground);
+            flex: 1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .org-count { font-size: 11px; color: var(--muted-foreground); flex-shrink: 0; }
+        .org-children { display: none; padding-left: 16px; }
+        .org-children.expanded { display: block; }
+        .org-children .org-row { padding-left: 10px; }
+
+        /* 右侧人员列表 */
+        .picker-staff {
+            flex: 1;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .picker-staff-toolbar {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; gap: 12px;
+        }
+        .picker-staff-toolbar .staff-total {
+            font-size: 13px; color: var(--muted-foreground); white-space: nowrap;
+        }
+        .picker-staff-toolbar .staff-total strong { color: var(--foreground); }
+        .picker-staff-search {
+            position: relative; flex: 1; max-width: 260px;
+        }
+        .picker-staff-search input {
+            width: 100%; height: 32px;
+            padding: 0 32px 0 12px;
+            border: 1px solid var(--input);
+            border-radius: 6px;
+            font-size: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .picker-staff-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.08);
+        }
+        .picker-staff-search .search-icon-btn {
+            position: absolute; right: 6px; top: 50%;
+            transform: translateY(-50%);
+            width: 24px; height: 24px;
+            border: none; background: transparent;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .picker-staff-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .staff-item {
+            display: flex; align-items: center;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            gap: 12px;
+        }
+        .staff-item:hover { background: rgba(var(--primary-rgb), 0.03); }
+        .staff-checkbox {
+            width: 17px; height: 17px;
+            border: 1.5px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .staff-item.checked .staff-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .staff-avatar-sm {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 13px; font-weight: 600;
+            flex-shrink: 0;
+        }
+        .staff-info { flex: 1; min-width: 0; }
+        .staff-name { font-size: 13px; font-weight: 500; color: var(--foreground); }
+        .staff-email { font-size: 11px; color: var(--muted-foreground); margin-top: 1px; }
+        .staff-role { font-size: 12px; color: var(--primary); font-weight: 500; flex-shrink: 0; }
+        .picker-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
+            background: var(--muted);
+        }
+        .picker-footer .selected-info {
+            font-size: 13px; color: var(--muted-foreground);
+        }
+        .picker-footer .selected-info span { color: var(--primary); font-weight: 600; }
+        .picker-footer .picker-btn-group { display: flex; gap: 8px; }
+        .picker-btn-group button {
+            height: 34px; padding: 0 20px;
+            border-radius: 8px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.2s ease;
+        }
+        .picker-btn-cancel {
+            background: var(--card);
+            border: 1px solid var(--border) !important;
+            color: var(--foreground);
+        }
+        .picker-btn-cancel:hover { background: rgba(var(--primary-rgb), 0.04); }
+        .picker-btn-confirm {
+            background: linear-gradient(135deg, var(--primary), #4f7dff);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+        }
+        .picker-btn-confirm:hover { opacity: 0.92; }
+        .picker-btn-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .detail-body,
+            .apply-body {
+                flex-direction: column;
+            }
+            .detail-right,
+            .apply-right {
+                width: 100%;
+                min-width: auto;
+                border-top: 1px solid var(--border);
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .header, .rule-section, .tab-wrap, .filter-section, .table-section, .pagination-section {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .date-filter {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .modal-header, .modal-body, .modal-footer {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部标题 -->
+        <div class="header">
+            <h1>补卡申请管理</h1>
+            <p>管理员工补卡申请，支持申请提交、审批进度查询、历史记录查看</p>
+        </div>
+
+        <!-- 规则说明区 -->
+        <div class="rule-section">
+            <h3>补卡申请规则</h3>
+            <div class="rule-content">
+                <div class="rule-item">
+                    <strong>申请时限：</strong>收到缺卡/旷工异常提醒后，需在3天内提交补卡申请
+                </div>
+                <div class="rule-item">
+                    <strong>申请次数：</strong>每月最多可提交3次补卡申请（可配置）
+                </div>
+                <div class="rule-item">
+                    <strong>补卡次数重置：</strong>每月1号00:00自动重置当月补卡申请次数
+                </div>
+                <div class="rule-item">
+                    <strong>次数扣减：</strong>每次成功提交补卡申请，自动扣减当月次数
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态标签页 -->
+        <div class="tab-wrap">
+            <div class="tab-item active" data-status="pending">审批中</div>
+            <div class="tab-item" data-status="approved">已通过</div>
+            <div class="tab-item" data-status="rejected">已驳回</div>
+            <div class="tab-item" data-status="canceled">已撤销</div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="filter-section">
+            <button class="apply-btn" id="applyBtn">+ 新增补卡申请</button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="请输入申请人姓名">
+            </div>
+            <div class="search-box">
+                <input type="text" id="deptInput" placeholder="请输入部门名称">
+            </div>
+            <div class="date-filter">
+                <label>申请日期：</label>
+                <input type="date" id="startDate">
+                <span>至</span>
+                <input type="date" id="endDate">
+            </div>
+            <button class="filter-btn">查询</button>
+            <button class="reset-btn">重置</button>
+            <button class="export-btn">导出数据</button>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="table-section">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>申请人</th>
+                        <th>所属部门</th>
+                        <th>异常类型</th>
+                        <th>补卡日期</th>
+                        <th>补卡原因</th>
+                        <th>提交时间</th>
+                        <th>审批节点</th>
+                        <th>审批人</th>
+                        <th>审批状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>张三</td>
+                        <td>技术部</td>
+                        <td>缺卡</td>
+                        <td>2025-12-20</td>
+                        <td>外出办公忘记打卡</td>
+                        <td>2025-12-20 09:30</td>
+                        <td>部门经理审批</td>
+                        <td>李四</td>
+                        <td><span class="status-tag status-approved">已通过</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>王五</td>
+                        <td>市场部</td>
+                        <td>旷工</td>
+                        <td>2025-12-19</td>
+                        <td>身体不适请假未及时报备</td>
+                        <td>2025-12-19 14:20</td>
+                        <td>部门经理审批</td>
+                        <td>李四</td>
+                        <td><span class="status-tag status-pending">审批中</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                            <button class="op-btn cancel">撤销</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>赵六</td>
+                        <td>人事部</td>
+                        <td>缺卡</td>
+                        <td>2025-12-18</td>
+                        <td>系统故障未打卡</td>
+                        <td>2025-12-18 16:45</td>
+                        <td>部门经理审批</td>
+                        <td>李四</td>
+                        <td><span class="status-tag status-rejected">已驳回</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>孙七</td>
+                        <td>财务部</td>
+                        <td>无</td>
+                        <td>2025-12-17</td>
+                        <td>漏打卡申请补卡</td>
+                        <td>2025-12-17 11:10</td>
+                        <td>已撤销</td>
+                        <td>--</td>
+                        <td><span class="status-tag status-canceled">已撤销</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>周十</td>
+                        <td>运营部</td>
+                        <td>缺卡</td>
+                        <td>2025-12-16</td>
+                        <td>外勤出差未打卡</td>
+                        <td>2025-12-16 08:50</td>
+                        <td>部门主管审批</td>
+                        <td>钱一</td>
+                        <td><span class="status-tag status-approved">已通过</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>吴一</td>
+                        <td>技术部</td>
+                        <td>旷工</td>
+                        <td>2025-12-15</td>
+                        <td>临时请假未登记</td>
+                        <td>2025-12-15 10:05</td>
+                        <td>部门总监审批</td>
+                        <td>冯二</td>
+                        <td><span class="status-tag status-pending">审批中</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                            <button class="op-btn cancel">撤销</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>郑二</td>
+                        <td>市场部</td>
+                        <td>缺卡</td>
+                        <td>2025-12-14</td>
+                        <td>电梯故障迟到漏打卡</td>
+                        <td>2025-12-14 09:12</td>
+                        <td>部门主管审批</td>
+                        <td>陈三</td>
+                        <td><span class="status-tag status-rejected">已驳回</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>王三</td>
+                        <td>行政部</td>
+                        <td>无</td>
+                        <td>2025-12-13</td>
+                        <td>手机没电未打卡</td>
+                        <td>2025-12-13 15:30</td>
+                        <td>部门经理审批</td>
+                        <td>褚四</td>
+                        <td><span class="status-tag status-canceled">已撤销</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>李四</td>
+                        <td>运营部</td>
+                        <td>缺卡</td>
+                        <td>2025-12-12</td>
+                        <td>会议超时忘记打卡</td>
+                        <td>2025-12-12 17:22</td>
+                        <td>部门主管审批</td>
+                        <td>卫五</td>
+                        <td><span class="status-tag status-approved">已通过</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>张五</td>
+                        <td>人事部</td>
+                        <td>旷工</td>
+                        <td>2025-12-11</td>
+                        <td>突发急事未及时打卡</td>
+                        <td>2025-12-11 08:10</td>
+                        <td>部门总监审批</td>
+                        <td>蒋六</td>
+                        <td><span class="status-tag status-pending">审批中</span></td>
+                        <td>
+                            <button class="op-btn view">详情</button>
+                            <button class="op-btn cancel">撤销</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination-section">
+            <button class="page-btn" disabled>上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+
+    <!-- 新增补卡申请弹窗（左侧表单 + 右侧审批流程） -->
+    <div class="modal" id="applyModal">
+        <div class="modal-box detail-modal-box">
+            <div class="modal-header">
+                <h3>新增补卡申请</h3>
+                <button class="modal-close" id="closeApply">×</button>
+            </div>
+            <div class="modal-body apply-body">
+                <!-- 左侧：申请表单 -->
+                <div class="apply-left">
+                    <div class="detail-section-title">申请信息</div>
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label>补卡日期 <span class="required">*</span></label>
+                            <input type="date" placeholder="仅支持选择3天内的考勤异常日期" required>
+                        </div>
+                        <div class="form-item">
+                            <label>异常类型 <span class="required">*</span></label>
+                            <select required>
+                                <option value="">请选择异常类型</option>
+                                <option>缺卡</option>
+                                <option>旷工</option>
+                                <option>无异常</option>
+                            </select>
+                        </div>
+                        <div class="form-item grid-full">
+                            <label>补卡时间 <span class="required">*</span></label>
+                            <div class="quick-time-row">
+                                <span class="quick-time-label">快速选择时间</span>
+                                <div class="quick-time-tags">
+                                    <button class="quick-tag" data-time="05:00">05:00</button>
+                                    <button class="quick-tag" data-time="06:00">06:00</button>
+                                    <button class="quick-tag" data-time="07:00">07:00</button>
+                                    <button class="quick-tag" data-time="07:30">07:30</button>
+                                    <button class="quick-tag" data-time="08:00">08:00</button>
+                                    <button class="quick-tag" data-time="08:30">08:30</button>
+                                    <button class="quick-tag" data-time="09:00">09:00</button>
+                                    <button class="quick-tag" data-time="09:30">09:30</button>
+                                    <button class="quick-tag" data-time="18:00">18:00</button>
+                                    <button class="quick-tag" data-time="18:30">18:30</button>
+                                </div>
+                            </div>
+                            <div class="selected-time-list" id="selectedTimeList"></div>
+                            <div class="manual-add-row">
+                                <input type="time" class="manual-time-input" id="manualTimeInput">
+                                <button class="add-time-btn" id="addTimeBtn">+ 添加</button>
+                            </div>
+                        </div>
+                        <div class="form-item">
+                            <label>证明附件</label>
+                            <input type="file" multiple placeholder="支持图片、文档格式，选填">
+                        </div>
+                        <div class="form-item grid-full">
+                            <label>补卡原因 <span class="required">*</span></label>
+                            <textarea placeholder="请详细描述补卡原因" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- 右侧：审批流程（可编辑） -->
+                <div class="apply-right">
+                    <div class="detail-section-title">审批流程</div>
+                    <div class="flow-wrap" id="applyFlow">
+                        <!-- 节点1：部门主管 -->
+                        <div class="flow-node" data-node="manager">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">部门主管</span>
+                                </div>
+                                <div class="flow-added-approvers" id="approvers-manager">
+                                    <div class="flow-added-approver" data-name="张永峰">
+                                        <div class="flow-approver-avatar">峰</div>
+                                        <div class="flow-approver-name">张永峰</div>
+                                        <button class="flow-remove-approver" title="移除">×</button>
+                                    </div>
+                                </div>
+                                <div class="flow-add-picker">
+                                    <button class="flow-picker-btn" data-node="manager">+ 添加审批人</button>
+                                </div>
+                                <div class="multi-approve-toggle" id="multi-toggle-manager">
+                                    <span class="toggle-label">是否多人审批：</span>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="multi-manager" value="yes"> 是</label>
+                                        <label><input type="radio" name="multi-manager" value="no" checked> 否</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点2：部门总监 -->
+                        <div class="flow-node" data-node="director">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">部门总监</span>
+                                </div>
+                                <div class="flow-added-approvers" id="approvers-director">
+                                    <div class="flow-added-approver" data-name="张三">
+                                        <div class="flow-approver-avatar" style="background: #ec4899;">三</div>
+                                        <div class="flow-approver-name">张三</div>
+                                        <button class="flow-remove-approver" title="移除">×</button>
+                                    </div>
+                                </div>
+                                <div class="flow-add-picker">
+                                    <button class="flow-picker-btn" data-node="director">+ 添加审批人</button>
+                                </div>
+                                <div class="multi-approve-toggle" id="multi-toggle-director">
+                                    <span class="toggle-label">是否多人审批：</span>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="multi-director" value="yes"> 是</label>
+                                        <label><input type="radio" name="multi-director" value="no" checked> 否</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点3：HR审批 -->
+                        <div class="flow-node" data-node="hr">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">HR审批</span>
+                                </div>
+                                <div class="flow-added-approvers" id="approvers-hr">
+                                    <div class="flow-added-approver" data-name="王丽">
+                                        <div class="flow-approver-avatar" style="background: #f59e0b;">丽</div>
+                                        <div class="flow-approver-name">王丽</div>
+                                        <button class="flow-remove-approver" title="移除">×</button>
+                                    </div>
+                                </div>
+                                <div class="flow-add-picker">
+                                    <button class="flow-picker-btn" data-node="hr">+ 添加审批人</button>
+                                </div>
+                                <div class="multi-approve-toggle" id="multi-toggle-hr">
+                                    <span class="toggle-label">是否多人审批：</span>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="multi-hr" value="yes"> 是</label>
+                                        <label><input type="radio" name="multi-hr" value="no" checked> 否</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点4：抄送 -->
+                        <div class="flow-node" data-node="cc">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending" style="background: #cbd5e1;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">抄送</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-cancel" id="cancelApply">取消</button>
+                <button class="modal-btn btn-submit">提交申请</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择审批人弹窗（左侧组织架构 + 右侧人员列表） -->
+    <div class="picker-modal" id="pickerModal">
+        <div class="picker-box">
+            <div class="picker-header">
+                <h3>选择审批人</h3>
+                <span class="picker-count" id="pickerSelectedCount">已选 0 人</span>
+            </div>
+            <div class="picker-body">
+                <div class="picker-org">
+                    <div class="picker-org-title">组织架构</div>
+                    <div class="picker-org-search">
+                        <input type="text" id="orgSearchInput" placeholder="搜索部门/工号">
+                    </div>
+                    <div class="picker-org-list" id="orgTreeList"></div>
+                </div>
+                <div class="picker-staff">
+                    <div class="picker-staff-toolbar">
+                        <span class="staff-total">全部人员 &nbsp; 共 <strong id="staffTotalCount">0</strong> 人</span>
+                        <div class="picker-staff-search">
+                            <input type="text" id="staffSearchInput" placeholder="请输入姓名/拼音/工号搜索">
+                            <button class="search-icon-btn">🔍</button>
+                        </div>
+                    </div>
+                    <div class="picker-staff-list" id="staffList"></div>
+                </div>
+            </div>
+            <div class="picker-footer">
+                <span class="selected-info">已选：<span id="footerSelectedCount">0</span> 人</span>
+                <div class="picker-btn-group">
+                    <button class="picker-btn-cancel" id="pickerCancel">取消</button>
+                    <button class="picker-btn-confirm" id="pickerConfirm" disabled>确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗（左侧详情 + 右侧审批流程） -->
+    <div class="modal" id="detailModal">
+        <div class="modal-box detail-modal-box">
+            <div class="modal-header">
+                <h3>补卡申请详情</h3>
+                <button class="modal-close" id="closeDetail">×</button>
+            </div>
+            <div class="modal-body detail-body">
+                <!-- 左侧：详情内容 -->
+                <div class="detail-left">
+                    <div class="detail-section-title">申请信息</div>
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label>申请人</label>
+                            <input type="text" value="张三" disabled>
+                        </div>
+                        <div class="form-item">
+                            <label>补卡日期</label>
+                            <input type="date" value="2025-12-20" disabled>
+                        </div>
+                        <div class="form-item">
+                            <label>异常类型</label>
+                            <input type="text" value="缺卡" disabled>
+                        </div>
+                        <div class="form-item">
+                            <label>补卡时间</label>
+                            <input type="time" value="09:30" disabled>
+                        </div>
+                        <div class="form-item">
+                            <label>提交时间</label>
+                            <input type="text" value="2025-12-20 09:30" disabled>
+                        </div>
+                        <div class="form-item">
+                            <label>审批状态</label>
+                            <input type="text" value="已通过" disabled>
+                        </div>
+                        <div class="form-item grid-full">
+                            <label>补卡原因</label>
+                            <textarea disabled>外出办公忘记打卡，特此申请补卡。</textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- 右侧：审批流程 -->
+                <div class="detail-right">
+                    <div class="detail-section-title">审批流程</div>
+                    <div class="flow-wrap">
+                        <!-- 节点1：部门主管 - 会签（2人） -->
+                        <div class="flow-node">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot done">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">部门主管</span>
+                                    <span class="flow-tag flow-tag-sign">会签</span>
+                                    <span class="flow-status flow-status-done">已完成</span>
+                                </div>
+                                <!-- 审批人1：张永峰 -->
+                                <div class="flow-approver">
+                                    <div class="flow-approver-avatar">峰</div>
+                                    <div class="flow-approver-info">
+                                        <div class="flow-approver-name">张永峰</div>
+                                        <div class="flow-approver-id">工号：4632</div>
+                                    </div>
+                                    <div class="flow-approver-result">
+                                        <span class="flow-result-agree">已同意</span>
+                                        <span class="flow-result-time">5/25 19:55</span>
+                                    </div>
+                                </div>
+                                <!-- 审批人2：李明辉 -->
+                                <div class="flow-approver" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dde1e8;">
+                                    <div class="flow-approver-avatar" style="background: #8b5cf6;">辉</div>
+                                    <div class="flow-approver-info">
+                                        <div class="flow-approver-name">李明辉</div>
+                                        <div class="flow-approver-id">工号：5821</div>
+                                    </div>
+                                    <div class="flow-approver-result">
+                                        <span class="flow-result-agree">已同意</span>
+                                        <span class="flow-result-time">5/25 20:12</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点2：部门总监 - 单人审批 -->
+                        <div class="flow-node">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot done">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">部门总监</span>
+                                    <span class="flow-status flow-status-done">已完成</span>
+                                </div>
+                                <div class="flow-approver">
+                                    <div class="flow-approver-avatar" style="background: #ec4899;">三</div>
+                                    <div class="flow-approver-info">
+                                        <div class="flow-approver-name">张三</div>
+                                        <div class="flow-approver-id">工号：9527</div>
+                                    </div>
+                                    <div class="flow-approver-result">
+                                        <span class="flow-result-agree">已同意</span>
+                                        <span class="flow-result-time">5/26 09:30</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点3：HR审批 - 单人审批（待处理） -->
+                        <div class="flow-node">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">HR审批</span>
+                                    <span class="flow-status" style="background:#fff7ed;color:#ea580c;">待审批</span>
+                                </div>
+                                <div class="flow-approver">
+                                    <div class="flow-approver-avatar" style="background: #f59e0b;">丽</div>
+                                    <div class="flow-approver-info">
+                                        <div class="flow-approver-name">王丽</div>
+                                        <div class="flow-approver-id">工号：3412</div>
+                                    </div>
+                                    <div class="flow-approver-result">
+                                        <span class="flow-result-agree" style="color:#9ca3af;">待处理</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 节点4：抄送 -->
+                        <div class="flow-node">
+                            <div class="flow-node-line"></div>
+                            <div class="flow-node-dot pending" style="background: #cbd5e1;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="white"/></svg>
+                            </div>
+                            <div class="flow-node-body">
+                                <div class="flow-node-header">
+                                    <span class="flow-node-title">抄送</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-cancel" id="cancelDetail">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签切换
+        const tabs = document.querySelectorAll('.tab-item');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            })
+        })
+
+        // 新增申请弹窗
+        const applyBtn = document.getElementById('applyBtn');
+        const applyModal = document.getElementById('applyModal');
+        const closeApply = document.getElementById('closeApply');
+        const cancelApply = document.getElementById('cancelApply');
+
+        applyBtn.addEventListener('click', () => {
+            applyModal.classList.add('active');
+            setTimeout(initApplyFlow, 50);
+        });
+        closeApply.addEventListener('click', () => applyModal.classList.remove('active'));
+        cancelApply.addEventListener('click', () => applyModal.classList.remove('active'));
+
+        // 详情弹窗
+        const viewBtns = document.querySelectorAll('.op-btn.view');
+        const detailModal = document.getElementById('detailModal');
+        const closeDetail = document.getElementById('closeDetail');
+        const cancelDetail = document.getElementById('cancelDetail');
+
+        viewBtns.forEach(btn => {
+            btn.addEventListener('click', () => detailModal.classList.add('active'));
+        })
+        closeDetail.addEventListener('click', () => detailModal.classList.remove('active'));
+        cancelDetail.addEventListener('click', () => detailModal.classList.remove('active'));
+
+        // 补卡时间 - 快捷选择 + 手动添加
+        const selectedTimes = [];
+        const selectedTimeList = document.getElementById('selectedTimeList');
+        const quickTags = document.querySelectorAll('.quick-tag');
+        const manualInput = document.getElementById('manualTimeInput');
+        const addTimeBtn = document.getElementById('addTimeBtn');
+
+        function getTodayStr() {
+            return new Date().toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', weekday: 'short' });
+        }
+
+        function renderSelectedTimes() {
+            selectedTimeList.innerHTML = '';
+            if (selectedTimes.length === 0) {
+                selectedTimeList.innerHTML = '<div style="color:#c0c4cc;font-size:12px;padding:8px 0;">暂未选择时间</div>';
+                return;
+            }
+            selectedTimes.forEach((t, idx) => {
+                const item = document.createElement('div');
+                item.className = 'time-item';
+                item.innerHTML = `
+                    <div class="time-item-left">
+                        <span class="time-item-date">${t.date}</span>
+                        <span class="time-item-val">${t.time}</span>
+                    </div>
+                    <button class="time-item-remove" data-idx="${idx}">&times;</button>`;
+                selectedTimeList.appendChild(item);
+            });
+            // 删除按钮事件
+            selectedTimeList.querySelectorAll('.time-item-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const i = parseInt(btn.dataset.idx);
+                    selectedTimes.splice(i, 1);
+                    // 更新快捷按钮状态
+                    quickTags.forEach(tag => {
+                        const t = tag.dataset.time;
+                        tag.classList.toggle('selected', selectedTimes.some(s => s.time === t));
+                    });
+                    renderSelectedTimes();
+                });
+            });
+        }
+
+        // 快捷标签点击
+        quickTags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                const time = tag.dataset.time;
+                const existIdx = selectedTimes.findIndex(t => t.time === time);
+                if (existIdx >= 0) {
+                    selectedTimes.splice(existIdx, 1);
+                    tag.classList.remove('selected');
+                } else {
+                    selectedTimes.push({ time, date: getTodayStr() });
+                    tag.classList.add('selected');
+                }
+                renderSelectedTimes();
+            });
+        });
+
+        // 手动添加 - 时间滚轮
+        function addManualTime() {
+            const val = manualInput.value.trim();
+            if (!val) return;
+            const existIdx = selectedTimes.findIndex(t => t.time === val);
+            if (existIdx >= 0) {
+                alert('该时间已存在：' + val);
+                manualInput.value = '';
+                return;
+            }
+            selectedTimes.push({ time: val, date: getTodayStr() });
+            // 同步快捷按钮状态
+            quickTags.forEach(tag => {
+                tag.classList.toggle('selected', selectedTimes.some(s => s.time === tag.dataset.time));
+            });
+            renderSelectedTimes();
+            manualInput.value = '';
+        }
+
+        addTimeBtn.addEventListener('click', addManualTime);
+        manualInput.addEventListener('change', addManualTime);
+
+        // 初始渲染
+        renderSelectedTimes();
+
+        // 提交申请
+        document.querySelector('.btn-submit').addEventListener('click', () => {
+            if (selectedTimes.length === 0) {
+                alert('请至少选择一个补卡时间');
+                return;
+            }
+            const times = selectedTimes.map(t => t.time).join('、');
+            alert('补卡申请提交成功，补卡时间：' + times);
+            applyModal.classList.remove('active');
+        })
+
+        // 撤销按钮
+        document.querySelectorAll('.op-btn.cancel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (confirm('确定要撤销该补卡申请吗？')) {
+                    alert('申请已撤销');
+                }
+            })
+        })
+
+        // 查询、重置、导出
+        document.querySelector('.filter-btn').addEventListener('click', () => alert('执行查询'));
+        document.querySelector('.reset-btn').addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('deptInput').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+        });
+        document.querySelector('.export-btn').addEventListener('click', () => alert('开始导出数据'));
+
+        // ===== 选择审批人弹窗 =====
+        const orgData = [
+            {
+                name: '强瑞集团', icon: '🏢', children: [
+                    {
+                        name: '(镍星科技园)深圳市强瑞', icon: '🏭', count: 7, children: [
+                            { name: '总经办', icon: '💼', count: 3 },
+                            { name: '博士后工作站', icon: '🔬', count: 2 }
+                        ]
+                    },
+                    {
+                        name: '(侨安科技工业园)深', icon: '🏭', count: 338, children: [
+                            { name: '总经办', icon: '💼', count: 5, expanded: true, staff: [
+                                { id:'GK001', name:'郭燕', email:'user347@qy.com', role:'总经理' },
+                                { id:'GK002', name:'李娜', email:'user5@qy.com', role:'副总经理' },
+                                { id:'GK003', name:'林峰', email:'user348@qy.com', role:'副总经理' },
+                                { id:'GK004', name:'宋雷', email:'user352@qy.com', role:'总经理' },
+                                { id:'GK005', name:'唐杰', email:'user353@qy.com', role:'副总经理' },
+                                { id:'GK006', name:'杨磊', email:'user7@qy.com', role:'总经理' },
+                                { id:'GK007', name:'张伟', email:'user12@qy.com', role:'总经理' }
+                            ]},
+                            { name: '事业部一', icon: '📂', count: 199, children: [
+                                { name: '人力资源部', icon: '👥', count: 27, staff: [
+                                    { id:'HR001',name:'王丽',email:'hr01@qy.com',role:'HR专员' },
+                                    { id:'HR002',name:'陈静',email:'hr02@qy.com',role:'HR主管' }
+                                ]},
+                                { name: '安管部', icon: '🛡️', count: 5 },
+                                { name: '后勤部', icon: '📦', count: 17 },
+                                { name: '人事部', icon: '👤', count: 5 }
+                            ]},
+                            { name: '财务部', icon: '💰', count: 5, children: [
+                                { name: '仓库组', icon: '📋', count: 3 }
+                            ]},
+                            { name: '质量运营部', icon: '✅', count: 10, children: [
+                                { name: '品质部', icon: '⭐', count: 5 },
+                                { name: '客服一部', icon: '🎧', count: 5 }
+                            ]},
+                            { name: '研发部', icon: '💻', count: 32, children: [
+                                { name: '工程部', icon: '⚙️', count: 32, staff: [
+                                    { id:'ENG001',name:'张永峰',email:'zhangyf@qy.com',role:'部门主管' },
+                                    { id:'ENG002',name:'邓',email:'GK0009@qy.com',role:'Java' },
+                                    { id:'ENG003',name:'谢晖健',email:'JunYiWeiQim@qy.com',role:'前端工程师' },
+                                    { id:'ENG004',name:'陶钧',email:'TaoJun@qy.com',role:'前端工程师' },
+                                    { id:'ENG005',name:'王玉林',email:'3462@qy.com',role:'JAVA工程师' },
+                                    { id:'ENG006',name:'程志辉',email:'ChengZhiHui@qy.com',role:'JAVA工程师' },
+                                    { id:'ENG007',name:'余彤形',email:'GK005@qy.com',role:'JAVA工程师' },
+                                    { id:'ENG008',name:'赵嬷嬷',email:'4910@qy.com',role:'人事专员' },
+                                    { id:'ENG009',name:'邓廷俊',email:'GK1@qy.com',role:'JAVA工程师' }
+                                ]}
+                            ]},
+                            { name: '供应链管理部', icon: '🔗', count: 96, children: [
+                                { name: '市场部', icon: '📈', count: 5 },
+                                { name: '项目部', icon: '📁', count: 12 },
+                                { name: '采购部', icon: '🛒', count: 8 },
+                                { name: '计划部', icon: '📅', count: 5 },
+                                { name: '板金部', icon: '🔩', count: 5 }
+                            ]}
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const pickerModal = document.getElementById('pickerModal');
+        const pickerConfirm = document.getElementById('pickerConfirm');
+        const pickerCancel = document.getElementById('pickerCancel');
+        let currentPickerNode = '';
+        let selectedStaff = [];
+        let allStaffCache = [];
+        const avatarColors = ['#2563eb','#ec4899','#f59e0b','#10b981','#8b5cf6','#ef4444','#06b6d4','#84cc16'];
+
+        function getAvatarColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return avatarColors[Math.abs(hash) % avatarColors.length];
+        }
+
+        // 渲染组织架构树
+        function renderOrgTree(data, container, level) {
+            data.forEach(item => {
+                const hasChildren = item.children && item.children.length > 0;
+                const hasStaff = item.staff && item.staff.length > 0;
+                const isExpanded = item.expanded || false;
+                const div = document.createElement('div');
+                div.className = 'org-item';
+                const row = document.createElement('div');
+                row.className = 'org-row';
+                row.innerHTML = `<span class="org-arrow">${hasChildren ? '▶' : ''}</span><span class="org-icon">${item.icon || '📁'}</span><span class="org-label">${item.name}</span><span class="org-count">${item.count || (hasStaff ? item.staff.length : '')}</span>`;
+
+                if (hasChildren || hasStaff) {
+                    row.addEventListener('click', () => {
+                        if (hasChildren) {
+                            const childContainer = div.querySelector('.org-children');
+                            const arrow = row.querySelector('.org-arrow');
+                            if (childContainer.classList.contains('expanded')) {
+                                childContainer.classList.remove('expanded');
+                                arrow.style.transform = '';
+                                row.classList.remove('active');
+                            } else {
+                                childContainer.classList.add('expanded');
+                                arrow.style.transform = 'rotate(90deg)';
+                                row.classList.add('active');
+                            }
+                        }
+                        if (hasStaff) {
+                            document.querySelectorAll('.org-row').forEach(r => r.classList.remove('active'));
+                            row.classList.add('active');
+                            renderStaffList(item.staff);
+                        } else if (!hasChildren && !hasStaff) {
+                            document.querySelectorAll('.org-row').forEach(r => r.classList.remove('active'));
+                            row.classList.add('active');
+                            renderStaffList([]);
+                        }
+                    });
+                }
+                div.appendChild(row);
+                if (hasChildren) {
+                    const childDiv = document.createElement('div');
+                    childDiv.className = 'org-children' + (isExpanded ? ' expanded' : '');
+                    renderOrgTree(item.children, childDiv, level + 1);
+                    div.appendChild(childDiv);
+                    if (isExpanded) {
+                        row.classList.add('active');
+                        row.querySelector('.org-arrow').style.transform = 'rotate(90deg)';
+                    }
+                }
+                container.appendChild(div);
+            });
+        }
+
+        // 渲染右侧人员列表
+        function renderStaffList(staff) {
+            const staffList = document.getElementById('staffList');
+            allStaffCache = staff || [];
+            document.getElementById('staffTotalCount').textContent = allStaffCache.length;
+            staffList.innerHTML = '';
+            if (!staff || staff.length === 0) {
+                staffList.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted-foreground);font-size:13px;">该部门暂无人员</div>';
+                return;
+            }
+            staff.forEach(s => {
+                const isSelected = selectedStaff.some(sel => sel.id === s.id);
+                const el = document.createElement('div');
+                el.className = 'staff-item' + (isSelected ? ' checked' : '');
+                el.dataset.id = s.id;
+                el.innerHTML = `<div class="staff-checkbox">${isSelected ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</div><div class="staff-avatar-sm" style="background:${getAvatarColor(s.name)};">${s.name.charAt(0)}</div><div class="staff-info"><div class="staff-name">${s.name}</div><div class="staff-email">${s.email}</div></div><div class="staff-role">${s.role}</div>`;
+                el.addEventListener('click', () => toggleStaffSelect(el, s));
+                staffList.appendChild(el);
+            });
+        }
+
+        function toggleStaffSelect(el, staff) {
+            const idx = selectedStaff.findIndex(s => s.id === staff.id);
+            if (idx > -1) {
+                selectedStaff.splice(idx, 1);
+                el.classList.remove('checked');
+                el.querySelector('.staff-checkbox').innerHTML = '';
+            } else {
+                selectedStaff.push(staff);
+                el.classList.add('checked');
+                el.querySelector('.staff-checkbox').innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const c = selectedStaff.length;
+            document.getElementById('pickerSelectedCount').textContent = `已选 ${c} 人`;
+            document.getElementById('footerSelectedCount').textContent = c;
+            pickerConfirm.disabled = c === 0;
+        }
+
+        document.getElementById('staffSearchInput').addEventListener('input', function() {
+            const kw = this.value.trim().toLowerCase();
+            if (!kw) { renderStaffList(allStaffCache); return; }
+            const filtered = allStaffCache.filter(s =>
+                s.name.toLowerCase().includes(kw) || s.email.toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw)
+            );
+            renderStaffList(filtered);
+        });
+
+        function openPicker(nodeName) {
+            currentPickerNode = nodeName;
+            selectedStaff = [];
+            updateSelectedCount();
+            document.getElementById('orgTreeList').innerHTML = '';
+            renderOrgTree(orgData, orgTreeList, 0);
+            document.getElementById('staffList').innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted-foreground);font-size:13px;">请在左侧选择部门查看人员</div>';
+            allStaffCache = [];
+            document.getElementById('staffTotalCount').textContent = 0;
+            document.getElementById('staffSearchInput').value = '';
+            document.getElementById('orgSearchInput').value = '';
+            pickerModal.classList.add('active');
+        }
+
+        pickerConfirm.addEventListener('click', () => {
+            if (selectedStaff.length === 0 || !currentPickerNode) return;
+            selectedStaff.forEach(s => addApprover(currentPickerNode, s.name));
+            closePicker();
+        });
+
+        function closePicker() { pickerModal.classList.remove('active'); }
+        pickerCancel.addEventListener('click', closePicker);
+        pickerModal.addEventListener('click', e => { if (e.target === pickerModal) closePicker(); });
+
+        // 审批流程交互
+        function addApprover(nodeName, approverName) {
+            const container = document.getElementById('approvers-' + nodeName);
+            if (!container || !approverName.trim()) return;
+            const existing = container.querySelectorAll('.flow-added-approver');
+            for (let i = 0; i < existing.length; i++) {
+                if (existing[i].getAttribute('data-name') === approverName.trim()) return;
+            }
+            const colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+            const avatarChar = approverName.trim().charAt(0);
+            const colorIndex = container.querySelectorAll('.flow-added-approver').length % colors.length;
+            const div = document.createElement('div');
+            div.className = 'flow-added-approver';
+            div.setAttribute('data-name', approverName.trim());
+            div.innerHTML = `<div class="flow-approver-avatar" style="background: ${colors[colorIndex]};">${avatarChar}</div><div class="flow-approver-name">${approverName.trim()}</div><button class="flow-remove-approver" title="移除">×</button>`;
+            container.appendChild(div);
+            div.querySelector('.flow-remove-approver').addEventListener('click', function() {
+                div.remove();
+                updateMultiToggle(nodeName);
+            });
+            updateMultiToggle(nodeName);
+        }
+
+        function updateMultiToggle(nodeName) {
+            const container = document.getElementById('approvers-' + nodeName);
+            const toggle = document.getElementById('multi-toggle-' + nodeName);
+            if (!container || !toggle) return;
+            const count = container.querySelectorAll('.flow-added-approver').length;
+            if (count < 2) {
+                const noRadio = toggle.querySelector('input[value="no"]');
+                if (noRadio) noRadio.checked = true;
+            }
+        }
+
+        function initRemoveButtons() {
+            document.querySelectorAll('#applyFlow .flow-remove-approver').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const approverEl = this.closest('.flow-added-approver');
+                    const flowNode = this.closest('.flow-node');
+                    const nodeName = flowNode ? flowNode.getAttribute('data-node') : '';
+                    approverEl.remove();
+                    updateMultiToggle(nodeName);
+                });
+            });
+        }
+
+        function initApplyFlow() {
+            initRemoveButtons();
+        }
+
+        // 绑定"+添加审批人"按钮
+        document.querySelectorAll('.flow-picker-btn[data-node]').forEach(btn => {
+            btn.addEventListener('click', () => openPicker(btn.getAttribute('data-node')));
+        });
+
+        // 点击弹窗外关闭
+        window.addEventListener('click', e => {
+            if (e.target === applyModal) applyModal.classList.remove('active');
+            if (e.target === detailModal) detailModal.classList.remove('active');
+        })
+    </script>
+</body>
+</html>

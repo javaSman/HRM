@@ -1,0 +1,472 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HRM 考勤管理系统 - 设备管理</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f1f5f9; }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+<!-- Main Content (Full Width, No Sidebar) -->
+<main class="w-full flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-2 text-sm text-slate-500">
+<span>首页</span>
+<iconify-icon class="text-sm" icon="lucide:chevron-right"></iconify-icon>
+<span class="text-slate-900 font-medium">设备管理</span>
+</div>
+<button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold flex items-center gap-2" onclick="openNewDeviceModal()">
+<iconify-icon icon="lucide:plus"></iconify-icon> 添加考勤设备
+            </button>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<!-- Tabs -->
+<div class="flex border-b border-slate-200 tab-header" id="settingsTabs">
+<button class="px-6 py-4 tab-active text-sm" onclick="switchTab('settingsTabs', 0)">考勤设备管理</button>
+<button class="px-6 py-4 hover:bg-slate-50 text-slate-500 text-sm transition-colors" onclick="switchTab('settingsTabs', 1)">同步参数</button>
+<button class="px-6 py-4 hover:bg-slate-50 text-slate-500 text-sm transition-colors" onclick="switchTab('settingsTabs', 2)">角色权限</button>
+<button class="px-6 py-4 hover:bg-slate-50 text-slate-500 text-sm transition-colors" onclick="switchTab('settingsTabs', 3)">异常容错日志</button>
+</div>
+<!-- Panel 0: 考勤设备管理 -->
+<div class="tab-panel" id="settingsPanel0">
+<!-- Device Stats -->
+<div class="grid grid-cols-3 gap-6">
+<div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+<div>
+<p class="text-sm text-slate-500">设备总数</p>
+<h4 class="text-xl font-bold text-slate-900">12 台</h4>
+</div>
+<iconify-icon class="text-2xl text-slate-300" icon="lucide:server"></iconify-icon>
+</div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+<div>
+<p class="text-sm text-slate-500">在线设备</p>
+<h4 class="text-xl font-bold text-green-600">10 台</h4>
+</div>
+<iconify-icon class="text-2xl text-green-400" icon="lucide:wifi"></iconify-icon>
+</div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+<div>
+<p class="text-sm text-slate-500">离线/异常</p>
+<h4 class="text-xl font-bold text-red-600">2 台</h4>
+</div>
+<iconify-icon class="text-2xl text-red-400" icon="lucide:wifi-off"></iconify-icon>
+</div>
+</div>
+<!-- Device Table -->
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+<tr>
+<th class="px-6 py-4 font-semibold">设备名称</th>
+<th class="px-6 py-4 font-semibold">所属组织</th>
+<th class="px-6 py-4 font-semibold">IP 地址</th>
+<th class="px-6 py-4 font-semibold">品牌型号</th>
+<th class="px-6 py-4 font-semibold">在线状态</th>
+<th class="px-6 py-4 font-semibold">最后同步时间</th>
+<th class="px-6 py-4 font-semibold text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr>
+<td class="px-6 py-4 font-bold text-slate-900">1号厂区主门禁</td>
+<td class="px-6 py-4">总公司 / 生产部</td>
+<td class="px-6 py-4">192.168.1.101</td>
+<td class="px-6 py-4 text-slate-500">海康威视 DS-K1T</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">在线</span></td>
+<td class="px-6 py-4 text-slate-400">2026-05-19 09:30</td>
+<td class="px-6 py-4 text-right">
+<button class="text-indigo-600 hover:underline mr-3" onclick="openNewDeviceModal('1号厂区主门禁')">配置</button>
+<button class="text-slate-400 hover:underline">重启</button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 font-bold text-slate-900">研发楼A座考勤机</td>
+<td class="px-6 py-4">总公司 / 技术部</td>
+<td class="px-6 py-4">192.168.1.105</td>
+<td class="px-6 py-4 text-slate-500">中控科技 iClock S5</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-sm">离线</span></td>
+<td class="px-6 py-4 text-slate-400">2026-05-18 18:00</td>
+<td class="px-6 py-4 text-right">
+<button class="text-indigo-600 hover:underline mr-3" onclick="openNewDeviceModal('研发楼A座考勤机')">配置</button>
+<button class="text-red-600 hover:underline">诊断</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- End Panel 0 -->
+<!-- Panel 1: 同步参数 -->
+<div class="tab-panel hidden" id="settingsPanel1">
+<!-- Sync Parameters (Preview) -->
+<div class="bg-white p-8 rounded-xl border border-slate-200">
+<h4 class="font-bold text-slate-900 mb-6">同步参数配置</h4>
+<div class="space-y-6 max-w-2xl">
+<div class="flex items-center justify-between py-3 border-b border-slate-100">
+<div>
+<p class="text-sm font-bold text-slate-900">打卡数据同步频率</p>
+<p class="text-sm text-slate-500">考勤机数据自动抓取的间隔时间</p>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-medium text-indigo-600 bg-blue-50 px-3 py-1 rounded">2 分钟</span>
+<button class="text-sm text-slate-400 hover:text-indigo-600" onclick="openEditParamModal('打卡数据同步频率','2 分钟','考勤机数据自动抓取的间隔时间')">编辑</button>
+</div>
+</div>
+<div class="flex items-center justify-between py-3 border-b border-slate-100">
+<div>
+<p class="text-sm font-bold text-slate-900">企微异常推送时间</p>
+<p class="text-sm text-slate-500">每日迟到/旷工名单推送到主管企业微信的时间</p>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-medium text-indigo-600 bg-blue-50 px-3 py-1 rounded">09:30</span>
+<button class="text-sm text-slate-400 hover:text-indigo-600" onclick="openEditParamModal('企微异常推送时间','09:30','每日迟到/旷工名单推送到主管企业微信的时间')">编辑</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- End Panel 1 -->
+<!-- Panel 2: 角色权限 -->
+<div class="tab-panel hidden" id="settingsPanel2">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-lg font-bold text-slate-900">角色权限管理</h4>
+<button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 flex items-center gap-2" onclick="openNewRoleModal()">
+<iconify-icon icon="lucide:plus"></iconify-icon> 新建角色
+                </button>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+<tr><th class="px-6 py-4 font-semibold">角色名称</th><th class="px-6 py-4 font-semibold">功能权限</th><th class="px-6 py-4 font-semibold">数据权限</th><th class="px-6 py-4 font-semibold">人员数量</th><th class="px-6 py-4 font-semibold">状态</th><th class="px-6 py-4 font-semibold text-right">操作</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold">系统管理员</td><td class="px-6 py-4 text-slate-500">全部模块权限</td><td class="px-6 py-4">全公司</td><td class="px-6 py-4">3人</td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">启用</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline mr-3 text-sm" onclick="openEditRoleModal('系统管理员')">编辑</button><button class="text-red-600 hover:underline text-sm">删除</button></td></tr>
+<tr class="hover:bg-slate-50 bg-slate-50/50"><td class="px-6 py-4 font-bold">HR专员</td><td class="px-6 py-4 text-slate-500">考勤管理/报表/审批</td><td class="px-6 py-4">全公司</td><td class="px-6 py-4">8人</td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">启用</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline mr-3 text-sm" onclick="openEditRoleModal('HR专员')">编辑</button><button class="text-red-600 hover:underline text-sm">删除</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold">部门主管</td><td class="px-6 py-4 text-slate-500">本部门考勤/审批/排班</td><td class="px-6 py-4">本部门及下级</td><td class="px-6 py-4">25人</td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">启用</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline mr-3 text-sm" onclick="openEditRoleModal('部门主管')">编辑</button><button class="text-red-600 hover:underline text-sm">删除</button></td></tr>
+<tr class="hover:bg-slate-50 bg-slate-50/50"><td class="px-6 py-4 font-bold">普通员工</td><td class="px-6 py-4 text-slate-500">个人打卡/申请/查询</td><td class="px-6 py-4">仅本人</td><td class="px-6 py-4">1,250人</td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">启用</span></td><td class="px-6 py-4 text-right"><button class="text-slate-400 cursor-not-allowed text-sm">删除</button></td></tr>
+</tbody>
+</table>
+</div>
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-4">
+<p class="text-sm text-slate-500"><iconify-icon class="inline mr-1" icon="lucide:info"></iconify-icon>支持行级/字段级数据权限控制，按公司/厂区/部门/班组/岗位多级数据隔离，字段脱敏</p>
+</div>
+</div>
+<!-- Panel 3: 异常容错日志 -->
+<div class="tab-panel hidden" id="settingsPanel3">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-lg font-bold text-slate-900">异常容错日志</h4>
+<button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 flex items-center gap-2" onclick="openErrorRuleConfig()">
+<iconify-icon icon="lucide:settings-2"></iconify-icon> 异常规则配置
+                </button>
+</div>
+<div class="grid grid-cols-4 gap-6 mb-6">
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><p class="text-sm text-slate-500">今日异常</p><h3 class="text-2xl font-bold text-red-600 mt-1">12 <span class="text-sm font-normal text-slate-400">次</span></h3></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><p class="text-sm text-slate-500">待处理</p><h3 class="text-2xl font-bold text-orange-500 mt-1">5 <span class="text-sm font-normal text-slate-400">条</span></h3></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><p class="text-sm text-slate-500">已解决</p><h3 class="text-2xl font-bold text-green-600 mt-1">86 <span class="text-sm font-normal text-slate-400">条</span></h3></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><p class="text-sm text-slate-500">本月累计</p><h3 class="text-2xl font-bold text-slate-900 mt-1">103 <span class="text-sm font-normal text-slate-400">条</span></h3></div>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+<tr><th class="px-6 py-4 font-semibold">日志ID</th><th class="px-6 py-4 font-semibold">设备名称</th><th class="px-6 py-4 font-semibold">异常类型</th><th class="px-6 py-4 font-semibold">发生时间</th><th class="px-6 py-4 font-semibold">重试次数</th><th class="px-6 py-4 font-semibold">告警状态</th><th class="px-6 py-4 font-semibold">处理状态</th><th class="px-6 py-4 font-semibold text-right">操作</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 text-slate-500">#ERR-001</td><td class="px-6 py-4 font-medium">研发楼A座考勤机</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-sm">断网</span></td><td class="px-6 py-4">2026-05-19 08:15</td><td class="px-6 py-4">3次</td><td class="px-6 py-4"><span class="text-green-600 text-sm">已告警</span></td><td class="px-6 py-4"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">待处理</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline text-sm">处理</button></td></tr>
+<tr class="hover:bg-slate-50 bg-slate-50/50"><td class="px-6 py-4 text-slate-500">#ERR-002</td><td class="px-6 py-4 font-medium">1号厂区主门禁</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-sm">同步失败</span></td><td class="px-6 py-4">2026-05-19 09:30</td><td class="px-6 py-4">5次</td><td class="px-6 py-4"><span class="text-green-600 text-sm">已告警</span></td><td class="px-6 py-4"><span class="px-2 py-1 bg-blue-100 text-indigo-700 rounded text-sm">处理中</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline text-sm">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 text-slate-500">#ERR-003</td><td class="px-6 py-4 font-medium">2号车间侧门</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-sm">时间校准</span></td><td class="px-6 py-4">2026-05-19 06:00</td><td class="px-6 py-4">1次</td><td class="px-6 py-4"><span class="text-green-600 text-sm">已告警</span></td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">已解决</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline text-sm">查看</button></td></tr>
+<tr class="hover:bg-slate-50 bg-slate-50/50"><td class="px-6 py-4 text-slate-500">#ERR-004</td><td class="px-6 py-4 font-medium">研发楼B座考勤机</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-sm">代打卡风险</span></td><td class="px-6 py-4">2026-05-18 18:05</td><td class="px-6 py-4">—</td><td class="px-6 py-4"><span class="text-green-600 text-sm">已告警</span></td><td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">已解决</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline text-sm">查看</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 text-slate-500">#ERR-005</td><td class="px-6 py-4 font-medium">食堂侧门考勤机</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-sm">同步失败</span></td><td class="px-6 py-4">2026-05-18 22:30</td><td class="px-6 py-4">2次</td><td class="px-6 py-4"><span class="text-slate-400 text-sm">未告警</span></td><td class="px-6 py-4"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">待处理</span></td><td class="px-6 py-4 text-right"><button class="text-indigo-600 hover:underline text-sm">处理</button></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // ====== TAB Switching ======
+        function switchTab(containerId, tabIndex) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          const tabs = container.querySelectorAll('.tab-header > button, .tab-btn');
+          const panels = container.parentElement.querySelectorAll('.tab-panel');
+          tabs.forEach((t, i) => {
+            if (i === tabIndex) {
+              t.classList.add('tab-active');
+              t.classList.remove('text-slate-500');
+            } else {
+              t.classList.remove('tab-active');
+              t.classList.add('text-slate-500');
+            }
+          });
+          panels.forEach((p, i) => {
+            p.classList.toggle('hidden', i !== tabIndex);
+          });
+        }
+
+        // ====== Modal System ======
+        let modalCallback = null;
+
+        function openModal(title, bodyHTML, footerHTML, width='max-w-lg') {
+          document.getElementById('modalOverlay').classList.remove('hidden');
+          const modal = document.getElementById('mainModal');
+          modal.classList.remove('hidden');
+          const inner = modal.querySelector('div:first-child');
+          inner.classList.remove('max-w-lg', 'max-w-2xl', 'max-w-md');
+          inner.classList.add(width);
+          document.getElementById('modalTitle').textContent = title;
+          document.getElementById('modalBody').innerHTML = bodyHTML;
+          if (footerHTML) {
+            document.getElementById('modalFooter').innerHTML = footerHTML;
+          } else {
+            document.getElementById('modalFooter').innerHTML = `
+              <button onclick="closeModal()" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">取消</button>
+              <button onclick="confirmModal()" class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700" id="modalConfirmBtn">确认</button>`;
+          }
+          modalCallback = null;
+        }
+
+        function closeModal() {
+          document.getElementById('modalOverlay').classList.add('hidden');
+          document.getElementById('mainModal').classList.add('hidden');
+          modalCallback = null;
+        }
+
+        function setModalConfirm(callback, btnText = '确认', btnClass = 'bg-indigo-600 hover:bg-indigo-700') {
+          modalCallback = callback;
+          const btn = document.getElementById('modalConfirmBtn');
+          if (btn) { btn.textContent = btnText; btn.className = `px-5 py-2 text-white rounded-lg text-sm font-medium transition-colors ${btnClass}`; }
+        }
+
+        function confirmModal() {
+          if (modalCallback) modalCallback();
+          else closeModal();
+        }
+
+        // ====== Confirm Dialog ======
+        let confirmCallback = null;
+
+        function showConfirm(title, message, callback, btnText = '确认', btnClass = 'bg-red-600 hover:bg-red-700', icon = 'alert-triangle') {
+          document.getElementById('confirmOverlay').classList.remove('hidden');
+          document.getElementById('confirmDialog').classList.remove('hidden');
+          document.getElementById('confirmTitle').textContent = title;
+          document.getElementById('confirmMessage').textContent = message;
+          const actionBtn = document.getElementById('confirmActionBtn');
+          actionBtn.textContent = btnText;
+          actionBtn.className = `flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-medium transition-colors ${btnClass}`;
+          const iconEl = document.getElementById('confirmIcon');
+          iconEl.setAttribute('icon', `lucide:${icon}`);
+          confirmCallback = callback;
+        }
+
+        function closeConfirm() {
+          document.getElementById('confirmOverlay').classList.add('hidden');
+          document.getElementById('confirmDialog').classList.add('hidden');
+          confirmCallback = null;
+        }
+
+        function execConfirm() {
+          if (confirmCallback) { confirmCallback(); }
+          closeConfirm();
+        }
+
+        // ====== Toast System ======
+        function showToast(message, type = 'success', duration = 3000) {
+          const container = document.getElementById('toastContainer');
+          const icons = { success: 'check-circle-2', error: 'x-circle', warning: 'alert-triangle' };
+          const colors = { success: 'bg-green-50 border-green-200 text-green-800', error: 'bg-red-50 border-red-200 text-red-800', warning: 'bg-amber-50 border-amber-200 text-amber-800' };
+          const iconColors = { success: 'text-green-500', error: 'text-red-500', warning: 'text-amber-500' };
+          const toast = document.createElement('div');
+          toast.className = `flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg ${colors[type]} min-w-[320px] transform transition-all duration-300`;
+          toast.innerHTML = `
+            <iconify-icon icon="lucide:${icons[type]}" class="text-lg ${iconColors[type]} shrink-0"></iconify-icon>
+            <span class="text-sm font-medium flex-1">${message}</span>
+            <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100">
+              <iconify-icon icon="lucide:x" class="text-sm"></iconify-icon>
+            </button>`;
+          container.appendChild(toast);
+          setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100px)'; setTimeout(() => toast.remove(), 300); }, duration);
+        }
+
+        // ====== Settings Specific Functions ======
+        function openNewDeviceModal(name) {
+          var isEdit = !!name;
+          var bodyHTML = `<div class="space-y-4">
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">设备名称 <span class="text-red-500">*</span></label>
+              <input type="text" value="${name||''}" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" placeholder="请输入设备名称" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">所属组织</label>
+                <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                  <option>总公司 / 技术部</option><option>总公司 / 生产部</option><option>总公司 / 人事部</option>
+                </select>
+              </div>
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">所属厂区</label>
+                <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                  <option>1号厂区</option><option>2号厂区</option><option>研发楼A座</option><option>研发楼B座</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">IP地址</label><input type="text" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" placeholder="192.168.1.xxx" /></div>
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">序列号</label><input type="text" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">品牌型号</label>
+                <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                  <option>中控</option><option>海康</option><option>其他</option>
+                </select>
+              </div>
+              <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">在线状态</label>
+                <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                  <option>在线</option><option>离线</option>
+                </select>
+              </div>
+            </div>
+          </div>`;
+          openModal(isEdit ? '编辑考勤设备' : '添加考勤设备', bodyHTML);
+          setModalConfirm(function(){ closeModal(); showToast('设备信息保存成功', 'success'); }, '保存', 'bg-indigo-600 hover:bg-indigo-700');
+        }
+
+        function openEditParamModal(paramName, paramValue, paramDesc) {
+          var bodyHTML = `<div class="space-y-4">
+            <div class="p-3 bg-slate-50 rounded-lg">
+              <div class="flex justify-between text-sm"><span class="text-slate-500">参数名称</span><span class="font-semibold text-slate-900">${paramName}</span></div>
+              <div class="mt-2 text-sm text-slate-400">${paramDesc}</div>
+            </div>
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">参数值</label>
+              <input type="text" value="${paramValue}" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" />
+            </div>
+          </div>`;
+          openModal('编辑参数', bodyHTML);
+          setModalConfirm(function(){ closeModal(); showToast('参数已更新', 'success'); }, '保存', 'bg-indigo-600 hover:bg-indigo-700');
+        }
+
+        function openNewRoleModal() {
+          var bodyHTML = `<div class="space-y-4">
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">角色名称</label>
+              <input type="text" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" placeholder="请输入角色名称" />
+            </div>
+            <div><label class="text-sm font-semibold text-slate-500 mb-2">功能权限</label>
+              <div class="grid grid-cols-2 gap-2">${['驾驶舱','打卡管理','考勤审批','排班管理','报表中心','规则配置','加班调休','设备管理'].map(function(f){ return '<label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked class="rounded text-indigo-600"/><span class="text-sm text-slate-700">'+f+'</span></label>'; }).join('')}</div>
+            </div>
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">数据权限</label>
+              <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                <option>全公司</option><option>本部门及下级</option><option>仅本人</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <span class="text-sm font-medium text-slate-700">状态</span>
+              <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-9 h-5 bg-slate-300 rounded-full peer peer-checked:bg-indigo-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div></label>
+            </div>
+          </div>`;
+          openModal('新建角色', bodyHTML);
+          setModalConfirm(function(){ closeModal(); showToast('角色创建成功', 'success'); }, '保存', 'bg-indigo-600 hover:bg-indigo-700');
+        }
+
+        function openEditRoleModal(name) {
+          var bodyHTML = `<div class="space-y-4">
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">角色名称</label>
+              <input type="text" value="${name}" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" />
+            </div>
+            <div><label class="text-sm font-semibold text-slate-500 mb-2">功能权限</label>
+              <div class="grid grid-cols-2 gap-2">${['驾驶舱','打卡管理','考勤审批','排班管理','报表中心','规则配置','加班调休','设备管理'].map(function(f){ return '<label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked class="rounded text-indigo-600"/><span class="text-sm text-slate-700">'+f+'</span></label>'; }).join('')}</div>
+            </div>
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">数据权限</label>
+              <select class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
+                <option>全公司</option><option>本部门及下级</option><option>仅本人</option>
+              </select>
+            </div>
+          </div>`;
+          openModal('编辑角色', bodyHTML);
+          setModalConfirm(function(){ closeModal(); showToast('角色已更新', 'success'); }, '保存', 'bg-indigo-600 hover:bg-indigo-700');
+        }
+
+        function openErrorRuleConfig() {
+          var bodyHTML = `<div class="space-y-4">
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">自动重试次数</label>
+              <input type="number" value="3" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" />
+            </div>
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">断网缓存时长 (分钟)</label>
+              <input type="number" value="60" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" />
+            </div>
+            <div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">告警阈值配置</label>
+              <input type="number" value="5" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-blue-100 transition-all" />
+            </div>
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <span class="text-sm font-medium text-slate-700">代打卡风险检测</span>
+              <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-9 h-5 bg-slate-300 rounded-full peer peer-checked:bg-indigo-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div></label>
+            </div>
+          </div>`;
+          openModal('异常规则配置', bodyHTML);
+          setModalConfirm(function(){ closeModal(); showToast('异常规则配置已保存', 'success'); }, '保存', 'bg-indigo-600 hover:bg-indigo-700');
+        }
+    </script>
+<!-- Modal Overlay -->
+<script>
+function showToast(message, type, duration) {
+    type = type || 'success'; duration = duration || 3000;
+    var container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer'; container.className = 'fixed top-4 right-4 z-[100] flex flex-col gap-2';
+        document.body.appendChild(container);
+    }
+    var icons = { success: 'check-circle-2', error: 'x-circle', warning: 'alert-triangle' };
+    var colors = { success: 'bg-green-50 border-green-200 text-green-800', error: 'bg-red-50 border-red-200 text-red-800', warning: 'bg-amber-50 border-amber-200 text-amber-800' };
+    var toast = document.createElement('div');
+    toast.className = 'flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg ' + (colors[type] || colors.success) + ' min-w-[320px]';
+    toast.innerHTML = '<iconify-icon icon="lucide:' + (icons[type] || icons.success) + '" class="text-lg shrink-0"></iconify-icon><span class="text-sm font-medium flex-1">' + message + '</span><button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100"><iconify-icon icon="lucide:x" class="text-sm"></iconify-icon></button>';
+    container.appendChild(toast);
+    setTimeout(function() { toast.style.opacity = '0'; toast.style.transform = 'translateX(100px)'; setTimeout(function() { toast.remove(); }, 300); }, duration);
+}
+</script>
+<div class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity" id="modalOverlay" onclick="closeModal()"></div>
+<!-- Main Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="mainModal">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform transition-all">
+<div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
+<h3 class="text-lg font-bold text-slate-900" id="modalTitle">弹窗标题</h3>
+<button class="p-1.5 hover:bg-slate-100 rounded-lg transition-colors" onclick="closeModal()">
+<iconify-icon class="text-lg text-slate-400" icon="lucide:x"></iconify-icon>
+</button>
+</div>
+<div class="px-6 py-5 max-h-96 overflow-y-auto" id="modalBody">
+</div>
+<div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl" id="modalFooter">
+<button class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50" onclick="closeModal()">取消</button>
+<button class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700" id="modalConfirmBtn" onclick="confirmModal()">确认</button>
+</div>
+</div>
+</div>
+<!-- Confirm Dialog -->
+<div class="fixed inset-0 bg-black/50 z-50 hidden" id="confirmOverlay" onclick="closeConfirm()"></div>
+<div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="confirmDialog">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+<div class="px-6 pt-6 pb-2 text-center">
+<div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center" id="confirmIconWrap">
+<iconify-icon class="text-2xl text-red-500" icon="lucide:alert-triangle" id="confirmIcon"></iconify-icon>
+</div>
+<h3 class="text-lg font-bold text-slate-900" id="confirmTitle">确认操作</h3>
+<p class="text-sm text-slate-500 mt-2" id="confirmMessage">确定要执行此操作吗？</p>
+</div>
+<div class="flex gap-3 px-6 pb-6 pt-4 justify-center">
+<button class="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" onclick="closeConfirm()">取消</button>
+<button class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors" id="confirmActionBtn" onclick="execConfirm()">确认</button>
+</div>
+</div>
+</div>
+<!-- Toast Container -->
+<div class="fixed top-4 right-4 z-[100] flex flex-col gap-2" id="toastContainer"></div>
+</body>
+</html>

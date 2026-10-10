@@ -1,0 +1,51 @@
+// 详情弹窗样式（从原型文件提取）
+.detail-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.detail-tabs .detail-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.detail-tabs .detail-tab.active {
+  color: #4A7BF7;
+  border-bottom-color: #4A7BF7;
+  font-weight: 500;
+}
+
+.detail-tabs .detail-tab:hover {
+  color: #4A7BF7;
+}
+
+.detail-content {
+  display: none;
+}
+
+.detail-content.show {
+  display: block;
+}
+
+// 章节标题
+.form-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-section-title .icon {
+  color: #4A7BF7;
+  font-size: 16px;
+}

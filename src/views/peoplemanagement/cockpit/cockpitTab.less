@@ -1,0 +1,503 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  animation: fade-in-up 0.35s ease;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.current-scope-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.current-scope-info strong {
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.scope-update-text,
+.risk-total-text {
+  margin-left: auto;
+  font-size: 10px;
+}
+
+.risk-total-text {
+  color: var(--danger);
+}
+
+.risk-total-num {
+  font-weight: 700;
+}
+
+.stat-pills,
+.stat-cards,
+.grid-2col,
+.grid-3col {
+  display: grid;
+  gap: var(--gap);
+}
+
+.stat-pills.cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.stat-pills.cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.stat-pills.cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.stat-pills.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stat-cards {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid-2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.stat-pill,
+.stat-card,
+.card,
+.mini-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: var(--transition);
+}
+
+.stat-pill:hover,
+.stat-card:hover,
+.card:hover,
+.mini-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.pill-dot.blue {
+  background: var(--blue-primary);
+  box-shadow: 0 0 8px var(--blue-primary);
+}
+
+.pill-dot.green {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.pill-dot.orange {
+  background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
+}
+
+.pill-dot.red {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+}
+
+.pill-dot.cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.pill-dot.warn {
+  background: var(--warning);
+  box-shadow: 0 0 8px var(--warning);
+}
+
+.pill-dot.purple {
+  background: var(--purple);
+  box-shadow: 0 0 8px var(--purple);
+}
+
+.pill-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pill-value,
+.stat-value {
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.pill-value.highlight {
+  color: var(--blue-primary);
+}
+
+.pill-value.danger {
+  color: var(--danger);
+}
+
+.pill-label,
+.stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.pill-trend,
+.pill-sub {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.pill-trend {
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.pill-trend.up {
+  background: rgba(5, 150, 105, 0.08);
+  color: var(--success);
+}
+
+.pill-trend.down {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+}
+
+.pill-trend.warn {
+  background: rgba(217, 119, 6, 0.08);
+  color: var(--warning);
+}
+
+.pill-sub {
+  color: var(--text-muted);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.stat-icon /deep/ .anticon {
+  font-size: 20px;
+}
+
+.stat-icon.blue {
+  background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
+}
+
+.stat-icon.cyan {
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+}
+
+.stat-icon.green {
+  background: linear-gradient(135deg, var(--success), #34d399);
+}
+
+.stat-icon.orange {
+  background: linear-gradient(135deg, var(--orange), #fb923c);
+}
+
+.stat-icon.purple {
+  background: linear-gradient(135deg, var(--purple), #a78bfa);
+}
+
+.card,
+.mini-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card {
+  min-height: 280px;
+  padding: 16px 18px;
+  border-radius: 16px;
+}
+
+.mini-card {
+  min-height: 220px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.card-title,
+.mc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.05);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mc-title {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.icon,
+.mc-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-blue);
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.mc-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+.icon /deep/ .anticon,
+.mc-icon /deep/ .anticon {
+  font-size: 12px;
+}
+
+.mc-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.mc-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mc-list::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.15);
+  border-radius: 2px;
+}
+
+.compact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.04);
+  font-size: 11px;
+}
+
+.ci-rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ci-rank.top {
+  background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
+}
+
+.ci-rank.mid {
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+}
+
+.ci-rank.low {
+  background: var(--slate);
+}
+
+.ci-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ci-value {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ci-value.good {
+  color: var(--success);
+}
+
+.ci-value.warn {
+  color: var(--warning);
+}
+
+.ci-value.bad {
+  color: var(--danger);
+}
+
+.mc-footnote,
+.personnel-note {
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+
+.personnel-note.danger {
+  color: var(--danger);
+  grid-column: 1 / -1;
+}
+
+.personnel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 10px;
+}
+
+.personnel-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.pi-label {
+  width: 56px;
+  color: var(--text-secondary);
+  text-align: right;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.pi-bar {
+  flex: 1;
+  min-width: 20px;
+  height: 7px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.pi-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.pi-val {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-gap {
+  margin-bottom: var(--gap);
+}
+
+.flex-grid {
+  min-height: 0;
+}
+
+.min-card {
+  min-height: 260px;
+}
+
+.limited-card {
+  max-height: 280px;
+}
+
+.risk-card {
+  max-height: 300px;
+}
+
+.risk-center-card {
+  min-height: 200px;
+}
+
+.comply-card {
+  min-height: 180px;
+}
+
+@media (max-width: 1400px) {
+  .stat-pills.cols-8,
+  .stat-pills.cols-7 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .stat-pills.cols-8,
+  .stat-pills.cols-7,
+  .stat-pills.cols-5,
+  .stat-pills.cols-4,
+  .stat-cards,
+  .grid-2col,
+  .grid-3col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-pills.cols-8,
+  .stat-pills.cols-7,
+  .stat-pills.cols-5,
+  .stat-pills.cols-4,
+  .stat-cards,
+  .grid-2col,
+  .grid-3col {
+    grid-template-columns: 1fr;
+  }
+}

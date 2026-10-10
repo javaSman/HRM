@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>考勤管理</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1890FF;
+      --primary-grad: linear-gradient(135deg, #3B82F6, #22D3EE);
+      --primary-grad-h: linear-gradient(90deg, #2563EB, #38BDF8);
+      --primary-light: #E6F4FF;
+      --accent: #38BDF8;
+      --border: #E8EBF0;
+      --border-light: #F0F1F5;
+      --text-title: #222222;
+      --text-body: #333333;
+      --text-secondary: #666666;
+      --text-muted: #888888;
+      --card-bg: #FFFFFF;
+      --page-bg: #F5F7FA;
+      --hover-bg: #FAFBFE;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+    body {
+      background: var(--page-bg);
+      color: var(--text-title);
+      min-height: 100vh;
+    }
+
+    .page-wrap {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ===== 侧边栏 ===== */
+    .sidebar {
+      width: 110px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      padding-top: 36px;
+      gap: 24px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--primary-grad-h);
+    }
+    .sidebar-child-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+    .sidebar-item {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+    .sidebar-item:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    .sidebar-item.active {
+      color: #fff;
+      background: var(--primary-grad);
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(24,144,255,0.25);
+    }
+
+    /* ===== 主内容 ===== */
+    .main-content {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      padding: 28px 32px;
+      position: relative;
+      overflow-y: auto;
+      max-height: calc(100vh - 40px);
+    }
+    .main-content::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--primary-grad-h);
+    }
+    .main-content::-webkit-scrollbar { width: 5px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .header-left h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+    .header-left p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* ========== 板块 ========== */
+    .section-block {
+      margin-bottom: 28px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-body);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before {
+      content: "";
+      width: 3px; height: 16px;
+      border-radius: 2px;
+      background: var(--primary-grad);
+      display: inline-block;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+
+    /* ===== 卡片 ===== */
+    .icon-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #EDF2FF;
+      border: 1px solid #D6E2FB;
+      box-shadow: none;
+    }
+    .icon-card:hover {
+      background: #DBE4FE;
+      border-color: #A0BDF9;
+      box-shadow: 0 2px 12px rgba(24,100,255,0.08);
+      transform: translateY(-2px);
+    }
+    .icon-card:hover .card-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .icon-card .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    }
+    .icon-card:hover .card-icon {
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    /* ===== 图标颜色 - 蓝青柔和渐变色系 ===== */
+    .ic-kaoqin-1 { background: linear-gradient(135deg, #60A5FA, #3B82F6); }  /* 补卡 */
+    .ic-kaoqin-2 { background: linear-gradient(135deg, #38BDF8, #22D3EE); }  /* 加班 */
+    .ic-kaoqin-3 { background: linear-gradient(135deg, #818CF8, #60A5FA); }  /* 外出 */
+    .ic-kaoqin-4 { background: linear-gradient(135deg, #FBBF24, #F59E0B); }  /* 请假 */
+    .ic-kaoqin-5 { background: linear-gradient(135deg, #34D399, #10B981); }  /* 移动打卡 */
+    .ic-kaoqin-6 { background: linear-gradient(135deg, #67E8F9, #22D3EE); }  /* 工龄 */
+    .ic-kaoqin-7 { background: linear-gradient(135deg, #A78BFA, #818CF8); }  /* 外勤 */
+    .ic-kaoqin-8 { background: linear-gradient(135deg, #94A3B8, #64748B); }  /* 加班补卡 */
+    .ic-kaoqin-9 { background: linear-gradient(135deg, #F87171, #EF4444); }  /* 批量补卡 */
+    .ic-sushe-1 { background: linear-gradient(135deg, #FDBA74, #FB923C); }   /* 入住 */
+    .ic-sushe-2 { background: linear-gradient(135deg, #FCD34D, #FBBF24); }   /* 退宿 */
+    .ic-sushe-3 { background: linear-gradient(135deg, #FCA5A5, #F87171); }   /* 调寝 */
+    .ic-sushe-4 { background: linear-gradient(135deg, #FDE68A, #FCD34D); }   /* 宿管 */
+    .ic-renshi-1 { background: linear-gradient(135deg, #93C5FD, #60A5FA); }  /* 调岗 */
+    .ic-renshi-2 { background: linear-gradient(135deg, #38BDF8, #3B82F6); }  /* 用人 */
+    .ic-renshi-3 { background: linear-gradient(135deg, #6EE7B7, #34D399); }  /* 社保 */
+    .ic-renshi-4 { background: linear-gradient(135deg, #FCD34D, #F59E0B); }  /* 临时工 */
+    .ic-renshi-5 { background: linear-gradient(135deg, #FDA4AF, #F87171); }  /* 离职 */
+    .ic-renshi-6 { background: linear-gradient(135deg, #67E8F9, #38BDF8); }  /* 裁员 */
+    .ic-gongtong-1 { background: linear-gradient(135deg, #5EEAD4, #2DD4BF); } /* 访客接待 */
+    .ic-gongtong-2 { background: linear-gradient(135deg, #7DD3FC, #38BDF8); } /* 访客申请 */
+    .ic-gongtong-3 { background: linear-gradient(135deg, #818CF8, #6366F1); } /* 自助访客登记 */
+    .ic-gongtong-4 { background: linear-gradient(135deg, #67E8F9, #22D3EE); } /* 放行条 */
+    .ic-gongtong-5 { background: linear-gradient(135deg, #C4B5FD, #A78BFA); } /* 会议预约 */
+    .ic-yongche-1 { background: linear-gradient(135deg, #FCD34D, #FBBF24); }  /* 停车位列表 */
+    .ic-yongche-2 { background: linear-gradient(135deg, #FDBA74, #FB923C); }  /* 停车位申请 */
+    .ic-yongche-3 { background: linear-gradient(135deg, #FDE68A, #FCD34D); }  /* 停车票申请 */
+    .ic-yongche-4 { background: linear-gradient(135deg, #FCA5A5, #EF4444); }  /* 车辆状态 */
+    .ic-yongche-5 { background: linear-gradient(135deg, #7DD3FC, #3B82F6); }  /* 公车申请 */
+    .ic-yongche-6 { background: linear-gradient(135deg, #FDBA74, #F97316); }  /* 货运车辆申请 */
+    .ic-yongche-7 { background: linear-gradient(135deg, #93C5FD, #818CF8); }  /* 我的货运申请单 */
+    .ic-yongche-8 { background: linear-gradient(135deg, #94A3B8, #64748B); }  /* 运营管理 */
+    .ic-yongche-9 { background: linear-gradient(135deg, #6EE7B7, #34D399); }  /* 司机货运订单 */
+
+    /* 未启用模块 - 卡片浅灰背景 */
+    .icon-card.disabled {
+      background: #F8F9FB;
+      border-color: #EDEEF2;
+      cursor: not-allowed;
+      opacity: 0.82;
+    }
+    .icon-card.disabled:hover {
+      background: #F4F5F8;
+      border-color: #E4E5EA;
+      box-shadow: none;
+      transform: none;
+    }
+    .icon-card.disabled:hover .card-icon {
+      transform: none;
+      box-shadow: none;
+    }
+    .icon-card.disabled:hover .card-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .icon-card .card-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-align: center;
+      white-space: nowrap;
+      transition: color 0.25s ease;
+    }
+
+    .audit-view { display: none; }
+    .audit-view.active { display: block; }
+    .apply-view.active { display: block; }
+    .apply-view { display: none; }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 40px;
+    }
+    .empty-state .empty-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: #F4F5FA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #c0c7d0;
+      margin-bottom: 16px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="sidebar">
+      <div class="sidebar-child-wrap">
+        <div class="sidebar-item active" id="menuApply">申请</div>
+        <div class="sidebar-item" id="menuAudit">我的审批</div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="header-left">
+          <h2 id="pageTitle">申请中心</h2>
+          <p id="pageDesc">快速办理各类考勤、宿舍、人事等业务申请</p>
+        </div>
+      </div>
+
+      <div class="apply-view active">
+
+        <!-- 考勤 -->
+        <div class="section-block">
+          <div class="section-title">考勤</div>
+          <div class="section-grid">
+            <div class="icon-card"><div class="card-icon ic-kaoqin-1"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="card-label">补卡申请</div></div>
+            <div class="icon-card"><div class="card-icon ic-kaoqin-2"><i class="fa-solid fa-hourglass-half"></i></div><div class="card-label">加班申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-3"><i class="fa-solid fa-person-walking-arrow-right"></i></div><div class="card-label">外出申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-4"><i class="fa-solid fa-calendar-minus"></i></div><div class="card-label">请假申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-5"><i class="fa-solid fa-mobile-screen"></i></div><div class="card-label">移动打卡申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-6"><i class="fa-solid fa-file-signature"></i></div><div class="card-label">工龄年限申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-7"><i class="fa-solid fa-person-walking-luggage"></i></div><div class="card-label">外勤申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-8"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="card-label">加班补卡申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-kaoqin-9"><i class="fa-solid fa-layer-group"></i></div><div class="card-label">批量补卡申请</div></div>
+          </div>
+        </div>
+
+        <!-- 宿舍食堂 -->
+        <div class="section-block">
+          <div class="section-title">宿舍食堂</div>
+          <div class="section-grid">
+            <div class="icon-card disabled"><div class="card-icon ic-sushe-1"><i class="fa-solid fa-house-user"></i></div><div class="card-label">入住申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-sushe-2"><i class="fa-solid fa-door-open"></i></div><div class="card-label">退宿申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-sushe-3"><i class="fa-solid fa-bed-pulse"></i></div><div class="card-label">调寝申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-sushe-4"><i class="fa-solid fa-building-circle-check"></i></div><div class="card-label">宿管管理</div></div>
+          </div>
+        </div>
+
+        <!-- 人事管理 -->
+        <div class="section-block">
+          <div class="section-title">人事管理</div>
+          <div class="section-grid">
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-1"><i class="fa-solid fa-shuffle"></i></div><div class="card-label">调岗申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-2"><i class="fa-solid fa-users-gear"></i></div><div class="card-label">用人申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-3"><i class="fa-solid fa-id-card-clip"></i></div><div class="card-label">社保调档申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-4"><i class="fa-solid fa-user-clock"></i></div><div class="card-label">临时工需求</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-5"><i class="fa-solid fa-right-from-bracket"></i></div><div class="card-label">离职申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-renshi-6"><i class="fa-solid fa-calculator"></i></div><div class="card-label">裁员核算</div></div>
+          </div>
+        </div>
+
+        <!-- 办公协同 -->
+        <div class="section-block">
+          <div class="section-title">办公协同</div>
+          <div class="section-grid">
+            <div class="icon-card disabled"><div class="card-icon ic-gongtong-1"><i class="fa-solid fa-handshake"></i></div><div class="card-label">访客接待</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-gongtong-2"><i class="fa-solid fa-file-circle-plus"></i></div><div class="card-label">访客申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-gongtong-3"><i class="fa-solid fa-clipboard-list"></i></div><div class="card-label">自助访客登记</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-gongtong-4"><i class="fa-solid fa-passport"></i></div><div class="card-label">放行条</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-gongtong-5"><i class="fa-solid fa-calendar-check"></i></div><div class="card-label">会议预约</div></div>
+          </div>
+        </div>
+
+        <!-- 用车管理 -->
+        <div class="section-block">
+          <div class="section-title">用车管理</div>
+          <div class="section-grid">
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-1"><i class="fa-solid fa-square-parking"></i></div><div class="card-label">停车位列表</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-2"><i class="fa-solid fa-circle-check"></i></div><div class="card-label">停车位申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-3"><i class="fa-solid fa-ticket"></i></div><div class="card-label">停车票申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-4"><i class="fa-solid fa-car-burst"></i></div><div class="card-label">车辆状态</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-5"><i class="fa-solid fa-car-side"></i></div><div class="card-label">公车申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-6"><i class="fa-solid fa-truck-fast"></i></div><div class="card-label">货运车辆申请</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-7"><i class="fa-solid fa-file-invoice"></i></div><div class="card-label">我的货运申请单</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-8"><i class="fa-solid fa-cogs"></i></div><div class="card-label">运营管理</div></div>
+            <div class="icon-card disabled"><div class="card-icon ic-yongche-9"><i class="fa-solid fa-truck-field"></i></div><div class="card-label">司机货运订单</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="audit-view">
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-regular fa-circle-check"></i></div>
+          <p>暂无待审批单据</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menuApply = document.getElementById('menuApply');
+    const menuAudit = document.getElementById('menuAudit');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageDesc = document.getElementById('pageDesc');
+    const applyView = document.querySelector('.apply-view');
+    const auditView = document.querySelector('.audit-view');
+
+    menuApply.addEventListener('click', () => {
+      menuApply.classList.add('active'); menuAudit.classList.remove('active');
+      pageTitle.innerText = '申请中心';
+      pageDesc.innerText = '快速办理各类考勤、宿舍、人事等业务申请';
+      applyView.classList.add('active'); auditView.classList.remove('active');
+    });
+
+    menuAudit.addEventListener('click', () => {
+      menuAudit.classList.add('active'); menuApply.classList.remove('active');
+      pageTitle.innerText = '我的审批';
+      pageDesc.innerText = '处理待我审核的全部单据';
+      auditView.classList.add('active'); applyView.classList.remove('active');
+    });
+  </script>
+</body>
+</html>

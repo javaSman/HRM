@@ -1,0 +1,2311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QY集团 · 人员角色管理系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================
+   CSS Variables — Blue-White Theme
+   ============================================ */
+:root {
+  --radius: 0.5rem;
+  --background: #f8fafd;
+  --foreground: #1a2a3d;
+  --card: #ffffff;
+  --card-foreground: #1a2a3d;
+  --popover: #ffffff;
+  --popover-foreground: #1a2a3d;
+  --primary: #2563eb;
+  --primary-rgb: 37, 99, 235;
+  --primary-foreground: #ffffff;
+  --secondary: #eff3fb;
+  --secondary-foreground: #1e3a5f;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eef2ff;
+  --accent-foreground: #1e3a5f;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --font-sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  --header-h: 0px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.15); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary-rgb), 0.3); }
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes slide-in-left { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-in-right { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes bounce-in {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.08); }
+  70% { transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes wave-in {
+  0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes float-up {
+  0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ripple-effect {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-fade-in-down { animation: fade-in-down 0.3s ease-out both; }
+.animate-scale-in { animation: scale-in 0.25s ease-out both; }
+.animate-slide-in-left { animation: slide-in-left 0.3s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.3s ease-out both; }
+.animate-bounce-in { animation: bounce-in 0.5s ease-out both; }
+.animate-float-up { animation: float-up 0.4s ease-out both; }
+.animate-wave-in { animation: wave-in 0.4s ease-out both; }
+.animate-count-up { animation: count-up 0.3s ease-out both; }
+.animate-check-pop { animation: check-pop 0.3s ease-out both; }
+.animate-dot-pulse { animation: dot-pulse 2s ease-in-out infinite; }
+
+.stagger-children > * { animation: wave-in 0.4s ease-out both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 35ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 70ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 105ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 140ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 175ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 245ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 280ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 315ms; }
+.stagger-children > *:nth-child(n+11) { animation-delay: 350ms; }
+
+/* ============================================
+   Layout
+   ============================================ */
+#app {
+  height: 100vh;
+  display: flex;
+  background: var(--background);
+  overflow: hidden;
+}
+
+/* Left Panel: Org Tree */
+#left-panel {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  animation: slide-in-left 0.3s ease-out both;
+}
+
+#left-panel .panel-header {
+  padding: 20px 20px 4px;
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 200ms;
+}
+
+#left-panel .panel-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(var(--primary-rgb), 0.6);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#left-panel .search-wrap {
+  padding: 0 16px 12px;
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 250ms;
+}
+
+#left-panel .search-wrap .search-box {
+  position: relative;
+}
+
+#left-panel .search-wrap .search-box svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+#left-panel .search-wrap .search-box:focus-within svg {
+  color: rgba(var(--primary-rgb), 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+#left-panel .search-wrap input {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 32px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.03);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#left-panel .search-wrap input::placeholder { color: rgba(var(--primary-rgb), 0.25); }
+#left-panel .search-wrap input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15), 0 0 0 4px rgba(var(--primary-rgb), 0.08);
+}
+
+#left-panel .tree-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+#left-panel .tree-list {
+  padding-bottom: 16px;
+}
+
+/* Org Tree Node */
+.tree-node-item {
+  animation: wave-in 0.4s ease-out both;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tree-node-row:hover { background: rgba(var(--primary-rgb), 0.04); }
+.tree-node-row.selected {
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+
+.tree-node-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--primary-rgb), 0);
+  transition: background 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.tree-node-row:active::after { background: rgba(var(--primary-rgb), 0.06); }
+
+.tree-node-toggle {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+.tree-node-toggle:hover { background: rgba(var(--primary-rgb), 0.1); }
+.tree-node-toggle:active { transform: scale(0.9); }
+
+.tree-node-toggle svg {
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.5);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tree-node-toggle.expanded svg { transform: rotate(0deg); }
+.tree-node-toggle.collapsed svg { transform: rotate(-90deg); }
+
+.tree-node-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.2);
+  flex-shrink: 0;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+.tree-node-row.selected .tree-node-dot {
+  background: rgba(var(--primary-rgb), 0.6);
+  transform: scale(1.25);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.tree-node-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), rgba(var(--primary-rgb), 0.04));
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  transition: all 0.25s ease;
+}
+.tree-node-icon svg {
+  width: 10px !important;
+  height: 10px !important;
+  stroke-width: 2px;
+}
+.tree-node-row:hover .tree-node-icon {
+  transform: scale(1.08);
+  border-color: rgba(var(--primary-rgb), 0.22);
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(var(--primary-rgb), 0.06));
+}
+.tree-node-row.selected .tree-node-icon {
+  transform: scale(1.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.15);
+  background: linear-gradient(135deg, var(--primary), rgba(var(--primary-rgb), 0.75));
+  color: #fff;
+}
+
+.tree-node-name {
+  flex: 1;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.tree-node-count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: rgba(var(--primary-rgb), 0.35);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.tree-node-row:hover .tree-node-count { color: rgba(var(--primary-rgb), 0.5); background: rgba(var(--primary-rgb), 0.05); }
+.tree-node-row.selected .tree-node-count { color: var(--primary); background: rgba(var(--primary-rgb), 0.12); animation: count-up 0.3s ease-out both; }
+
+.tree-node-children {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  position: relative;
+}
+.tree-node-children.expanded { max-height: 2000px; opacity: 1; }
+.tree-node-children.collapsed { max-height: 0; opacity: 0; }
+
+.tree-line-wrap {
+  position: relative;
+}
+.tree-line-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(var(--primary-rgb), 0.15), rgba(var(--primary-rgb), 0.1), transparent);
+  transition: opacity 0.3s ease;
+}
+
+/* ============================================
+   Right Panel: Content Area
+   ============================================ */
+#right-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  animation: slide-in-right 0.3s ease-out both;
+}
+
+/* Tab Bar */
+#tab-bar {
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+  padding: 12px 24px 0;
+  flex-shrink: 0;
+  display: flex;
+  gap: 2px;
+  background: var(--card);
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-btn:hover { color: var(--foreground); }
+.tab-btn.active { color: var(--primary); }
+.tab-btn.active::after { width: 60%; }
+
+.tab-btn svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+.tab-btn.active svg { transform: scale(1.15); }
+
+/* Content Container */
+#content-container {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ============================================
+   Personnel Table
+   ============================================ */
+.personnel-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.personnel-header {
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: var(--card);
+  flex-shrink: 0;
+  animation: fade-in 0.3s ease-out both;
+}
+
+.personnel-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.personnel-header-top h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, var(--primary), #4f7dff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 50ms;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-top: 6px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 100ms;
+}
+
+.breadcrumb svg {
+  width: 12px;
+  height: 12px;
+  color: rgba(var(--primary-rgb), 0.3);
+}
+
+.breadcrumb span:last-child {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.personnel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.personnel-count {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 150ms;
+}
+.personnel-count strong {
+  font-weight: 600;
+  color: var(--primary);
+  animation: count-up 0.3s ease-out both;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), #4f7dff);
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+  box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.15);
+  transition: all 0.2s ease;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:active { transform: scale(0.95); }
+
+.btn-primary svg { width: 14px; height: 14px; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--foreground);
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.btn-outline:hover { background: rgba(var(--primary-rgb), 0.05); border-color: rgba(var(--primary-rgb), 0.25); }
+.btn-outline:active { transform: scale(0.98); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover { background: rgba(var(--primary-rgb), 0.1); }
+.btn-ghost:active { transform: scale(0.9); }
+.btn-ghost svg { width: 14px; height: 14px; }
+
+.personnel-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 250ms;
+}
+
+.filter-search {
+  position: relative;
+  flex: 1;
+  max-width: 240px;
+}
+
+.filter-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+.filter-search:focus-within svg { color: rgba(var(--primary-rgb), 0.6); transform: translateY(-50%) scale(1.1); }
+
+.filter-search input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.03);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.3s ease;
+}
+.filter-search input::placeholder { color: rgba(var(--primary-rgb), 0.25); }
+.filter-search input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15), 0 0 0 4px rgba(var(--primary-rgb), 0.08);
+}
+
+.filter-select {
+  position: relative;
+}
+
+.filter-select select {
+  height: 36px;
+  padding: 0 28px 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.03);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+}
+.filter-select select:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15);
+}
+
+.filter-select::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(var(--primary-rgb), 0.4);
+  pointer-events: none;
+}
+
+/* Table */
+.personnel-table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.personnel-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.personnel-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(var(--primary-rgb), 0.5);
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+  white-space: nowrap;
+}
+
+.personnel-table thead th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+.personnel-table thead th button:hover { color: var(--primary); }
+.personnel-table thead th button svg { width: 12px; height: 12px; }
+
+.personnel-table tbody td {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.04);
+}
+
+.personnel-table tbody tr {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.personnel-table tbody tr:hover {
+  background: rgba(var(--primary-rgb), 0.03);
+  box-shadow: 0 1px 6px rgba(var(--primary-rgb), 0.05);
+  transform: translateY(-1px);
+}
+
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+  transition: box-shadow 0.25s ease;
+}
+tr:hover .avatar { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(var(--primary-rgb), 0.3); }
+
+.person-name { font-weight: 500; line-height: 1.2; }
+.person-email { font-size: 12px; color: rgba(var(--primary-rgb), 0.35); margin-top: 2px; }
+
+.person-position { color: rgba(var(--foreground), 0.8); }
+
+.level-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  background: rgba(var(--primary-rgb), 0.05);
+  color: rgba(var(--primary-rgb), 0.7);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.status-active { background: #ecfdf5; color: #059669; }
+.status-active .status-dot { background: #10b981; }
+.status-inactive { background: #fef2f2; color: #dc2626; }
+.status-inactive .status-dot { background: #ef4444; }
+.status-leave { background: #fffbeb; color: #d97706; }
+.status-leave .status-dot { background: #f59e0b; }
+
+.role-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.role-tag {
+  display: inline-flex;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.role-tag:hover { transform: scale(1.1); }
+.role-tag:active { transform: scale(0.95); }
+
+.person-date { font-size: 14px; color: rgba(var(--primary-rgb), 0.35); font-variant-numeric: tabular-nums; }
+
+.row-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+tr:hover .row-actions { opacity: 1; }
+
+.empty-state {
+  padding: 80px 0;
+  text-align: center;
+  color: rgba(var(--primary-rgb), 0.3);
+}
+.empty-state svg { width: 32px; height: 32px; margin-bottom: 8px; }
+.empty-state span { font-size: 14px; }
+
+/* ============================================
+   Modal / Dialog
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 0.2s ease-out both;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 90%;
+  overflow: hidden;
+  animation: scale-in 0.25s ease-out both;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-banner {
+  background: linear-gradient(135deg, var(--primary), #4f7dff);
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+  padding: 24px 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.04) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.modal-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  animation: bounce-in 0.5s ease-out both;
+  animation-delay: 100ms;
+}
+
+.modal-name { font-size: 16px; color: #fff; animation: fade-in-up 0.35s ease-out both; animation-delay: 150ms; }
+.modal-position { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-top: 2px; animation: fade-in-up 0.35s ease-out both; animation-delay: 180ms; }
+
+.modal-body {
+  padding: 24px;
+  animation: float-up 0.4s ease-out both;
+  animation-delay: 200ms;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-field {}
+.modal-field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(var(--primary-rgb), 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.modal-field-value { font-size: 14px; font-family: var(--font-mono); }
+
+.modal-section { margin-bottom: 20px; }
+.modal-section-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(var(--primary-rgb), 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.modal-contacts { display: flex; gap: 20px; font-size: 14px; }
+.modal-contacts span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(var(--foreground), 0.7);
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+.modal-contacts span:hover { color: var(--primary); }
+.modal-contacts svg { width: 14px; height: 14px; color: rgba(var(--primary-rgb), 0.4); }
+
+.modal-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+}
+.modal-footer button { flex: 1; }
+
+/* ============================================
+   Role Permission Page
+   ============================================ */
+.role-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  animation: fade-in 0.3s ease-out both;
+}
+
+.role-header {
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: var(--card);
+  flex-shrink: 0;
+  animation: fade-in-up 0.35s ease-out both;
+  animation-delay: 50ms;
+}
+
+.role-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #4f7dff);
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(var(--primary-rgb), 0.2);
+  animation: bounce-in 0.5s ease-out both;
+  animation-delay: 100ms;
+}
+.role-icon-box svg { width: 16px; height: 16px; color: #fff; }
+
+.role-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; background: linear-gradient(135deg, var(--primary), #4f7dff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: fade-in-up 0.35s ease-out both; animation-delay: 150ms; }
+.role-subtitle { font-size: 12px; color: rgba(var(--primary-rgb), 0.4); margin-top: 2px; animation: fade-in-up 0.35s ease-out both; animation-delay: 180ms; }
+
+.role-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.role-left {
+  width: 260px;
+  border-right: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.role-left-title {
+  padding: 16px 16px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(var(--primary-rgb), 0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.role-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.role-list { padding: 0 12px 16px; }
+
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.role-item:hover { background: rgba(var(--primary-rgb), 0.04); }
+.role-item.selected { background: rgba(var(--primary-rgb), 0.08); box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.15); }
+.role-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--primary-rgb), 0);
+  transition: background 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.role-item:active::after { background: rgba(var(--primary-rgb), 0.06); }
+
+.role-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid rgba(var(--primary-rgb), 0.2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  animation: check-pop 0.3s ease-out both;
+}
+.role-checkbox.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.role-checkbox.checked svg { width: 10px; height: 10px; }
+
+.role-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+  transition: all 0.2s ease;
+  animation: dot-pulse 3s ease-in-out infinite;
+}
+.role-item:hover .role-color-dot { transform: scale(1.5); }
+
+.role-item-info { flex: 1; min-width: 0; }
+.role-item-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.2s ease; }
+.role-item.selected .role-item-name { color: var(--primary); font-weight: 600; }
+.role-item-meta { font-size: 11px; color: rgba(var(--primary-rgb), 0.3); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.role-item-meta svg { width: 10px; height: 10px; }
+.role-level-tiny { padding: 0 4px; border-radius: 2px; font-size: 10px; }
+
+.role-item-edit {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: rgba(var(--primary-rgb), 0.5);
+}
+.role-item:hover .role-item-edit { opacity: 1; }
+.role-item-edit:hover { background: rgba(var(--primary-rgb), 0.1); }
+
+/* Role Right: Detail */
+.role-right {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--background);
+  min-width: 0;
+}
+
+.role-detail {
+  padding: 24px;
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+.role-detail-header {
+  margin-bottom: 20px;
+}
+.role-detail-header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.role-detail-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.1);
+  transition: transform 0.2s ease;
+  animation: dot-pulse 3s ease-in-out infinite;
+}
+.role-detail-dot:hover { transform: scale(1.5); }
+.role-detail-name { font-size: 16px; font-weight: 600; background: linear-gradient(135deg, var(--primary), #4f7dff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.role-detail-desc { font-size: 14px; color: rgba(var(--primary-rgb), 0.4); padding-left: 28px; }
+.role-detail-actions { display: flex; gap: 8px; margin-top: 16px; padding-left: 28px; }
+
+.role-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: rgba(var(--primary-rgb), 0.25); gap: 8px; }
+.role-empty svg { width: 40px; height: 40px; }
+.role-empty span { font-size: 14px; }
+
+.perm-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(var(--primary-rgb), 0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.perm-module {
+  border: 1px solid rgba(var(--primary-rgb), 0.08);
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.perm-module:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(var(--primary-rgb), 0.08);
+}
+
+.perm-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.perm-module-header:hover { background: rgba(var(--primary-rgb), 0.03); }
+
+.perm-module-left { display: flex; align-items: center; gap: 10px; }
+.perm-module-left svg {
+  width: 14px;
+  height: 14px;
+  color: rgba(var(--primary-rgb), 0.4);
+  transition: transform 0.3s ease;
+}
+.perm-module-left svg.expanded { transform: rotate(0deg); }
+.perm-module-left svg.collapsed { transform: rotate(-90deg); }
+
+.perm-module-name { font-size: 14px; font-weight: 500; }
+
+.perm-module-count {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+}
+.perm-module-count.full { background: #ecfdf5; color: #059669; }
+.perm-module-count.partial { background: rgba(var(--primary-rgb), 0.08); color: rgba(var(--primary-rgb), 0.7); }
+.perm-module-count.none { color: rgba(var(--primary-rgb), 0.25); }
+
+.perm-module-body {
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease;
+}
+.perm-module-body.expanded { max-height: 500px; opacity: 1; }
+.perm-module-body.collapsed { max-height: 0; opacity: 0; }
+
+.perm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 0 16px 12px;
+}
+
+.perm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.perm-check-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: all 0.2s ease;
+}
+.perm-check-icon.granted { background: #ecfdf5; color: #059669; animation: check-pop 0.3s ease-out both; }
+.perm-check-icon.denied { background: rgba(var(--primary-rgb), 0.03); color: rgba(var(--primary-rgb), 0.2); }
+.perm-check-icon svg { width: 10px; height: 10px; }
+.perm-check-icon.granted:hover { transform: scale(1.25); }
+
+.perm-item-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perm-item-src { font-size: 10px; color: rgba(var(--primary-rgb), 0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ============================================
+   Edit Role Dialog (Large)
+   ============================================ */
+.dialog-lg { max-width: 640px; max-height: 85vh; }
+.dialog-lg .modal-body { max-height: 60vh; overflow-y: auto; }
+
+.edit-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.edit-role-field { margin-bottom: 12px; }
+.edit-role-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(var(--primary-rgb), 0.5);
+  margin-bottom: 6px;
+}
+.edit-role-field input, .edit-role-field textarea, .edit-role-field select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.2s ease;
+}
+.edit-role-field input:focus, .edit-role-field textarea:focus, .edit-role-field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15);
+}
+.edit-role-field textarea { resize: none; min-height: 60px; }
+
+.perm-edit-module {
+  border: 1px solid rgba(var(--primary-rgb), 0.08);
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.perm-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.perm-edit-left { display: flex; align-items: center; gap: 10px; }
+.perm-edit-left label { font-size: 14px; font-weight: 500; cursor: pointer; }
+.perm-edit-left input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.perm-edit-body { padding: 0 16px 12px; }
+
+.perm-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.perm-edit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.perm-edit-item:hover { background: rgba(var(--primary-rgb), 0.03); }
+.perm-edit-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.perm-edit-item span { font-size: 12px; }
+.perm-edit-item code { font-size: 10px; color: rgba(var(--primary-rgb), 0.25); display: block; }
+
+.dialog-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(var(--primary-rgb), 0.08);
+  background: rgba(var(--primary-rgb), 0.02);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ============================================
+   Assigned Roles (Person Mode)
+   ============================================ */
+.assigned-roles { margin-bottom: 24px; }
+.assigned-roles .role-tags { margin-top: 8px; }
+
+.separator {
+  height: 1px;
+  background: rgba(var(--primary-rgb), 0.08);
+  margin: 20px 0;
+}
+
+/* ============================================
+   Utility
+   ============================================ */
+.hidden { display: none !important; }
+.text-destructive { color: var(--destructive) !important; }
+
+.level-l1 { background: #fef2f2; color: #dc2626; }
+.level-l2 { background: #fff7ed; color: #ea580c; }
+.level-l3 { background: #eff6ff; color: #2563eb; }
+.level-l4 { background: #ecfdf5; color: #16a34a; }
+.level-l5 { background: #f9fafb; color: #6b7280; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Left Panel -->
+  <div id="left-panel">
+    <div class="panel-header"><h3>组织架构</h3></div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" id="tree-search" placeholder="搜索部门..." />
+      </div>
+    </div>
+    <div class="tree-scroll">
+      <div class="tree-list stagger-children" id="tree-container"></div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div id="right-panel">
+    <div id="tab-bar">
+      <button class="tab-btn active" data-tab="personnel"><i data-lucide="users"></i> 人员管理</button>
+      <button class="tab-btn" data-tab="roles"><i data-lucide="shield"></i> 角色权限</button>
+    </div>
+    <div id="content-container"></div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay hidden" id="detail-modal">
+  <div class="modal-content" id="detail-modal-content"></div>
+</div>
+
+<!-- Edit Role Modal -->
+<div class="modal-overlay hidden" id="role-modal">
+  <div class="modal-content dialog-lg" id="role-modal-content"></div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const permissions = [
+  { id: "p1", module: "人员管理", name: "查看人员", code: "person:view", description: "查看人员列表与详情" },
+  { id: "p2", module: "人员管理", name: "新增人员", code: "person:add", description: "新增员工档案" },
+  { id: "p3", module: "人员管理", name: "编辑人员", code: "person:edit", description: "修改员工信息" },
+  { id: "p4", module: "人员管理", name: "删除人员", code: "person:delete", description: "删除员工档案" },
+  { id: "p5", module: "人员管理", name: "导出人员", code: "person:export", description: "导出人员数据" },
+  { id: "p6", module: "角色管理", name: "查看角色", code: "role:view", description: "查看角色列表" },
+  { id: "p7", module: "角色管理", name: "新增角色", code: "role:add", description: "创建新角色" },
+  { id: "p8", module: "角色管理", name: "编辑角色", code: "role:edit", description: "修改角色信息" },
+  { id: "p9", module: "角色管理", name: "删除角色", code: "role:delete", description: "删除角色" },
+  { id: "p10", module: "角色管理", name: "分配权限", code: "role:assign_perm", description: "为角色分配权限" },
+  { id: "p11", module: "部门管理", name: "查看部门", code: "dept:view", description: "查看组织架构" },
+  { id: "p12", module: "部门管理", name: "新增部门", code: "dept:add", description: "创建新部门" },
+  { id: "p13", module: "部门管理", name: "编辑部门", code: "dept:edit", description: "修改部门信息" },
+  { id: "p14", module: "部门管理", name: "删除部门", code: "dept:delete", description: "删除部门" },
+  { id: "p15", module: "审批管理", name: "查看审批", code: "approval:view", description: "查看审批流程" },
+  { id: "p16", module: "审批管理", name: "发起审批", code: "approval:create", description: "创建审批流程" },
+  { id: "p17", module: "审批管理", name: "审批操作", code: "approval:action", description: "审批通过/驳回" },
+  { id: "p18", module: "报表管理", name: "查看报表", code: "report:view", description: "查看统计报表" },
+  { id: "p19", module: "报表管理", name: "导出报表", code: "report:export", description: "导出报表数据" },
+  { id: "p20", module: "系统设置", name: "查看设置", code: "setting:view", description: "查看系统配置" },
+  { id: "p21", module: "系统设置", name: "修改设置", code: "setting:edit", description: "修改系统配置" }
+];
+
+let roles = [
+  { id: "r1", name: "超级管理员", description: "拥有系统全部权限，可管理所有模块和用户", level: 1, color: "#dc2626", permissions: permissions.map(p => p.id) },
+  { id: "r2", name: "企业管理员", description: "管理企业级配置，可管理所有部门及人员", level: 2, color: "#ea580c", permissions: ["p1","p2","p3","p4","p5","p6","p7","p8","p11","p12","p13","p15","p16","p17","p18","p19","p20"] },
+  { id: "r3", name: "部门负责人", description: "管理本部门人员及审批，可查看报表", level: 3, color: "#2563eb", permissions: ["p1","p2","p3","p5","p6","p11","p15","p16","p17","p18","p19"] },
+  { id: "r4", name: "组长", description: "管理本组人员，可发起和查看审批", level: 4, color: "#16a34a", permissions: ["p1","p3","p11","p15","p16","p18"] },
+  { id: "r5", name: "普通员工", description: "查看基本信息，发起个人审批", level: 5, color: "#9333ea", permissions: ["p1","p11","p15","p16"] },
+  { id: "r6", name: "HR专员", description: "负责人力资源相关业务，管理人员档案", level: 3, color: "#0891b2", permissions: ["p1","p2","p3","p5","p6","p7","p11","p15","p16","p17","p18","p19"] },
+  { id: "r7", name: "财务专员", description: "负责财务相关审批与报表", level: 3, color: "#ca8a04", permissions: ["p1","p11","p15","p16","p17","p18","p19"] }
+];
+
+const departments = [
+  { id: "qy", name: "QY集团", parentId: null, children: [
+    { id: "dept1", name: "事业一部", parentId: "qy", children: [
+      { id: "dept1-1", name: "人力资源部", parentId: "dept1" },
+      { id: "dept1-2", name: "安管部", parentId: "dept1", children: [
+        { id: "dept1-2-1", name: "后勤部-厨房组", parentId: "dept1-2" },
+        { id: "dept1-2-2", name: "后勤部-行政组", parentId: "dept1-2" },
+        { id: "dept1-2-3", name: "后勤部-司机组", parentId: "dept1-2" }
+      ]},
+      { id: "dept1-3", name: "人事部", parentId: "dept1" },
+      { id: "dept1-4", name: "财务部", parentId: "dept1" },
+      { id: "dept1-5", name: "质量运营部", parentId: "dept1" },
+      { id: "dept1-6", name: "研发部", parentId: "dept1" },
+      { id: "dept1-7", name: "供应链管理部", parentId: "dept1" },
+      { id: "dept1-8", name: "工艺研究院", parentId: "dept1" }
+    ]},
+    { id: "dept2", name: "旭益达", parentId: "qy" },
+    { id: "dept3", name: "QY精密装备", parentId: "qy" },
+    { id: "dept4", name: "QY超能", parentId: "qy" },
+    { id: "dept5", name: "昆山QY", parentId: "qy" },
+    { id: "dept6", name: "QY精密组件", parentId: "qy" },
+    { id: "dept7", name: "三烨&维玺&维德", parentId: "qy" },
+    { id: "dept8", name: "QY卡仕标", parentId: "qy" },
+    { id: "dept9", name: "事业二部", parentId: "qy" },
+    { id: "dept10", name: "运维支持中心", parentId: "qy" },
+    { id: "dept11", name: "总经办", parentId: "qy" }
+  ]}
+];
+
+const personNames = ["张伟","李娜","王强","刘洋","陈敏","杨磊","赵静","黄鑫","周芳","吴涛","徐慧","孙浩","马丽","朱军","胡明","郭燕","林峰","何平","罗琳","梁勇","宋雪","唐杰","韩冰","曹宇","邓颖","冯刚","许丹","彭斌","蒋梅","蔡超"];
+
+const positions = {
+  "dept1-1": ["HR总监","HR经理","招聘主管","培训专员","薪酬专员"],
+  "dept1-2": ["安管经理","后勤主管","行政专员","司机班长"],
+  "dept1-2-1": ["厨师长","厨师","帮厨"],
+  "dept1-2-2": ["行政主管","前台","文员","采购专员"],
+  "dept1-2-3": ["司机班长","司机","调度员"],
+  "dept1-3": ["人事经理","人事专员","档案管理员"],
+  "dept1-4": ["财务总监","财务经理","会计","出纳","审计"],
+  "dept1-5": ["质量经理","质量工程师","审核员","运营专员"],
+  "dept1-6": ["研发总监","高级工程师","开发工程师","测试工程师","产品经理","UI设计师"],
+  "dept1-7": ["供应链经理","采购主管","物流专员","仓储管理员"],
+  "dept1-8": ["院长","高级研究员","工艺工程师","技术员"],
+  "dept2": ["总经理","副总经理","项目经理","技术主管","业务员"],
+  "dept3": ["总经理","技术总监","机械工程师","电气工程师","装配技师"],
+  "dept4": ["总经理","研发经理","材料工程师","测试员"],
+  "dept5": ["总经理","生产经理","质检员","操作工"],
+  "dept6": ["总经理","工程经理","模具设计师","CNC操作员"],
+  "dept7": ["总经理","运营经理","销售主管","客服专员"],
+  "dept8": ["总经理","品牌经理","市场专员","渠道经理"],
+  "dept9": ["总经理","事业部总监","区域经理","销售代表"],
+  "dept10": ["运维总监","运维工程师","网络管理员","DBA"],
+  "dept11": ["总经理","秘书","助理","行政专员"]
+};
+
+function getLevel(pos) {
+  const m = { "总经理":"M4","总监":"M3","副总经理":"M3","院长":"M3","经理":"M2","部长":"M2","主管":"M1","班长":"P4","组长":"P4" };
+  for (const [k, v] of Object.entries(m)) { if (pos.includes(k)) return v; }
+  return "P3";
+}
+
+function getRoleIds(deptId, pos) {
+  if (pos.includes("总经理") || pos.includes("总监")) return ["r2"];
+  if (pos.includes("经理") || pos.includes("院长")) return ["r3"];
+  if (pos.includes("主管") || pos.includes("班长")) return ["r4"];
+  if (pos.includes("HR") || pos.includes("招聘") || pos.includes("薪酬") || pos.includes("培训")) return ["r6"];
+  if (pos.includes("财务") || pos.includes("会计") || pos.includes("出纳") || pos.includes("审计")) return ["r7"];
+  return ["r5"];
+}
+
+// Generate persons
+const persons = [];
+let idCounter = 1;
+const leafDeptIds = ["dept1-1","dept1-2","dept1-2-1","dept1-2-2","dept1-2-3","dept1-3","dept1-4","dept1-5","dept1-6","dept1-7","dept1-8","dept2","dept3","dept4","dept5","dept6","dept7","dept8","dept9","dept10","dept11"];
+
+for (const deptId of leafDeptIds) {
+  const posList = positions[deptId] || ["员工"];
+  const count = Math.min(posList.length + 2, 8);
+  for (let i = 0; i < count; i++) {
+    const pos = posList[i % posList.length];
+    const nameIdx = (idCounter - 1) % personNames.length;
+    persons.push({
+      id: `person-${idCounter++}`,
+      name: personNames[nameIdx],
+      departmentId: deptId,
+      position: pos,
+      level: getLevel(pos),
+      roleIds: getRoleIds(deptId, pos),
+      status: idCounter % 20 === 0 ? "离职" : idCounter % 15 === 0 ? "休假" : "在职",
+      phone: `138${String(10000000 + idCounter * 7).slice(0, 8)}`,
+      email: `user${idCounter}@qy.com`,
+      joinDate: `202${Math.min(Math.floor(idCounter / 15), 5)}-${String((idCounter % 12) + 1).padStart(2, "0")}-15`
+    });
+  }
+}
+
+// ==================== HELPERS ====================
+function getDescendantDeptIds(dept) {
+  const ids = [dept.id];
+  if (dept.children) dept.children.forEach(c => ids.push(...getDescendantDeptIds(c)));
+  return ids;
+}
+
+function findDepartment(depts, id) {
+  for (const d of depts) {
+    if (d.id === id) return d;
+    if (d.children) { const f = findDepartment(d.children, id); if (f) return f; }
+  }
+  return null;
+}
+
+function getDeptPath(depts, id) {
+  const path = [];
+  function walk(list, target) {
+    for (const d of list) {
+      path.push(d);
+      if (d.id === target) return true;
+      if (d.children && walk(d.children, target)) return true;
+      path.pop();
+    }
+    return false;
+  }
+  walk(depts, id);
+  return path;
+}
+
+function getPermsByModule() {
+  const map = {};
+  permissions.forEach(p => { if (!map[p.module]) map[p.module] = []; map[p.module].push(p); });
+  return map;
+}
+
+function getPersonsInDept(deptId) {
+  const dept = findDepartment(departments, deptId);
+  if (!dept) return [];
+  const ids = getDescendantDeptIds(dept);
+  return persons.filter(p => ids.includes(p.departmentId));
+}
+
+function buildDeptPersonCountMap() {
+  const map = new Map();
+  const direct = new Map();
+  persons.forEach(p => direct.set(p.departmentId, (direct.get(p.departmentId) || 0) + 1));
+  function walk(dept) {
+    let cnt = direct.get(dept.id) || 0;
+    if (dept.children) dept.children.forEach(c => cnt += walk(c));
+    map.set(dept.id, cnt);
+    return cnt;
+  }
+  departments.forEach(d => walk(d));
+  return map;
+}
+const deptPersonCountMap = buildDeptPersonCountMap();
+
+function getRolePersonCount(roleId) {
+  return persons.filter(p => p.roleIds.includes(roleId)).length;
+}
+
+const avatarColors = ["#2563eb,#3b82f6","#4f46e5,#6366f1","#0284c7,#38bdf8","#0891b2,#22d3ee","#2563eb,#4f46e5","#7c3aed,#3b82f6"];
+
+function getAvatarColor(name) {
+  const idx = name.charCodeAt(0) % avatarColors.length;
+  return avatarColors[idx];
+}
+
+// ==================== STATE ====================
+let selectedDeptId = "qy";
+let activeTab = "personnel";
+let managingPerson = null;
+let expandedDeptIds = new Set();
+let treeSearchQuery = "";
+let personnelSearch = "";
+let statusFilter = "all";
+let roleFilter = "all";
+let sortField = "name";
+let sortAsc = true;
+
+// Init expanded - all levels
+(function() {
+  departments.forEach(d => { expandedDeptIds.add(d.id); d.children?.forEach(c => { expandedDeptIds.add(c.id); c.children?.forEach(cc => expandedDeptIds.add(cc.id)); }); });
+})();
+
+// ==================== RENDER: ORG TREE ====================
+function matchesSearchRecursive(dept, query) {
+  if (!query) return true;
+  if (dept.name.toLowerCase().includes(query.toLowerCase())) return true;
+  if (dept.children) return dept.children.some(c => matchesSearchRecursive(c, query));
+  return false;
+}
+
+function renderTree() {
+  const container = document.getElementById('tree-container');
+  container.innerHTML = '';
+  const filtered = treeSearchQuery ? departments.filter(d => matchesSearchRecursive(d, treeSearchQuery)) : departments;
+  filtered.forEach((dept, i) => renderTreeNode(dept, 0, container, i));
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function renderTreeNode(dept, depth, parent, index) {
+  const hasChildren = dept.children && dept.children.length > 0;
+  const isExpanded = expandedDeptIds.has(dept.id);
+  const isSelected = selectedDeptId === dept.id;
+  const personCount = deptPersonCountMap.get(dept.id) || 0;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tree-node-item';
+  wrapper.style.animationDelay = `${index * 35}ms`;
+
+  const row = document.createElement('div');
+  row.className = 'tree-node-row' + (isSelected ? ' selected' : '');
+  row.style.paddingLeft = `${depth * 18 + 10}px`;
+  row.addEventListener('click', () => { selectedDeptId = dept.id; refreshAll(); });
+
+  // Toggle or dot
+  if (hasChildren) {
+    const toggle = document.createElement('button');
+    toggle.className = 'tree-node-toggle ' + (isExpanded ? 'expanded' : 'collapsed');
+    toggle.innerHTML = '<i data-lucide="chevron-down"></i>';
+    toggle.addEventListener('click', e => { e.stopPropagation(); if (expandedDeptIds.has(dept.id)) expandedDeptIds.delete(dept.id); else expandedDeptIds.add(dept.id); renderTree(); });
+    row.appendChild(toggle);
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'tree-node-dot';
+    row.appendChild(dot);
+  }
+
+  // Icon
+  const icon = document.createElement('span');
+  icon.className = 'tree-node-icon';
+  icon.innerHTML = '<i data-lucide="building"></i>';
+  row.appendChild(icon);
+
+  // Name
+  const name = document.createElement('span');
+  name.className = 'tree-node-name';
+  name.textContent = dept.name;
+  row.appendChild(name);
+
+  // Count
+  const count = document.createElement('span');
+  count.className = 'tree-node-count';
+  count.textContent = personCount;
+  row.appendChild(count);
+
+  wrapper.appendChild(row);
+
+  // Children
+  if (hasChildren) {
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-node-children ' + (isExpanded ? 'expanded' : 'collapsed');
+    const lineWrap = document.createElement('div');
+    lineWrap.className = 'tree-line-wrap';
+    lineWrap.style.setProperty('--left', `${depth * 18 + 20}px`);
+    dept.children.forEach((c, ci) => renderTreeNodeIn(c, depth + 1, lineWrap, ci));
+    childWrap.appendChild(lineWrap);
+    wrapper.appendChild(childWrap);
+  }
+
+  parent.appendChild(wrapper);
+}
+
+function renderTreeNodeIn(dept, depth, parent, index) {
+  const hasChildren = dept.children && dept.children.length > 0;
+  const isExpanded = expandedDeptIds.has(dept.id);
+  const isSelected = selectedDeptId === dept.id;
+  const personCount = deptPersonCountMap.get(dept.id) || 0;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tree-node-item';
+  wrapper.style.animationDelay = `${index * 35}ms`;
+
+  const row = document.createElement('div');
+  row.className = 'tree-node-row' + (isSelected ? ' selected' : '');
+  row.style.paddingLeft = `${depth * 18 + 10}px`;
+  row.addEventListener('click', () => { selectedDeptId = dept.id; refreshAll(); });
+
+  if (hasChildren) {
+    const toggle = document.createElement('button');
+    toggle.className = 'tree-node-toggle ' + (isExpanded ? 'expanded' : 'collapsed');
+    toggle.innerHTML = '<i data-lucide="chevron-down"></i>';
+    toggle.addEventListener('click', e => { e.stopPropagation(); if (expandedDeptIds.has(dept.id)) expandedDeptIds.delete(dept.id); else expandedDeptIds.add(dept.id); renderTree(); });
+    row.appendChild(toggle);
+  } else {
+    const dot = document.createElement('span');
+    dot.className = 'tree-node-dot';
+    row.appendChild(dot);
+  }
+
+  const icon = document.createElement('span');
+  icon.className = 'tree-node-icon';
+  icon.innerHTML = '<i data-lucide="building"></i>';
+  row.appendChild(icon);
+
+  const name = document.createElement('span');
+  name.className = 'tree-node-name';
+  name.textContent = dept.name;
+  row.appendChild(name);
+
+  const count = document.createElement('span');
+  count.className = 'tree-node-count';
+  count.textContent = personCount;
+  row.appendChild(count);
+
+  wrapper.appendChild(row);
+
+  if (hasChildren) {
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-node-children ' + (isExpanded ? 'expanded' : 'collapsed');
+    dept.children.forEach((c, ci) => renderTreeNodeIn(c, depth + 1, childWrap, ci));
+    wrapper.appendChild(childWrap);
+  }
+
+  parent.appendChild(wrapper);
+}
+
+// ==================== RENDER: PERSONNEL TABLE ====================
+function renderPersonnel() {
+  const container = document.getElementById('content-container');
+  const allPersons = selectedDeptId ? getPersonsInDept(selectedDeptId) : getPersonsInDept("qy");
+
+  let filtered = [...allPersons];
+  if (personnelSearch) {
+    const q = personnelSearch.toLowerCase();
+    filtered = filtered.filter(p => p.name.includes(q) || p.position.toLowerCase().includes(q) || p.email.includes(q));
+  }
+  if (statusFilter !== "all") filtered = filtered.filter(p => p.status === statusFilter);
+  if (roleFilter !== "all") filtered = filtered.filter(p => p.roleIds.includes(roleFilter));
+
+  filtered.sort((a, b) => {
+    let cmp = 0;
+    if (sortField === "name") cmp = a.name.localeCompare(b.name);
+    else if (sortField === "level") cmp = a.level.localeCompare(b.level);
+    else if (sortField === "joinDate") cmp = a.joinDate.localeCompare(b.joinDate);
+    return sortAsc ? cmp : -cmp;
+  });
+
+  const deptPath = selectedDeptId ? getDeptPath(departments, selectedDeptId) : [];
+  const breadcrumbHTML = deptPath.map((d, i) => {
+    const sep = i > 0 ? '<i data-lucide="chevron-right"></i>' : '';
+    return `<span>${sep}${d.name}</span>`;
+  }).join('');
+
+  let rowsHTML = '';
+  if (filtered.length === 0) {
+    rowsHTML = `<tr><td colspan="7"><div class="empty-state"><i data-lucide="search"></i><span>暂无匹配人员</span></div></td></tr>`;
+  } else {
+    filtered.forEach(p => {
+      const personRoles = roles.filter(r => p.roleIds.includes(r.id));
+      const statusMap = { "在职": ["status-active","#10b981"], "离职": ["status-inactive","#ef4444"], "休假": ["status-leave","#f59e0b"] };
+      const [sc, sd] = statusMap[p.status] || statusMap["在职"];
+      const avatarGrad = getAvatarColor(p.name);
+      rowsHTML += `
+        <tr onclick="showPersonDetail('${p.id}')">
+          <td>
+            <div class="person-cell">
+              <div class="avatar" style="background:linear-gradient(135deg,${avatarGrad})">${p.name.slice(-2)}</div>
+              <div><div class="person-name">${p.name}</div><div class="person-email">${p.email}</div></div>
+            </div>
+          </td>
+          <td class="person-position">${p.position}</td>
+          <td><span class="level-badge">${p.level}</span></td>
+          <td><div class="role-tags">${personRoles.map(r => `<span class="role-tag" style="background:${r.color}12;color:${r.color}">${r.name}</span>`).join('')}</div></td>
+          <td><span class="status-badge ${sc}"><span class="status-dot" style="background:${sd}"></span>${p.status}</span></td>
+          <td class="person-date">${p.joinDate}</td>
+          <td>
+            <div class="row-actions" style="display:flex;gap:2px" onclick="event.stopPropagation()">
+              <button class="btn-ghost" title="编辑" onclick="editPerson('${p.id}')"><i data-lucide="edit-3"></i></button>
+              <button class="btn-ghost" title="角色权限" onclick="manageRole('${p.id}')"><i data-lucide="shield"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    });
+  }
+
+  container.innerHTML = `
+    <div class="personnel-wrap">
+      <div class="personnel-header">
+        <div class="personnel-header-top">
+          <div>
+            <h2>人员列表</h2>
+            ${deptPath.length > 0 ? `<div class="breadcrumb">${breadcrumbHTML}</div>` : ''}
+          </div>
+          <div class="personnel-header-actions">
+            <span class="personnel-count">共 <strong>${filtered.length}</strong> 人</span>
+            <button class="btn-primary"><i data-lucide="user-plus"></i> 添加人员</button>
+          </div>
+        </div>
+        <div class="personnel-filters">
+          <div class="filter-search">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="搜索姓名、岗位、邮箱..." value="${esc(personnelSearch)}" oninput="personnelSearch=this.value;renderPersonnel()" />
+          </div>
+          <div class="filter-select">
+            <select onchange="statusFilter=this.value;renderPersonnel()">
+              <option value="all" ${statusFilter==='all'?'selected':''}>全部状态</option>
+              <option value="在职" ${statusFilter==='在职'?'selected':''}>在职</option>
+              <option value="离职" ${statusFilter==='离职'?'selected':''}>离职</option>
+              <option value="休假" ${statusFilter==='休假'?'selected':''}>休假</option>
+            </select>
+          </div>
+          <div class="filter-select">
+            <select onchange="roleFilter=this.value;renderPersonnel()">
+              <option value="all" ${roleFilter==='all'?'selected':''}>全部角色</option>
+              ${roles.map(r => `<option value="${r.id}" ${roleFilter===r.id?'selected':''}>${r.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="personnel-table-wrap">
+        <table class="personnel-table">
+          <thead>
+            <tr>
+              <th><button onclick="handleSort('name')">姓名 <i data-lucide="arrow-up-down"></i></button></th>
+              <th>岗位</th>
+              <th><button onclick="handleSort('level')">职级 <i data-lucide="arrow-up-down"></i></button></th>
+              <th>角色</th>
+              <th>状态</th>
+              <th><button onclick="handleSort('joinDate')">入职日期 <i data-lucide="arrow-up-down"></i></button></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody class="stagger-children">${rowsHTML}</tbody>
+        </table>
+      </div>
+    </div>`;
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function handleSort(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = true; }
+  renderPersonnel();
+}
+
+function editPerson(personId) {
+  const p = persons.find(x => x.id === personId);
+  if (!p) return;
+  alert('编辑人员: ' + p.name);
+}
+
+function manageRole(personId) {
+  const p = persons.find(x => x.id === personId);
+  if (!p) return;
+  managingPerson = p;
+  activeTab = 'roles';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-tab="roles"]').classList.add('active');
+  renderRolePage();
+}
+
+function showPersonDetail(personId) {
+  const p = persons.find(x => x.id === personId);
+  if (!p) return;
+  const personRoles = roles.filter(r => p.roleIds.includes(r.id));
+  const statusMap = { "在职": ["status-active","#10b981"], "离职": ["status-inactive","#ef4444"], "休假": ["status-leave","#f59e0b"] };
+  const [sc, sd] = statusMap[p.status] || statusMap["在职"];
+  const avatarGrad = getAvatarColor(p.name);
+  const deptPath = getDeptPath(departments, p.departmentId).map(d => d.name).join(" / ");
+
+  const modal = document.getElementById('detail-modal');
+  modal.classList.remove('hidden');
+  modal.innerHTML = `
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-banner">
+        <div class="modal-banner-inner">
+          <div class="modal-avatar" style="background:linear-gradient(135deg,${avatarGrad})">${p.name.slice(-2)}</div>
+          <div><div class="modal-name">${p.name}</div><div class="modal-position">${p.position}</div></div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-field"><div class="modal-field-label">职级</div><div class="modal-field-value">${p.level}</div></div>
+          <div class="modal-field"><div class="modal-field-label">状态</div><span class="status-badge ${sc}"><span class="status-dot" style="background:${sd}"></span>${p.status}</span></div>
+          <div class="modal-field"><div class="modal-field-label">入职日期</div><div class="modal-field-value">${p.joinDate}</div></div>
+          <div class="modal-field"><div class="modal-field-label">所属部门</div><div class="modal-field-value" style="font-family:var(--font-sans);font-size:13px">${deptPath}</div></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">联系方式</div>
+          <div class="modal-contacts">
+            <span><i data-lucide="phone"></i>${p.phone}</span>
+            <span><i data-lucide="mail"></i>${p.email}</span>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">角色权限</div>
+          <div class="role-tags">${personRoles.map(r => `<span class="role-tag" style="background:${r.color}12;color:${r.color}">${r.name}</span>`).join('')}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-outline" onclick="closeDetailModal();editPerson('${p.id}')">编辑信息</button>
+          <button class="btn-primary" onclick="closeDetailModal();manageRole('${p.id}')">角色权限</button>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', closeDetailModal);
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function closeDetailModal() {
+  const modal = document.getElementById('detail-modal');
+  modal.classList.add('hidden');
+  modal.removeEventListener('click', closeDetailModal);
+}
+
+// ==================== RENDER: ROLE PERMISSION ====================
+let roleEditDialogOpen = false;
+let editingRole = null;
+let newRolePerms = new Set();
+
+function renderRolePage() {
+  const container = document.getElementById('content-container');
+  const sortedRoles = [...roles].sort((a, b) => a.level - b.level);
+  const isPersonMode = !!managingPerson;
+  let personRoleIds = managingPerson ? [...managingPerson.roleIds] : [];
+
+  let roleListHTML = sortedRoles.map(role => {
+    const count = getRolePersonCount(role.id);
+    const isAssigned = personRoleIds.includes(role.id);
+    const levelClass = `level-l${role.level}`;
+    return `
+      <div class="role-item ${!isPersonMode && window._selectedRoleId === role.id ? 'selected' : ''}" onclick="${isPersonMode ? `togglePersonRole('${role.id}')` : `selectRole('${role.id}')`}">
+        ${isPersonMode ? `<div class="role-checkbox ${isAssigned ? 'checked' : ''}">${isAssigned ? '<i data-lucide="check"></i>' : ''}</div>` : ''}
+        <div class="role-color-dot" style="background:${role.color}"></div>
+        <div class="role-item-info">
+          <div class="role-item-name">${role.name}</div>
+          <div class="role-item-meta">
+            <span class="role-level-tiny ${levelClass}">L${role.level}</span>
+            <span><i data-lucide="users"></i>${count}</span>
+          </div>
+        </div>
+        ${!isPersonMode ? `<button class="role-item-edit" onclick="event.stopPropagation();openEditRole('${role.id}')"><i data-lucide="edit-3"></i></button>` : ''}
+      </div>`;
+  }).join('');
+
+  const selectedRoleId = window._selectedRoleId || sortedRoles[0]?.id || '';
+  const selectedRole = roles.find(r => r.id === selectedRoleId);
+  const permsByModule = getPermsByModule();
+  const moduleEntries = Object.entries(permsByModule);
+
+  let rightHTML = '';
+  if (isPersonMode) {
+    // Person role assignment mode
+    const assignedRoles = roles.filter(r => personRoleIds.includes(r.id));
+    const effectivePermIds = new Set();
+    assignedRoles.forEach(r => r.permissions.forEach(pid => effectivePermIds.add(pid)));
+
+    rightHTML = `
+      <div class="role-detail">
+        <div class="assigned-roles">
+          <div class="perm-section-title">已分配角色</div>
+          <div class="role-tags">
+            ${assignedRoles.length === 0 ? '<span style="font-size:14px;color:rgba(var(--primary-rgb),0.3)">暂未分配角色</span>' :
+              assignedRoles.map(r => `<span class="role-tag" style="background:${r.color}12;color:${r.color};padding:4px 10px;font-size:12px">${r.name}</span>`).join('')
+            }
+          </div>
+        </div>
+        <div class="separator"></div>
+        <div class="perm-section-title">有效权限 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:rgba(var(--primary-rgb),0.25)">${effectivePermIds.size} / ${permissions.length}</span></div>
+        <div class="stagger-children">
+          ${moduleEntries.map(([mod, perms]) => {
+            const isExpanded = window._expandedMods?.has(mod) ?? true;
+            const granted = perms.filter(p => effectivePermIds.has(p.id));
+            const getSources = (pid) => assignedRoles.filter(r => r.permissions.includes(pid)).map(r => r.name);
+            return `
+              <div class="perm-module">
+                <div class="perm-module-header" onclick="toggleModule('${mod}')">
+                  <div class="perm-module-left">
+                    <i data-lucide="chevron-down" class="${isExpanded ? 'expanded' : 'collapsed'}"></i>
+                    <span class="perm-module-name">${mod}</span>
+                  </div>
+                  <span class="perm-module-count ${granted.length === perms.length ? 'full' : granted.length > 0 ? 'partial' : 'none'}">
+                    ${granted.length === perms.length ? '全部授权' : granted.length === 0 ? '未授权' : `${granted.length}/${perms.length}`}
+                  </span>
+                </div>
+                <div class="perm-module-body ${isExpanded ? 'expanded' : 'collapsed'}">
+                  <div class="perm-grid">
+                    ${perms.map(perm => {
+                      const isGranted = effectivePermIds.has(perm.id);
+                      const sources = getSources(perm.id);
+                      return `
+                        <div class="perm-item" style="color:${isGranted ? 'var(--foreground)' : 'rgba(var(--primary-rgb),0.25)'}">
+                          <div class="perm-check-icon ${isGranted ? 'granted' : 'denied'}">${isGranted ? '<i data-lucide="check"></i>' : '<i data-lucide="x"></i>'}</div>
+                          <div>
+                            <div class="perm-item-name">${perm.name}</div>
+                            ${isGranted && sources.length > 0 ? `<div class="perm-item-src">来源: ${sources.join(', ')}</div>` : ''}
+                          </div>
+                        </div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  } else if (selectedRole) {
+    rightHTML = `
+      <div class="role-detail">
+        <div class="role-detail-header">
+          <div class="role-detail-header-top">
+            <div class="role-detail-dot" style="background:${selectedRole.color}"></div>
+            <span class="role-detail-name">${selectedRole.name}</span>
+            <span class="role-level-tiny level-l${selectedRole.level}" style="font-size:11px;padding:1px 6px">L${selectedRole.level}</span>
+          </div>
+          <div class="role-detail-desc">${selectedRole.description}</div>
+          <div class="role-detail-actions">
+            <button class="btn-outline" onclick="openEditRole('${selectedRole.id}')"><i data-lucide="edit-3"></i> 编辑角色</button>
+            <button class="btn-outline text-destructive" style="border-color:rgba(239,68,68,0.2)" onclick="deleteRole('${selectedRole.id}')"><i data-lucide="trash-2"></i> 删除</button>
+          </div>
+        </div>
+        <div class="separator"></div>
+        <div class="perm-section-title">权限配置 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:rgba(var(--primary-rgb),0.25)">${selectedRole.permissions.length} / ${permissions.length}</span></div>
+        <div class="stagger-children">
+          ${moduleEntries.map(([mod, perms]) => {
+            const isExpanded = window._expandedMods?.has(mod) ?? true;
+            const selectedCount = perms.filter(p => selectedRole.permissions.includes(p.id)).length;
+            return `
+              <div class="perm-module">
+                <div class="perm-module-header" onclick="toggleModule('${mod}')">
+                  <div class="perm-module-left">
+                    <i data-lucide="chevron-down" class="${isExpanded ? 'expanded' : 'collapsed'}"></i>
+                    <span class="perm-module-name">${mod}</span>
+                  </div>
+                  <span class="perm-module-count ${selectedCount === perms.length ? 'full' : selectedCount > 0 ? 'partial' : 'none'}">${selectedCount}/${perms.length}</span>
+                </div>
+                <div class="perm-module-body ${isExpanded ? 'expanded' : 'collapsed'}">
+                  <div class="perm-grid">
+                    ${perms.map(perm => {
+                      const isChecked = selectedRole.permissions.includes(perm.id);
+                      return `
+                        <div class="perm-item" style="color:${isChecked ? 'var(--foreground)' : 'rgba(var(--primary-rgb),0.3)'}">
+                          <div class="perm-check-icon ${isChecked ? 'granted' : 'denied'}">${isChecked ? '<i data-lucide="check"></i>' : ''}</div>
+                          <div>
+                            <div class="perm-item-name">${perm.name}</div>
+                            <div style="font-size:10px;color:rgba(var(--primary-rgb),0.25)">${perm.description}</div>
+                          </div>
+                        </div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  } else {
+    rightHTML = `<div class="role-empty"><i data-lucide="shield"></i><span>请选择一个角色查看详情</span></div>`;
+  }
+
+  container.innerHTML = `
+    <div class="role-wrap">
+      <div class="role-header">
+        <div class="role-header-top">
+          <div class="role-title-group">
+            ${isPersonMode ? `<button class="btn-ghost" style="margin-right:4px" onclick="closePersonRole()"><i data-lucide="arrow-left"></i></button>` : ''}
+            <div class="role-icon-box"><i data-lucide="shield"></i></div>
+            <div>
+              <div class="role-title">${isPersonMode ? managingPerson.name : '角色权限管理'}</div>
+              ${isPersonMode ? '<div class="role-subtitle">角色权限配置</div>' : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            ${isPersonMode ? `<button class="btn-outline" onclick="closePersonRole()">返回列表</button>` : ''}
+            <button class="btn-primary" onclick="openNewRole()"><i data-lucide="plus"></i> 新建角色</button>
+          </div>
+        </div>
+      </div>
+      <div class="role-body">
+        <div class="role-left">
+          <div class="role-left-title">${isPersonMode ? '分配角色' : '角色列表'}</div>
+          <div class="role-list-scroll">
+            <div class="role-list stagger-children">${roleListHTML}</div>
+          </div>
+        </div>
+        <div class="role-right">${rightHTML}</div>
+      </div>
+    </div>`;
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function selectRole(roleId) {
+  window._selectedRoleId = roleId;
+  renderRolePage();
+}
+
+function togglePersonRole(roleId) {
+  if (!managingPerson) return;
+  const idx = managingPerson.roleIds.indexOf(roleId);
+  if (idx >= 0) managingPerson.roleIds.splice(idx, 1);
+  else managingPerson.roleIds.push(roleId);
+  // Also update in persons array
+  const p = persons.find(x => x.id === managingPerson.id);
+  if (p) p.roleIds = [...managingPerson.roleIds];
+  renderRolePage();
+}
+
+function closePersonRole() {
+  managingPerson = null;
+  activeTab = 'personnel';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-tab="personnel"]').classList.add('active');
+  renderPersonnel();
+}
+
+function toggleModule(mod) {
+  if (!window._expandedMods) window._expandedMods = new Set(Object.keys(getPermsByModule()));
+  if (window._expandedMods.has(mod)) window._expandedMods.delete(mod);
+  else window._expandedMods.add(mod);
+  renderRolePage();
+}
+
+// ==================== ROLE CRUD ====================
+function openNewRole() {
+  editingRole = null;
+  newRolePerms = new Set();
+  showRoleEditDialog("新建角色", "创建新的角色并分配权限", null);
+}
+
+function openEditRole(roleId) {
+  const role = roles.find(r => r.id === roleId);
+  if (!role) return;
+  editingRole = role;
+  newRolePerms = new Set(role.permissions);
+  showRoleEditDialog("编辑角色", "修改角色信息和权限配置", role);
+}
+
+function showRoleEditDialog(title, desc, role) {
+  const permsByModule = getPermsByModule();
+  const moduleEntries = Object.entries(permsByModule);
+
+  const modal = document.getElementById('role-modal');
+  modal.classList.remove('hidden');
+  modal.innerHTML = `
+    <div class="modal-content dialog-lg" onclick="event.stopPropagation()">
+      <div style="padding:24px 24px 0">
+        <h3 style="font-size:16px;font-weight:600;background:linear-gradient(135deg,var(--primary),#4f7dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${title}</h3>
+        <p style="font-size:13px;color:rgba(var(--primary-rgb),0.4);margin-top:4px">${desc}</p>
+      </div>
+      <div class="modal-body" style="padding:16px 24px">
+        <div class="edit-role-grid">
+          <div class="edit-role-field">
+            <label>角色名称</label>
+            <input type="text" id="role-name-input" value="${esc(role?.name || '')}" placeholder="输入角色名称" />
+          </div>
+          <div class="edit-role-field">
+            <label>角色层级</label>
+            <select id="role-level-select">
+              <option value="1" ${role?.level === 1 ? 'selected' : ''}>L1 · 最高级</option>
+              <option value="2" ${role?.level === 2 ? 'selected' : ''}>L2 · 高级</option>
+              <option value="3" ${role?.level === 3 ? 'selected' : ''}>L3 · 中级</option>
+              <option value="4" ${role?.level === 4 ? 'selected' : ''}>L4 · 初管</option>
+              <option value="5" ${role?.level === 5 ? 'selected' : ''}>L5 · 基础</option>
+            </select>
+          </div>
+        </div>
+        <div class="edit-role-field">
+          <label>角色描述</label>
+          <textarea id="role-desc-input" placeholder="描述该角色的职责范围" rows="2">${esc(role?.description || '')}</textarea>
+        </div>
+        <div style="height:1px;background:rgba(var(--primary-rgb),0.08);margin:16px 0"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span style="font-size:12px;font-weight:600;color:rgba(var(--primary-rgb),0.5);text-transform:uppercase;letter-spacing:1px">权限配置</span>
+          <span style="font-size:12px;color:rgba(var(--primary-rgb),0.3)" id="perm-count">${newRolePerms.size} / ${permissions.length}</span>
+        </div>
+        <div class="stagger-children">
+          ${moduleEntries.map(([mod, perms]) => {
+            const allSelected = perms.every(p => newRolePerms.has(p.id));
+            const someSelected = perms.some(p => newRolePerms.has(p.id));
+            const selectedIn = perms.filter(p => newRolePerms.has(p.id)).length;
+            return `
+              <div class="perm-edit-module">
+                <div class="perm-edit-header">
+                  <div class="perm-edit-left">
+                    <input type="checkbox" id="mod-${mod}" ${allSelected ? 'checked' : ''} ${someSelected && !allSelected ? 'data-indeterminate="true"' : ''} onchange="toggleModulePerms('${mod}', ${JSON.stringify(perms.map(p => p.id))})" />
+                    <label for="mod-${mod}">${mod}</label>
+                  </div>
+                  <span class="perm-module-count ${selectedIn === perms.length ? 'full' : selectedIn > 0 ? 'partial' : 'none'}">${selectedIn}/${perms.length}</span>
+                </div>
+                <div class="perm-edit-body">
+                  <div class="perm-edit-grid">
+                    ${perms.map(perm => `
+                      <label class="perm-edit-item">
+                        <input type="checkbox" id="perm-${perm.id}" ${newRolePerms.has(perm.id) ? 'checked' : ''} onchange="togglePerm('${perm.id}')" />
+                        <div><span>${perm.name}</span><code>${perm.code}</code></div>
+                      </label>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn-outline" onclick="closeRoleModal()">取消</button>
+        <button class="btn-primary" onclick="saveRole()">${role ? '保存修改' : '创建角色'}</button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', closeRoleModal);
+  lucide.createIcons({ attrs: { class: '' } });
+}
+
+function togglePerm(permId) {
+  if (newRolePerms.has(permId)) newRolePerms.delete(permId);
+  else newRolePerms.add(permId);
+  const cnt = document.getElementById('perm-count');
+  if (cnt) cnt.textContent = `${newRolePerms.size} / ${permissions.length}`;
+}
+
+function toggleModulePerms(mod, permIds) {
+  const allSelected = permIds.every(id => newRolePerms.has(id));
+  if (allSelected) permIds.forEach(id => newRolePerms.delete(id));
+  else permIds.forEach(id => newRolePerms.add(id));
+  showRoleEditDialog(
+    editingRole ? "编辑角色" : "新建角色",
+    editingRole ? "修改角色信息和权限配置" : "创建新的角色并分配权限",
+    editingRole
+  );
+}
+
+function saveRole() {
+  const name = document.getElementById('role-name-input')?.value?.trim();
+  const desc = document.getElementById('role-desc-input')?.value?.trim();
+  const level = parseInt(document.getElementById('role-level-select')?.value || '3');
+  if (!name) return;
+
+  if (editingRole) {
+    roles = roles.map(r => r.id === editingRole.id ? { ...r, name, description: desc, level, permissions: [...newRolePerms] } : r);
+  } else {
+    const colors = ["#dc2626","#ea580c","#2563eb","#16a34a","#9333ea","#0891b2","#ca8a04"];
+    const newRole = { id: `r-${Date.now()}`, name, description: desc, level, color: colors[Math.floor(Math.random() * colors.length)], permissions: [...newRolePerms] };
+    roles.push(newRole);
+    window._selectedRoleId = newRole.id;
+  }
+  closeRoleModal();
+  renderRolePage();
+}
+
+function deleteRole(roleId) {
+  if (!confirm('确定要删除该角色吗？')) return;
+  roles = roles.filter(r => r.id !== roleId);
+  if (window._selectedRoleId === roleId) window._selectedRoleId = roles[0]?.id || '';
+  renderRolePage();
+}
+
+function closeRoleModal() {
+  const modal = document.getElementById('role-modal');
+  modal.classList.add('hidden');
+  modal.removeEventListener('click', closeRoleModal);
+  roleEditDialogOpen = false;
+}
+
+// ==================== TAB SWITCHING ====================
+document.getElementById('tab-bar').addEventListener('click', function(e) {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTab = btn.dataset.tab;
+  if (activeTab === 'personnel') {
+    managingPerson = null;
+    renderPersonnel();
+  } else {
+    if (!window._selectedRoleId) window._selectedRoleId = roles[0]?.id || '';
+    renderRolePage();
+  }
+});
+
+// ==================== TREE SEARCH ====================
+document.getElementById('tree-search').addEventListener('input', function(e) {
+  treeSearchQuery = e.target.value;
+  renderTree();
+});
+
+// ==================== INIT ====================
+function refreshAll() {
+  renderTree();
+  if (activeTab === 'personnel') renderPersonnel();
+  else renderRolePage();
+}
+
+// Init expanded modules
+window._expandedMods = new Set(Object.keys(getPermsByModule()));
+window._selectedRoleId = roles[0]?.id || '';
+
+renderTree();
+renderPersonnel();
+lucide.createIcons();
+</script>
+</body>
+</html>

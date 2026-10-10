@@ -1,0 +1,99 @@
+.recruitment-dashboard {
+  height: calc(100vh - 120px - 24px);
+  overflow: hidden;
+  overflow-y: auto;
+  background: #f4f7fb;
+
+  .recruitment-dashboard-content {
+    padding: 20px;
+  }
+}
+
+.recruitment-dashboard-section {
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+}
+
+.recruitment-dashboard-overview-section {
+  padding-bottom: 4px;
+}
+
+.recruitment-dashboard-kanban-section {
+  padding-left: 21px;
+  border-left: 3px solid #4a7bf7;
+}
+
+.recruitment-dashboard-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recruitment-dashboard-section-title.is-highlighted {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 15px;
+}
+
+.recruitment-dashboard-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a7bf7;
+  font-size: 16px;
+}
+
+.recruitment-dashboard-title-sub {
+  margin-left: 8px;
+  color: #999;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.recruitment-dashboard-month-picker {
+  width: 120px;
+  margin-left: auto;
+  font-weight: 400;
+}
+
+.recruitment-dashboard-middle {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.recruitment-dashboard-middle .recruitment-dashboard-section {
+  margin-bottom: 0;
+}
+
+.recruitment-dashboard-table-section {
+  padding-bottom: 20px;
+}
+
+@media (max-width: 1200px) {
+  .recruitment-dashboard-middle {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .recruitment-dashboard .recruitment-dashboard-content {
+    padding: 16px;
+  }
+
+  .recruitment-dashboard-section {
+    padding: 18px;
+  }
+
+  .recruitment-dashboard-title-sub {
+    display: none;
+  }
+}

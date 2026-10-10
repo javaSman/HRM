@@ -1,0 +1,675 @@
+{
+  "groups": {
+    "backend": {
+      "label": "后端",
+      "sections": [
+        { "key": "business", "name": "业务与集成", "color": "#3b82f6" },
+        { "key": "platform", "name": "平台支撑", "color": "#8b5cf6" }
+      ]
+    },
+    "frontend": {
+      "label": "前端",
+      "sections": [
+        { "key": "hr", "name": "人员与园区", "color": "#10b981" },
+        { "key": "attendance", "name": "考勤与审批", "color": "#e8950c" },
+        { "key": "system", "name": "系统与数据", "color": "#8b5cf6" },
+        { "key": "common", "name": "平台通用", "color": "#0ea5e9" }
+      ]
+    }
+  },
+  "statLabels": {
+    "backend": "后端模块",
+    "frontend": "前端功能入口",
+    "mermaid": "流程图",
+    "docs": "已登记文档"
+  },
+  "modules": {
+    "backend": {
+      "business": [
+        {
+          "slug": "be-zt-main",
+          "name": "HRM 主业务",
+          "sub": "zt-main",
+          "desc": "员工、组织、考勤、申请审批、访客、放行条、图层与自定义流程",
+          "readme": "../jeecg-boot/jeecg-boot-module/zt-main/README.md"
+        },
+        {
+          "slug": "be-device",
+          "name": "设备对接",
+          "sub": "device",
+          "desc": "考勤机 PUSH 上行、A4 门禁下行、设备同步队列与回执",
+          "readme": "../jeecg-boot/jeecg-boot-module/zt-device/README.md"
+        },
+        {
+          "slug": "be-airag",
+          "name": "AI / RAG",
+          "sub": "jeecg-boot-module-airag",
+          "desc": "AI 对话、知识库、应用编排、模型配置与 OCR",
+          "readme": "../jeecg-boot/jeecg-boot-module/jeecg-boot-module-airag/README.md"
+        },
+        {
+          "slug": "be-wechat",
+          "name": "企业微信",
+          "sub": "zt-wechat",
+          "desc": "通讯录同步、用户关联、打卡接口与通知卡片",
+          "readme": "../jeecg-boot/jeecg-boot-module/zt-wechat/README.md"
+        }
+      ],
+      "platform": [
+        {
+          "slug": "be-system-biz",
+          "name": "系统扩展",
+          "sub": "zt-system-biz",
+          "desc": "登录、用户、字典、数据规则、GIS、统计、上传与短信等扩展",
+          "readme": "../jeecg-boot/jeecg-module-system/zt-system-biz/README.md"
+        },
+        {
+          "slug": "be-base-core",
+          "name": "共通核心",
+          "sub": "jeecg-boot-base-core",
+          "desc": "工具类、配置、Shiro 权限、查询过滤与注解",
+          "readme": "../jeecg-boot/jeecg-boot-base-core/README.md"
+        },
+        {
+          "slug": "be-system-start",
+          "name": "单体启动",
+          "sub": "jeecg-system-start",
+          "desc": "装配系统、HRM、设备和企业微信模块的单体运行入口",
+          "readme": "../jeecg-boot/jeecg-module-system/jeecg-system-start/README.md"
+        },
+        {
+          "slug": "be-cloud",
+          "name": "微服务支撑",
+          "sub": "jeecg-server-cloud",
+          "desc": "网关、Nacos、监控、Sentinel 与 xxl-job，按需启用",
+          "readme": "../jeecg-boot/jeecg-server-cloud/README.md"
+        }
+      ]
+    },
+    "frontend": {
+      "hr": [
+        {
+          "slug": "fe-people",
+          "name": "人员管理",
+          "sub": "peoplemanagement",
+          "desc": "员工档案、合同、岗位与人员变动",
+          "readme": "src/views/peoplemanagement/README.md"
+        },
+        {
+          "slug": "fe-personnel",
+          "name": "人事管理",
+          "sub": "PersonnelManagement",
+          "desc": "入离职办理、人事审批与异动管理",
+          "readme": "src/views/PersonnelManagement/README.md"
+        },
+        {
+          "slug": "fe-visitor",
+          "name": "访客管理",
+          "sub": "visitor",
+          "desc": "访客申请、审批、接待、放行条与二维码登记",
+          "readme": "src/views/visitor/README.md"
+        },
+        {
+          "slug": "fe-dorm",
+          "name": "宿舍管理",
+          "sub": "dormAdmin",
+          "desc": "宿舍资源、入住调宿、门禁、检查与看板",
+          "readme": "src/views/dormAdmin/README.md"
+        },
+        {
+          "slug": "fe-meeting",
+          "name": "会议管理",
+          "sub": "meetingAdmin",
+          "desc": "会议预约、会议室、时段冲突与状态",
+          "readme": "src/views/meetingAdmin/README.md"
+        }
+      ],
+      "attendance": [
+        {
+          "slug": "fe-attendance-rule",
+          "name": "考勤规则",
+          "sub": "attendanceRule",
+          "desc": "日历、大小周、补卡、请假、移动打卡、加班、排班与报表",
+          "readme": "src/views/attendanceRule/README.md"
+        },
+        {
+          "slug": "fe-employee-attendance",
+          "name": "员工考勤",
+          "sub": "EmployeeAttendance",
+          "desc": "考勤记录、统计、异常处理与报表导出",
+          "readme": "src/views/EmployeeAttendance/README.md"
+        },
+        {
+          "slug": "fe-clockin",
+          "name": "打卡管理",
+          "sub": "clockInManagement",
+          "desc": "打卡记录与打卡规则相关页面",
+          "readme": "src/views/clockInManagement/README.md"
+        },
+        {
+          "slug": "fe-abnormal",
+          "name": "异常考勤",
+          "sub": "abnormal-attendance",
+          "desc": "迟到、早退、缺卡、旷工申诉与修正",
+          "readme": "src/views/abnormal-attendance/README.md"
+        },
+        {
+          "slug": "fe-attendance-check",
+          "name": "考勤核对",
+          "sub": "attendance-check",
+          "desc": "批量核对、异常标记、核对记录与报告",
+          "readme": "src/views/attendance-check/README.md"
+        },
+        {
+          "slug": "fe-compensatory",
+          "name": "补休管理",
+          "sub": "compensatory-leave",
+          "desc": "补休申请、审批与补休记录",
+          "readme": "src/views/compensatory-leave/README.md"
+        },
+        {
+          "slug": "fe-shift",
+          "name": "班次管理",
+          "sub": "shiftManagement",
+          "desc": "班次、排班、调整、导入导出及相关申请页面",
+          "readme": "src/views/shiftManagement/README.md"
+        },
+        {
+          "slug": "fe-approval",
+          "name": "审批中心",
+          "sub": "approval",
+          "desc": "我的申请、待办审批、已审批与审批统计",
+          "readme": "src/views/approval/README.md"
+        },
+        {
+          "slug": "fe-workbench",
+          "name": "工作台",
+          "sub": "workbench",
+          "desc": "常用申请入口、我的申请、我的审批与取消申请",
+          "readme": "src/views/workbench/modules/applyCommon/README.md"
+        }
+      ],
+      "system": [
+        {
+          "slug": "fe-system",
+          "name": "系统管理",
+          "sub": "system",
+          "desc": "用户、角色、部门、菜单、数据权限、字典、公告与日志",
+          "readme": "src/views/system/README.md"
+        },
+        {
+          "slug": "fe-user",
+          "name": "用户入口",
+          "sub": "user",
+          "desc": "登录、注册、第三方登录与租户选择",
+          "readme": "src/views/user/README.md"
+        },
+        {
+          "slug": "fe-account",
+          "name": "账户中心",
+          "sub": "account",
+          "desc": "个人资料、安全、绑定、通知与个性化设置",
+          "readme": "src/views/account/README.md"
+        },
+        {
+          "slug": "fe-data",
+          "name": "数据管理",
+          "sub": "dataManage",
+          "desc": "接口请求记录、数据日志与运行数据追踪",
+          "readme": "src/views/dataManage/README.md"
+        }
+      ],
+      "common": [
+        {
+          "slug": "fe-dashboard",
+          "name": "仪表盘",
+          "sub": "dashboard",
+          "desc": "人员、人事、考勤与合同指标可视化",
+          "readme": "src/views/dashboard/README.md"
+        },
+        {
+          "slug": "fe-process",
+          "name": "流程配置",
+          "sub": "process",
+          "desc": "流程类型、节点、审批人、会签与部署配置",
+          "readme": "src/views/process/README.md"
+        },
+        {
+          "slug": "fe-components",
+          "name": "公共组件",
+          "sub": "components",
+          "desc": "JEECG 表单/列表、字典、表格、上传、地图与图表组件",
+          "readme": "src/components/README.md"
+        },
+        {
+          "slug": "fe-api",
+          "name": "API 接口",
+          "sub": "api",
+          "desc": "Axios 请求封装与业务接口定义",
+          "readme": "src/api/README.md"
+        },
+        {
+          "slug": "fe-store",
+          "name": "状态管理",
+          "sub": "store",
+          "desc": "Vuex 用户、权限、应用与全局状态模块",
+          "readme": "src/store/README.md"
+        },
+        {
+          "slug": "fe-utils",
+          "name": "工具库",
+          "sub": "utils",
+          "desc": "权限、上传、校验、加密、查询与通用工具",
+          "readme": "src/utils/README.md"
+        }
+      ]
+    }
+  },
+  "menu": [
+    { "key": "home", "name": "首页", "path": "/dashboard/analysis" },
+    { "key": "workbench", "name": "工作台", "path": "/workbench", "doc": "fe-workbench", "flow": "applications" },
+    { "key": "job", "name": "岗位管理", "path": "/peoplemanagement/jobInfo/index", "doc": "fe-people" },
+    {
+      "key": "recruitment", "name": "招聘管理", "flow": "recruit", "doc": "fe-personnel",
+      "children": [
+        { "name": "招聘总览", "path": "/PersonnelManagement/Recruitment/overview" },
+        { "name": "用人申请", "path": "/PersonnelManagement/Recruitment/yongren" },
+        { "name": "招聘计划", "path": "/PersonnelManagement/Recruitment/plan" },
+        { "name": "简历管理", "path": "/PersonnelManagement/Recruitment/resume" },
+        { "name": "面试管理", "path": "/PersonnelManagement/Recruitment/interview/index" },
+        { "name": "offer管理", "path": "/PersonnelManagement/Recruitment/offer" },
+        { "name": "黑名单管理", "path": "/PersonnelManagement/Recruitment/blackList" },
+        { "name": "高校管理", "path": "/PersonnelManagement/Recruitment/school" }
+      ]
+    },
+    {
+      "key": "personnel", "name": "人员管理", "flow": "onboarding", "doc": "fe-personnel",
+      "children": [
+        { "name": "员工档案", "path": "/peoplemanagement/employeeInfo", "doc": "fe-people" },
+        { "name": "入职管理", "path": "/PersonnelManagement/Personnel/onboarding", "flow": "onboarding" },
+        { "name": "试用跟踪", "path": "/PersonnelManagement/Personnel/probationPeriod" },
+        { "name": "转正申请", "path": "/PersonnelManagement/Personnel/passProbation/index" },
+        { "name": "访谈配置", "path": "/PersonnelManagement/Personnel/interviewConfig" },
+        { "name": "调动管理", "path": "/PersonnelManagement/Personnel/mobilize/HrmTdglList" },
+        { "name": "调薪申请", "path": "/PersonnelManagement/Personnel/salaryAdjustment/index" },
+        { "name": "访谈问题跟进", "path": "/PersonnelManagement/Personnel/interviewFollow/index" },
+        { "name": "离职管理", "path": "/PersonnelManagement/Personnel/offboarding/index", "flow": "offboarding" },
+        {
+          "name": "临时工管理",
+          "children": [
+            { "name": "临时工申请", "path": "/temporaryWorker/apply/index" },
+            { "name": "临时工审批", "path": "/temporaryWorker/approval/index" },
+            { "name": "临时工档案", "path": "/temporaryWorker/file/index" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "attendance", "name": "考勤管理", "flow": "attendance", "doc": "fe-employee-attendance",
+      "children": [
+        { "name": "员工考勤", "path": "/EmployeeAttendance/index", "doc": "fe-employee-attendance", "flow": "attendance" },
+        { "name": "异常考勤", "path": "/EmployeeAttendance/Ycindex", "doc": "fe-abnormal", "flow": "review" },
+        {
+          "name": "考勤规则",
+          "children": [
+            { "name": "新员工入职规则", "path": "/attendanceRule/hrNewEmployeeRuleList/index", "doc": "fe-attendance-rule", "flow": "attendance_prepare" },
+            { "name": "大小周配置", "path": "/attendanceRule/biweekly", "doc": "fe-attendance-rule", "flow": "attendance_prepare" },
+            { "name": "节假日配置", "path": "/attendanceRule/calendar", "doc": "fe-attendance-rule", "flow": "attendance_prepare" },
+            { "name": "考勤规则配置", "path": "/attendanceRule/settingPage", "doc": "fe-attendance-rule", "flow": "attendance_prepare" },
+            { "name": "补卡配置", "path": "/attendanceRule/PCR", "doc": "fe-attendance-rule", "flow": "applications" }
+          ]
+        },
+        { "name": "考勤汇总", "path": "/attendanceRule/TaReports", "doc": "fe-employee-attendance", "flow": "review" },
+        { "name": "班组排班（班组长）", "path": "/attendanceRule/schedule", "doc": "fe-shift", "flow": "attendance_prepare" },
+        {
+          "name": "外勤管理",
+          "children": [
+            { "name": "外勤人员", "path": "/fieldWork/HrWqryList", "flow": "applications" },
+            { "name": "外勤点", "path": "/fieldWork/HrWqdList" }
+          ]
+        },
+        {
+          "name": "请假管理",
+          "flow": "applications",
+          "children": [
+            { "name": "请假申请", "path": "/leave/HrXjsqList", "flow": "applications" },
+            { "name": "请假审批", "path": "/leave/HrXjsqLists", "doc": "fe-approval", "flow": "applications" },
+            { "name": "事假抵扣申请", "path": "/attendanceRule/leaveDeductionApply/index" },
+            { "name": "事假抵扣审批", "path": "/attendanceRule/leaveDeductionApply/approval" },
+            { "name": "销假申请", "path": "/attendanceRule/leaveResumptionApply/index" },
+            { "name": "销假审批", "path": "/attendanceRule/leaveResumptionApply/approval" }
+          ]
+        },
+        {
+          "name": "补卡管理",
+          "flow": "applications",
+          "children": [
+            { "name": "补卡申请", "path": "/card/HrCardApplyList", "flow": "applications" },
+            { "name": "补卡审批", "path": "/card/HrCardApplyLists", "doc": "fe-approval", "flow": "applications" }
+          ]
+        },
+        {
+          "name": "加班管理",
+          "flow": "applications",
+          "children": [
+            { "name": "加班申请", "path": "/ot/HrOvertimeApplyList", "flow": "applications" },
+            { "name": "加班审批", "path": "/ot/HrOvertimeApplyLists", "doc": "fe-approval", "flow": "applications" }
+          ]
+        },
+        {
+          "name": "外出管理",
+          "children": [
+            { "name": "外出申请", "path": "/out/HrWcApplyList", "flow": "applications" },
+            { "name": "外出审批", "path": "/out/HrWcApplyLists", "doc": "fe-approval", "flow": "applications" }
+          ]
+        },
+        {
+          "name": "移动打卡管理",
+          "flow": "attendance",
+          "children": [
+            { "name": "移动打卡申请", "path": "/mobile/HrMobileApplyList", "flow": "applications" },
+            { "name": "移动打卡审批", "path": "/mobile/HrMobileApplyLists", "doc": "fe-approval", "flow": "applications" },
+            { "name": "移动打卡记录", "path": "/mobile/HrPunchRecordList", "doc": "fe-clockin", "flow": "attendance" }
+          ]
+        },
+        {
+          "name": "年假管理",
+          "children": [
+            { "name": "工龄年假申请", "path": "/attendanceRule/serviceLeaveApply/index", "flow": "applications" },
+            { "name": "工龄年假审批", "path": "/attendanceRule/serviceLeaveApply/approval", "doc": "fe-approval", "flow": "applications" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "visitor", "name": "访客管理", "flow": "visitor_meeting", "doc": "fe-visitor",
+      "children": [
+        { "name": "访客中心", "path": "/visitor/VisitorApply", "doc": "fe-visitor", "flow": "visitor_meeting" },
+        { "name": "审批中心", "path": "/visitor/VisitorApproval", "doc": "fe-approval" },
+        { "name": "我的接待", "path": "/visitor/VisitorReceive" },
+        { "name": "放行条", "path": "/visitor/PassApply", "flow": "visitor_meeting" }
+      ]
+    },
+    {
+      "key": "statistics", "name": "统计分析", "flow": "review",
+      "children": [
+        { "name": "考勤确认记录表", "path": "/online/cgformList/012685b5d1c84bcd986f625fba743493", "flow": "review" },
+        { "name": "月度考勤汇总报表", "path": "/online/cgformList/ebc4b15851f4455c8a64835eefae2ff3", "flow": "review" },
+        { "name": "异常考勤分析报表", "path": "/online/cgformList/904222d15eee4d1a8657163a420c3038", "flow": "review" }
+      ]
+    },
+    {
+      "key": "administration", "name": "行政管理", "flow": "lodging",
+      "children": [
+        {
+          "name": "宿舍管理", "flow": "lodging",
+          "children": [
+            { "name": "宿舍看板", "path": "/dormAdmin/DormBoardList", "doc": "fe-dorm", "flow": "lodging" },
+            { "name": "舍区管理", "path": "/dormAdmin/DormitoryList", "doc": "fe-dorm", "flow": "lodging" },
+            { "name": "宿舍申请", "path": "/dormAdmin/DormAllotList", "doc": "fe-dorm", "flow": "lodging" },
+            { "name": "宿舍审核调度", "path": "/dormAdmin/DormInpsectList", "doc": "fe-dorm", "flow": "lodging" },
+            { "name": "人员基本信息", "path": "/dormAdmin/DormMateList", "doc": "fe-dorm", "flow": "lodging" },
+            { "name": "宿舍门禁管理", "path": "/dormAdmin/DormGuardList", "doc": "fe-dorm", "flow": "lodging" }
+          ]
+        },
+        {
+          "name": "会议管理", "flow": "visitor_meeting",
+          "children": [
+            { "name": "会议室管理", "path": "/meetingAdmin/HrmHyglRoomList", "doc": "fe-meeting", "flow": "visitor_meeting" },
+            { "name": "会议室申请", "path": "/meetingAdmin/HrmHyglBookingList", "doc": "fe-meeting", "flow": "visitor_meeting" }
+          ]
+        }
+      ]
+    },
+    { "key": "operations", "name": "运维管理", "path": "/newRO/newRO" },
+    {
+      "key": "online", "name": "在线开发",
+      "children": [
+        { "name": "Online表单开发", "path": "/online/cgform" },
+        { "name": "Online报表配置", "path": "/online/cgreport" },
+        { "name": "系统编码规则", "path": "/isystem/fillRule" },
+        { "name": "系统校验规则", "path": "/isystem/checkRule" },
+        { "name": "多数据源管理", "path": "/isystem/dataSource" }
+      ]
+    },
+    {
+      "key": "system", "name": "系统管理",
+      "children": [
+        { "name": "流程管理", "path": "/process", "doc": "fe-process" },
+        { "name": "系统变量", "path": "/resultMenu/sysVariableMenuList" },
+        { "name": "系统配置", "path": "/System/SysConfigTree" },
+        { "name": "数据资源", "path": "/layerManage/layerRole" },
+        { "name": "在线统计", "path": "/superQuery/index" },
+        { "name": "echarts模板配置", "path": "/echartsTemplate/echartsTempMenuList" },
+        { "name": "用户管理", "path": "/isystem/user" },
+        { "name": "角色管理", "path": "/isystem/roleUserList" },
+        { "name": "菜单管理", "path": "/isystem/newPermissionList" },
+        { "name": "菜单管理(老)", "path": "/isystem/permission" },
+        { "name": "租户管理", "path": "/isys/tenant" },
+        { "name": "部门管理", "path": "/isystem/depart" },
+        { "name": "职务管理", "path": "/isystem/position" },
+        { "name": "短信记录", "path": "/sms/ztSysSmsList" },
+        { "name": "我的部门", "path": "/isystem/departUserList" },
+        { "name": "通讯录", "path": "/isystem/addressList" },
+        { "name": "数据字典", "path": "/isystem/dict" },
+        { "name": "分类字典", "path": "/isys/category" },
+        { "name": "系统通告", "path": "/isystem/annountCement" }
+      ]
+    },
+    {
+      "key": "monitor", "name": "系统监控",
+      "children": [
+        { "name": "考勤实时计算监控", "path": "/attendance/realtime" },
+        { "name": "路由网关", "path": "/isystem/gatewayroute" },
+        { "name": "定时任务", "path": "/isystem/QuartzJobList" },
+        { "name": "日志管理", "path": "/isystem/log" },
+        { "name": "数据日志", "path": "/sys/dataLog-list" },
+        {
+          "name": "性能监控",
+          "children": [
+            { "name": "Redis监控", "path": "/monitor/redis/info" },
+            { "name": "Tomcat信息", "path": "/monitor/TomcatInfo" },
+            { "name": "服务器信息", "path": "/monitor/SystemInfo" },
+            { "name": "JVM信息", "path": "/monitor/JvmInfo" },
+            { "name": "请求追踪", "path": "/monitor/HttpTrace" },
+            { "name": "磁盘监控", "path": "/monitor/Disk" }
+          ]
+        },
+        { "name": "SQL监控", "path": "/dashboard/5f22d2592b01c9e964efe70040162b83" },
+        { "name": "在线文档", "path": "/dashboard/10b80437abc6eee8c3e3daabb5e9f59e" },
+        { "name": "在线用户", "path": "/isystem/online" }
+      ]
+    },
+    {
+      "key": "messages", "name": "消息中心",
+      "children": [
+        { "name": "消息管理", "path": "/modules/message/sysMessageList" },
+        { "name": "模板管理", "path": "/modules/message/sysMessageTemplateList" },
+        { "name": "我的消息", "path": "/isps/userAnnouncement" }
+      ]
+    }
+  ],
+  "menuFlows": {
+    "job": {
+      "title": "岗位管理业务流程",
+      "subtitle": "岗位信息维护为招聘计划和员工任职提供基础数据",
+      "functions": ["岗位信息维护", "岗位需求与编制承接", "招聘计划引用岗位", "员工档案关联岗位"],
+      "diagram": "flowchart TB\n    A[岗位信息维护] --> B[岗位职责 / 职级 / 编制]\n    B --> C[提交招聘或用人申请]\n    C --> D[招聘计划引用岗位]\n    D --> E[录用后写入员工任职信息]"
+    },
+    "operations": {
+      "title": "运维管理业务流程",
+      "subtitle": "提供平台运行入口与运维操作承接",
+      "functions": ["进入运维工作台", "处理运行维护事项", "联动系统监控与日志", "完成运维结果留痕"],
+      "diagram": "flowchart TB\n    A[运维人员进入管理入口] --> B[查看运行状态 / 待处理事项]\n    B --> C[执行运维操作]\n    C --> D[查看日志与监控反馈]\n    D --> E[记录处理结果]"
+    },
+    "online": {
+      "title": "在线开发业务流程",
+      "subtitle": "通过 Online 能力配置表单、报表和数据校验规则",
+      "functions": ["Online 表单开发", "Online 报表配置", "系统编码规则", "系统校验规则", "多数据源管理"],
+      "diagram": "flowchart TB\n    A[选择业务数据需求] --> B[Online 表单开发]\n    B --> C[配置编码与校验规则]\n    C --> D[Online 报表配置]\n    D --> E[绑定数据源并发布]\n    E --> F[业务菜单使用与持续调整]"
+    },
+    "system": {
+      "title": "系统管理业务流程",
+      "subtitle": "组织、角色、菜单、流程和字典共同形成平台权限基础",
+      "functions": ["组织、部门、职务与通讯录维护", "用户、角色、菜单与租户管理", "流程、系统变量和系统配置", "数据字典、分类字典和系统通告", "数据资源、在线统计和图表模板"],
+      "diagram": "flowchart TB\n    A[组织 / 部门 / 职务] --> B[用户与角色]\n    B --> C[菜单与数据权限]\n    C --> D[流程、变量与系统配置]\n    D --> E[字典 / 公告 / 数据资源]\n    E --> F[业务菜单权限生效]"
+    },
+    "monitor": {
+      "title": "系统监控业务流程",
+      "subtitle": "从实时计算、网关、任务、日志和性能指标定位平台运行问题",
+      "functions": ["考勤实时计算监控", "路由网关、定时任务与日志管理", "数据日志、SQL 监控和在线用户", "Redis、Tomcat、服务器、JVM、请求追踪和磁盘监控", "在线文档与运行诊断"],
+      "diagram": "flowchart TB\n    A[业务请求 / 定时任务 / 设备计算] --> B[网关与运行服务]\n    B --> C[实时计算与数据日志]\n    C --> D[性能、SQL 与在线用户监控]\n    D --> E{是否发现异常}\n    E -->|否| F[持续运行]\n    E -->|是| G[日志 / 请求 / JVM / Redis 诊断]\n    G --> H[处理并复核运行结果]"
+    },
+    "messages": {
+      "title": "消息中心业务流程",
+      "subtitle": "通过消息模板和消息记录完成平台通知触达",
+      "functions": ["消息管理", "消息模板管理", "我的消息查看", "通知发送与状态留痕"],
+      "diagram": "flowchart TB\n    A[业务事件或审批结果] --> B[选择消息模板]\n    B --> C[生成并发送消息]\n    C --> D[消息记录留痕]\n    D --> E[用户在我的消息查看]\n    E --> F[已读 / 未读状态跟踪]"
+    }
+  },
+  "businessFlows": {
+    "employee_lifecycle": {
+      "title": "员工全生命周期：招聘到离职",
+      "subtitle": "以同一个人为主线，串联招聘、入职、在职、考勤申请、人员变动和离职归档的信息流与业务流",
+      "moduleSlugs": ["fe-personnel", "fe-people", "fe-attendance-rule", "fe-employee-attendance", "fe-approval", "fe-dorm", "be-device"],
+      "functions": [
+        "人员身份演进：候选人 → 待入职 → 在职员工 → 离职归档",
+        "业务审批链：招聘计划、入职、转正、调动/调薪、日常申请和离职",
+        "主数据沉淀：员工档案、部门、岗位、合同、薪资和人员状态",
+        "业务回写：住宿门禁、设备账号、考勤结果、假期余额与补休记录",
+        "异常闭环：异常考勤申诉、补卡、核对、修正和重新核算"
+      ],
+      "diagram": "flowchart TB\n    subgraph B[招聘与录用]\n        B1[岗位需求 / 用人申请] --> B2[招聘计划审批]\n        B2 --> B3[简历筛选 / 面试评价]\n        B3 --> B4{录用决策}\n        B4 -->|通过| B5[Offer 与候选人确认]\n        B4 -->|不通过| B6[淘汰 / 黑名单归档]\n    end\n    subgraph I[入职与建档]\n        I1[入职申请] --> I2{部门 / 人事审批}\n        I2 -->|退回| I3[补充资料] --> I1\n        I2 -->|通过| I4[入职办理 / 资料补充]\n        I4 --> I5[员工档案、合同、部门、岗位]\n    end\n    subgraph W[在职与日常履职]\n        W1[试用跟踪 / 转正] --> W2[正式在职]\n        W2 --> W3[住宿与门禁]\n        W2 --> W4[规则、班次、设备同步]\n        W4 --> W5[打卡与考勤核算]\n        W5 --> W6{异常？}\n        W6 -->|是| W7[申诉 / 补卡 / 核对 / 修正] --> W5\n        W6 -->|否| W8[考勤汇总与报表]\n        W2 --> W9[请假 / 加班 / 外出 / 年假 / 调动 / 调薪]\n        W9 --> W10[统一审批后回写考勤、假期或档案]\n    end\n    subgraph O[离职与归档]\n        O1[离职申请与审批] --> O2[交接 / 退宿 / 回收门禁]\n        O2 --> O3[停用账号与设备权限]\n        O3 --> O4[人事、合同、考勤档案归档]\n    end\n    subgraph D[人员信息状态]\n        D1[(候选人)] --> D2[(员工主档)] --> D3[(在职状态 / 组织岗位 / 合同)] --> D4[(考勤、住宿、审批记录)] --> D5[(离职归档)]\n    end\n    B5 --> I1\n    I5 --> W1\n    W2 --> O1\n    B3 -. 候选人资料 .-> D1\n    I5 -. 建档 .-> D2\n    W2 -. 主数据生效 .-> D3\n    W5 -. 考勤结果 .-> D4\n    W10 -. 业务回写 .-> D4\n    O4 --> D5"
+    },
+    "recruit": {
+      "title": "招聘管理功能流程",
+      "subtitle": "从招聘需求到候选人确认入职，形成招聘闭环",
+      "moduleSlugs": ["fe-personnel"],
+      "functions": [
+        "招聘总览：招聘漏斗、部门招聘分布、招聘动态和进度统计",
+        "招聘计划：发起计划、审批计划、分配候选人和维护招聘人数",
+        "简历管理：简历导入、筛选、邀约、拒绝和淘汰归档",
+        "面试管理：安排面试、改期、面试评价、复试/终试和结果跟踪",
+        "Offer 与入职衔接：Offer 发起、候选人确认后转入入职办理"
+      ],
+      "diagram": "flowchart TB\n    A[招聘需求 / 岗位计划] --> B[提交招聘计划]\n    B --> C{计划审批}\n    C -->|退回| B\n    C -->|通过| D[发布招聘 / 候选人入库]\n    D --> E[简历筛选与分配计划]\n    E --> F[面试邀约]\n    F --> G[一面 / 复试 / 终试]\n    G --> H{面试结果}\n    H -->|淘汰| I[淘汰归档]\n    H -->|通过| J[发起 Offer]\n    J --> K{候选人确认}\n    K -->|拒绝| I\n    K -->|接受| L[转入入职办理]"
+    },
+    "onboarding": {
+      "title": "入职与员工建档功能流程",
+      "subtitle": "将录用候选人转化为可管理、可考勤、可授权的员工主数据",
+      "moduleSlugs": ["fe-personnel", "fe-people", "fe-workbench"],
+      "functions": [
+        "入职申请：承接招聘录用结果并填写入职信息",
+        "多级审批：部门负责人、人事及可选的总经理审批",
+        "资料补充：通过入职二维码补齐个人资料、证件和联系信息",
+        "员工建档：建立员工档案、部门、岗位、合同和组织关系",
+        "初始化：为住宿、考勤设备、账号和权限同步提供基础数据"
+      ],
+      "diagram": "flowchart TB\n    A[录用候选人] --> B[发起入职申请]\n    B --> C[部门负责人审批]\n    C --> D[人事审批]\n    D --> E{审批结果}\n    E -->|退回| F[补充 / 修改资料] --> B\n    E -->|通过| G[入职手续办理]\n    G --> H[入职二维码 / 资料补充]\n    H --> I[员工档案建立]\n    I --> J[合同、部门、岗位归档]\n    J --> K[同步住宿、考勤设备与账号权限]"
+    },
+    "lodging": {
+      "title": "住宿与门禁功能流程",
+      "subtitle": "员工入职后的住宿资源申请、分配、入住和门禁授权",
+      "moduleSlugs": ["fe-dorm"],
+      "functions": [
+        "住宿申请：支持入住、调宿、退宿三类申请",
+        "审批处理：状态筛选、多级审批、抄送和特殊情况办理",
+        "资源分配：区域、楼栋、房间、床位和室友关系管理",
+        "住宿看板：查看楼栋、楼层、房间和床位使用情况",
+        "门禁与检查：授权门禁卡、访问日志、宿舍检查和退宿归档"
+      ],
+      "diagram": "flowchart TB\n    A[员工发起住宿申请] --> B{申请类型}\n    B -->|入住| C[选择区域 / 楼栋 / 房间 / 床位]\n    B -->|调宿| D[选择原宿舍与目标宿舍]\n    B -->|退宿| E[提交退宿原因与照片]\n    C --> F[宿舍审批]\n    D --> F\n    E --> F\n    F --> G{审批结果}\n    G -->|退回| A\n    G -->|通过| H[办理入住 / 调宿 / 退宿]\n    H --> I[更新房间与室友关系]\n    I --> J[同步门禁权限]\n    J --> K[看板、检查与记录归档]"
+    },
+    "attendance_prepare": {
+      "title": "考勤准备功能流程",
+      "subtitle": "先配置规则和排班，再把员工与权限同步到打卡设备",
+      "moduleSlugs": ["fe-attendance-rule", "fe-shift", "be-device"],
+      "functions": [
+        "考勤规则：大小周、工作日、节假日、迟到早退和加班规则",
+        "班次排班：班次设置、排班计划、排班调整和导入导出",
+        "员工同步：向设备下发用户、照片、指纹和卡号",
+        "移动端准备：配置移动打卡、GPS 和照片打卡能力",
+        "设备状态：查看设备连接、同步队列、回执和异常状态"
+      ],
+      "diagram": "flowchart TB\n    A[员工档案与组织岗位] --> B[配置考勤规则]\n    B --> C[维护考勤日历]\n    C --> D[设置班次与排班]\n    A --> E[生成设备人员同步任务]\n    E --> F[下发用户 / 照片 / 指纹 / 卡号]\n    D --> G[考勤设备与移动端就绪]\n    F --> G\n    G --> H[进入打卡与考勤核算]"
+    },
+    "attendance": {
+      "title": "打卡与考勤核算功能流程",
+      "subtitle": "从设备或移动端产生记录，到匹配班次并形成考勤结果",
+      "moduleSlugs": ["fe-clockin", "fe-employee-attendance", "fe-attendance-rule", "be-device"],
+      "functions": [
+        "打卡采集：接收考勤机 PUSH、移动打卡和 GPS/照片记录",
+        "原始记录：保存打卡时间、设备、人员和来源信息",
+        "规则匹配：按照员工、日历、班次和排班匹配考勤规则",
+        "结果计算：生成出勤、迟到、早退、缺卡、旷工等结果",
+        "汇总查询：提供员工考勤、统计和报表导出"
+      ],
+      "diagram": "flowchart TB\n    A[考勤机 PUSH / 移动打卡] --> B[原始考勤记录]\n    B --> C[记录清洗与人员匹配]\n    C --> D[排班、班次与日历匹配]\n    D --> E[考勤规则计算]\n    E --> F{考勤结果}\n    F -->|正常| G[出勤结果汇总]\n    F -->|迟到 / 早退 / 缺卡 / 旷工| H[生成异常记录]\n    G --> I[员工考勤与报表]\n    H --> I"
+    },
+    "applications": {
+      "title": "请假、加班、补卡与外勤功能流程",
+      "subtitle": "统一从工作台发起申请，经审批后回写考勤、假期或补休数据",
+      "moduleSlugs": ["fe-workbench", "fe-approval", "fe-attendance-rule", "fe-compensatory"],
+      "functions": [
+        "申请入口：工作台提供请假、加班、补卡、外勤和移动打卡入口",
+        "表单校验：校验时间、时长、规则、附件和可用余额",
+        "审批流转：部门经理、HR 等节点逐级审批，支持退回修改",
+        "过程追踪：查看我的申请、待审批、已审批、审批日志和时间轴",
+        "结果回写：通过后回写考勤结果、假期余额、补卡记录或补休余额"
+      ],
+      "diagram": "flowchart TB\n    A[选择申请类型] --> B[填写表单 / 上传附件]\n    B --> C[规则与余额校验]\n    C --> D[提交审批]\n    D --> E[部门负责人审批]\n    E --> F[HR 审批]\n    F --> G{审批结果}\n    G -->|退回| H[修改并重新提交] --> D\n    G -->|通过| I[记录审批日志]\n    I --> J[回写考勤 / 假期 / 补休]\n    G -->|不通过| K[结束并保留记录]"
+    },
+    "review": {
+      "title": "异常考勤与核对功能流程",
+      "subtitle": "发现异常后进入申诉、核对、修正和重新核算闭环",
+      "moduleSlugs": ["fe-abnormal", "fe-attendance-check", "fe-employee-attendance", "fe-compensatory"],
+      "functions": [
+        "异常识别：识别迟到、早退、缺卡、旷工和规则匹配异常",
+        "员工申诉：提交说明、附件和补卡等佐证材料",
+        "管理员核对：批量核对、异常标记、查看原始记录和核对报告",
+        "修正处理：通过、驳回、补卡或调整考勤结果",
+        "重新核算：修正结果回写后重新计算并进入统计报表"
+      ],
+      "diagram": "flowchart TB\n    A[考勤核算结果] --> B{是否异常}\n    B -->|否| C[进入正常汇总]\n    B -->|是| D[异常考勤记录]\n    D --> E{处理方式}\n    E -->|员工申诉| F[提交说明 / 附件 / 补卡]\n    E -->|管理员核对| G[批量核对原始记录]\n    F --> H[审批与复核]\n    G --> H\n    H --> I{是否修正}\n    I -->|是| J[修正考勤结果]\n    I -->|否| K[保留异常记录]\n    J --> L[重新核算并生成报表]\n    C --> L\n    K --> L"
+    },
+    "offboarding": {
+      "title": "离职与权限回收功能流程",
+      "subtitle": "离职审批完成后联动交接、退宿、设备权限和档案归档",
+      "moduleSlugs": ["fe-personnel", "fe-people", "fe-dorm", "be-device"],
+      "functions": [
+        "离职申请与审批：提交原因、日期、交接信息并完成多级审批",
+        "离职办理：离职面谈、工作交接、物品交接和手续确认",
+        "住宿处理：发起退宿、回收房间和更新室友/床位状态",
+        "权限回收：停用账号、撤销门禁权限和设备人员信息",
+        "档案归档：保留人事、合同、考勤和审批记录"
+      ],
+      "diagram": "flowchart TB\n    A[发起离职申请] --> B[部门审批]\n    B --> C[人事审批]\n    C --> D{是否通过}\n    D -->|退回| A\n    D -->|通过| E[工作与物品交接]\n    E --> F[办理退宿]\n    F --> G[撤销门禁与考勤设备权限]\n    G --> H[停用系统账号]\n    H --> I[人事 / 合同 / 考勤档案归档]"
+    },
+    "visitor_meeting": {
+      "title": "访客与会议旁路功能流程",
+      "subtitle": "围绕园区协同的访客放行、会议预约和门禁联动",
+      "moduleSlugs": ["fe-visitor", "fe-meeting", "be-zt-main"],
+      "functions": [
+        "访客申请：登记访客、同行人、物品、来访时间和接待人",
+        "访客审批：接待确认、审批、二维码生成和 H5 自助登记",
+        "放行管理：生成放行条并联动门禁放行",
+        "会议预约：维护会议室、预约时段、冲突校验和会议状态",
+        "过程留痕：保留来访确认、放行和会议预约记录"
+      ],
+      "diagram": "flowchart TB\n    A[访客申请 / 会议预约] --> B{业务类型}\n    B -->|访客| C[接待人确认与访客审批]\n    C --> D[二维码 / 放行条]\n    D --> E[门禁放行与来访记录]\n    B -->|会议| F[会议室与时段冲突校验]\n    F --> G[预约确认 / 取消]\n    G --> H[会议状态与使用记录]"
+    }
+  },
+  "project": {
+    "pageTitle": "QR-HRM · 项目总览与业务流程",
+    "brandName": "QR-HRM",
+    "brandSub": "QR-HRM · 人力资源管理系统",
+    "heroTitle": "QR-HRM 人力资源管理系统",
+    "heroTitleExtra": "模块与业务流程",
+    "heroSub": "Vue 2.6 · Ant Design Vue 1.7 · JeecgBoot · Spring Boot 3",
+    "techBadges": "<span>Vue 2.6</span><span>Ant Design Vue</span><span>Vuex</span><span>Axios</span><span>Echarts</span><span>Spring Boot 3</span><span>MyBatis-Plus</span>",
+    "giteeHome": "https://gitee.com/playsea/qr-hrm",
+    "giteeRawPrefix": "https://gitee.com/playsea/qr-hrm/blob/master",
+    "indexBackendReadme": "../jeecg-boot/README.md",
+    "indexFrontendReadme": "src/views/README.md"
+  }
+}

@@ -1,0 +1,98 @@
+@import '~@assets/less/common.less';
+
+.probation-period-page {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 87vh;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.probation-period-status-filter {
+  position: relative;
+  margin-bottom: 10px;
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar {
+    margin: 0;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab {
+    border-radius: 10px 10px 0 0;
+    background: #4a7bf7;
+    color: #e6f7ff;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='probation']) {
+    background: #0082fc;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='rejected']) {
+    background: #f56c6c;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active {
+    background: #4a7bf7;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='probation']) {
+    background: #0082fc;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='rejected']) {
+    background: #f56c6c;
+  }
+}
+
+.pass-probation-toolbar {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}
+.pm-btn-primary {
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pm-btn-primary:hover,
+.pm-btn-primary:focus {
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  opacity: 0.92;
+}
+
+.status-count {
+  margin-left: 1px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.table-page-search-wrapper {
+  margin-bottom: 8px;
+
+  /deep/ .ant-form-item {
+    display: flex;
+    flex-direction: column;
+  }
+  /deep/ .ant-form-item-control-wrapper {
+    flex: 1;
+  }
+  /deep/ .ant-form-item-label {
+    text-align: left;
+    line-height: 1.5;
+  }
+  /deep/ .search-btn-col {
+    padding-top: 30px;
+  }
+  /deep/ .ant-select,
+  /deep/ .ant-cascader-picker,
+  /deep/ .ant-calendar-picker {
+    width: 100%;
+  }
+}
+

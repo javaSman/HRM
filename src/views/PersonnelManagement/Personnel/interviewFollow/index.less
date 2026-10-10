@@ -1,0 +1,129 @@
+@import '~@assets/less/common.less';
+
+.interview-follow-page {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 87vh;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.status-filter {
+  position: relative;
+  margin-bottom: 10px;
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar {
+    margin: 0;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab {
+    border-radius: 10px 10px 0 0;
+    background: #0082fc;
+    color: #e6f7ff;
+  }
+
+  // 跟进中 - 橙色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+
+  // 已完成 - 绿色
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab:has([data-status='done']) {
+    background: #67c23a;
+  }
+
+  // 激活状态样式
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active {
+    background: #0082fc;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='pending']) {
+    background: #e6a23c;
+  }
+
+  /deep/ .ant-tabs-card > .ant-tabs-bar .ant-tabs-tab-active:has([data-status='done']) {
+    background: #67c23a;
+  }
+}
+
+.status-count {
+  margin-left: 1px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.interview-follow-toolbar {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}
+
+.interview-follow-toolbar > * + * {
+  margin-left: 8px;
+}
+
+.table-page-search-wrapper {
+  margin-bottom: 8px;
+
+  /deep/ .ant-form-item {
+    display: flex;
+  }
+
+  /deep/ .ant-form-item-control-wrapper {
+    flex: 1;
+  }
+
+  /deep/ .ant-select,
+  /deep/ .ant-cascader-picker,
+  /deep/ .ant-calendar-picker {
+    width: 100%;
+  }
+}
+
+.table-page-search-submitButtons {
+  display: inline-block;
+  margin-bottom: 24px;
+  white-space: nowrap;
+}
+
+.pm-btn-primary {
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  box-shadow: 0 2px 10px rgba(45, 120, 255, 0.2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pm-btn-primary:hover,
+.pm-btn-primary:focus {
+  background: linear-gradient(135deg, #2d78ff 0%, #00b4d8 100%);
+  opacity: 0.92;
+}
+
+.pm-btn-reset {
+  height: 34px;
+  margin-left: 8px;
+  border-color: #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .interview-follow-toolbar {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .status-filter {
+    margin-bottom: 10px;
+  }
+}

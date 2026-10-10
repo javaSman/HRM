@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>异常考勤 - HRM考勤系统</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; }
+.tab-panel.active { display: block; }
+.modal-overlay { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display: flex; }
+.toast-container { position: fixed; top: 20px; right: 20px; z-index:2000; }
+.toast { padding: 12px 20px; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 8px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+</style>
+</head>
+<body>
+<div class="flex h-screen" id="app">
+<div class="flex-1 flex flex-col w-full">
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4"><h2 class="text-lg font-bold text-slate-800">异常考勤处理</h2><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理 6</span></div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><iconify-icon class="text-slate-400" icon="lucide:search"></iconify-icon><input class="bg-transparent outline-none w-40" placeholder="搜索员工..."/></div>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50"><iconify-icon class="text-slate-500" icon="lucide:bell"></iconify-icon></button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<!-- Stats Cards -->
+<div class="grid grid-cols-4 gap-6">
+<div class="bg-white p-5 rounded-xl border border-slate-200"><div class="flex items-center justify-between"><div><p class="text-xs text-slate-400">待处理异常</p><h3 class="text-2xl font-bold text-red-600 mt-1">6</h3><p class="text-[10px] text-red-500 mt-1">较昨日 +2</p></div><div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-xl"><iconify-icon icon="lucide:alert-triangle"></iconify-icon></div></div></div>
+<div class="bg-white p-5 rounded-xl border border-slate-200"><div class="flex items-center justify-between"><div><p class="text-xs text-slate-400">今日迟到</p><h3 class="text-2xl font-bold text-amber-600 mt-1">4</h3><p class="text-[10px] text-amber-500 mt-1">占比 2.6%</p></div><div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 text-xl"><iconify-icon icon="lucide:clock-arrow-up"></iconify-icon></div></div></div>
+<div class="bg-white p-5 rounded-xl border border-slate-200"><div class="flex items-center justify-between"><div><p class="text-xs text-slate-400">今日早退</p><h3 class="text-2xl font-bold text-orange-600 mt-1">1</h3><p class="text-[10px] text-orange-500 mt-1">占比 0.6%</p></div><div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 text-xl"><iconify-icon icon="lucide:clock-arrow-down"></iconify-icon></div></div></div>
+<div class="bg-white p-5 rounded-xl border border-slate-200"><div class="flex items-center justify-between"><div><p class="text-xs text-slate-400">今日缺卡</p><h3 class="text-2xl font-bold text-slate-800 mt-1">1</h3><p class="text-[10px] text-slate-500 mt-1">占比 0.6%</p></div><div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-xl"><iconify-icon icon="lucide:ban"></iconify-icon></div></div></div>
+</div>
+<!-- Anomaly Threshold Info -->
+<div class="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
+<iconify-icon class="text-amber-600 mt-0.5 shrink-0" icon="lucide:info"></iconify-icon>
+<div class="flex-1">
+<p class="text-sm font-bold text-amber-800">异常判定阈值</p>
+<div class="mt-2 flex flex-wrap gap-4 text-xs text-amber-700">
+<span>🕐 迟到阈值：超过上班时间 <strong>5分钟</strong> 计为迟到</span>
+<span>🕐 早退阈值：早于下班时间 <strong>15分钟</strong> 计为早退</span>
+<span>🕐 缺卡判定：上下班任一打卡缺失</span>
+<span>🕐 旷工判定：全天无打卡记录或未出勤</span>
+</div>
+</div>
+<button class="px-3 py-1.5 bg-white border border-amber-200 rounded-lg text-[10px] font-medium text-amber-700 hover:bg-amber-100 shrink-0" onclick="openThresholdConfig()">配置阈值</button>
+</div>
+<!-- Tabs -->
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+<div class="flex border-b border-slate-200 px-4">
+<button class="px-4 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600" onclick="switchTab('anomaly', 'all', this)">全部异常</button>
+<button class="px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="switchTab('anomaly', 'late', this)">迟到</button>
+<button class="px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="switchTab('anomaly', 'early', this)">早退</button>
+<button class="px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="switchTab('anomaly', 'miss', this)">缺卡</button>
+<button class="px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700" onclick="switchTab('anomaly', 'absent', this)">旷工</button>
+</div>
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+<tr>
+<th class="px-6 py-4 font-semibold">姓名</th>
+<th class="px-6 py-4 font-semibold">工号</th>
+<th class="px-6 py-4 font-semibold">部门</th>
+<th class="px-6 py-4 font-semibold">异常类型</th>
+<th class="px-6 py-4 font-semibold">发生时间</th>
+<th class="px-6 py-4 font-semibold">异常说明</th>
+<th class="px-6 py-4 font-semibold">状态</th>
+<th class="px-6 py-4 font-semibold">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">张三</td><td class="px-6 py-4 text-slate-500">EMP001</td><td class="px-6 py-4">技术部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">迟到</span></td><td class="px-6 py-4">2026-05-19 08:35</td><td class="px-6 py-4 text-slate-500">超过上班时间5分钟</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('张三','迟到','2026-05-19 08:35')">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">李四</td><td class="px-6 py-4 text-slate-500">EMP002</td><td class="px-6 py-4">产品部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">迟到</span></td><td class="px-6 py-4">2026-05-19 08:42</td><td class="px-6 py-4 text-slate-500">超过上班时间12分钟</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('李四','迟到','2026-05-19 08:42')">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">王五</td><td class="px-6 py-4 text-slate-500">EMP003</td><td class="px-6 py-4">市场部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">迟到</span></td><td class="px-6 py-4">2026-05-19 08:35</td><td class="px-6 py-4 text-slate-500">超过上班时间5分钟</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('王五','迟到','2026-05-19 08:35')">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">赵六</td><td class="px-6 py-4 text-slate-500">EMP004</td><td class="px-6 py-4">行政部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-[10px]">早退</span></td><td class="px-6 py-4">2026-05-19 16:45</td><td class="px-6 py-4 text-slate-500">早于下班时间15分钟</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('赵六','早退','2026-05-19 16:45')">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">钱七</td><td class="px-6 py-4 text-slate-500">EMP008</td><td class="px-6 py-4">技术部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">缺卡</span></td><td class="px-6 py-4">2026-05-19</td><td class="px-6 py-4 text-slate-500">下班打卡缺失</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('钱七','缺卡','2026-05-19')">处理</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-slate-800">孙八</td><td class="px-6 py-4 text-slate-500">EMP009</td><td class="px-6 py-4">仓储部</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px]">旷工</span></td><td class="px-6 py-4">2026-05-19</td><td class="px-6 py-4 text-slate-500">全天无打卡记录</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">未处理</span></td><td class="px-6 py-4"><button class="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="openAnomalyProcessModal('孙八','旷工','2026-05-19')">处理</button></td></tr>
+</tbody>
+</table>
+<div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+<p class="text-xs text-slate-500">共 6 条未处理异常</p>
+<div class="flex gap-1">
+<button class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400"><iconify-icon class="text-xs" icon="lucide:chevron-left"></iconify-icon></button>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-indigo-600 bg-indigo-600 text-white text-xs">1</button>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400"><iconify-icon class="text-xs" icon="lucide:chevron-right"></iconify-icon></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+<div class="bg-white rounded-2xl shadow-2xl w-full mx-4" id="modalContent">
+<div class="flex items-center justify-between p-6 pb-0">
+<h3 class="text-lg font-bold text-slate-800" id="modalTitle">弹窗标题</h3>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100" onclick="closeModal()"><iconify-icon class="text-slate-400" icon="lucide:x"></iconify-icon></button>
+</div>
+<div class="p-6" id="modalBody"></div>
+<div class="px-6 pb-6 flex justify-end gap-3" id="modalFooter"></div>
+</div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+function openModal(title, bodyHTML, footerHTML, sizeClass) {
+  document.getElementById('modalTitle').textContent = title || '弹窗标题';
+  document.getElementById('modalBody').innerHTML = bodyHTML || '';
+  var footer = document.getElementById('modalFooter');
+  footer.innerHTML = footerHTML || '<button onclick="closeModal()" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">关闭</button>';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalContent').className = 'bg-white rounded-2xl shadow-2xl w-full mx-4 ' + (sizeClass || 'max-w-lg');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+function showToast(message, type) {
+  type = type || 'info';
+  var container = document.getElementById('toastContainer');
+  var bgColors = { success: 'bg-green-600', warning: 'bg-amber-500', error: 'bg-red-500', info: 'bg-blue-600' };
+  var icons = { success: 'lucide:check-circle', warning: 'lucide:alert-triangle', error: 'lucide:x-circle', info: 'lucide:info' };
+  var toast = document.createElement('div');
+  toast.className = 'toast ' + (bgColors[type] || bgColors.info);
+  toast.innerHTML = '<iconify-icon icon="' + (icons[type] || icons.info) + '"></iconify-icon>' + message;
+  container.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
+function switchTab(scope, tab, btn) {
+  showToast('已切换至: ' + tab);
+}
+
+function openAnomalyProcessModal(name, type, time) {
+  openModal('异常处理 - ' + name,
+    '<div class="space-y-4"><div class="grid grid-cols-2 gap-3"><div class="space-y-1"><p class="text-xs text-slate-400">异常类型</p><p class="text-sm font-bold"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">' + type + '</span></p></div><div class="space-y-1"><p class="text-xs text-slate-400">发生时间</p><p class="text-sm font-bold text-slate-900">' + time + '</p></div></div><div class="space-y-1.5"><label class="text-xs font-semibold text-slate-500">处理方式</label><select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"><option>标记为正常 (人工豁免)</option><option>提交补卡申请</option><option>转为请假</option><option>记为旷工</option></select></div><div class="space-y-1.5"><label class="text-xs font-semibold text-slate-500">处理备注</label><textarea class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" rows="3" placeholder="请填写处理说明..."></textarea></div><div class="p-3 bg-blue-50 rounded-lg flex gap-2"><iconify-icon icon="lucide:info" class="text-blue-600 mt-0.5 shrink-0"></iconify-icon><p class="text-[10px] text-blue-700">选择"标记为正常"将记录豁免原因；选择"提交补卡申请"将跳转至补卡管理。</p></div></div>',
+    null, 'max-w-md');
+}
+
+function openThresholdConfig() {
+  openModal('异常判定阈值配置',
+    '<div class="space-y-4"><div class="flex items-center justify-between"><span class="text-sm text-slate-600">迟到阈值</span><div class="flex items-center gap-2"><input type="number" value="5" class="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center"><span class="text-sm text-slate-400">分钟</span></div></div><div class="flex items-center justify-between"><span class="text-sm text-slate-600">早退阈值</span><div class="flex items-center gap-2"><input type="number" value="15" class="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center"><span class="text-sm text-slate-400">分钟</span></div></div><div class="flex items-center justify-between"><span class="text-sm text-slate-600">缺卡判定</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label></div><div class="flex items-center justify-between"><span class="text-sm text-slate-600">旷工判定 (连续缺卡)</span><div class="flex items-center gap-2"><input type="number" value="1" class="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm text-center"><span class="text-sm text-slate-400">天</span></div></div><div class="pt-4 border-t border-slate-100"><button onclick="showToast(\'异常阈值已保存\',\'success\')" class="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">保存配置</button></div></div>',
+    null, 'max-w-sm');
+}
+</script>
+</body>
+</html>

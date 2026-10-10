@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>外勤出差 - HRM考勤系统</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; }
+.tab-panel.active { display: block; }
+.modal-overlay { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display: flex; }
+.toast-container { position: fixed; top: 20px; right: 20px; z-index:2000; }
+.toast { padding: 12px 20px; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); margin-bottom: 8px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+</style>
+</head>
+<body>
+<div class="flex flex-col h-screen" id="app">
+<div class="flex-1 flex flex-col">
+<header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4"><h2 class="text-lg font-bold text-slate-800">外勤出差管理</h2><span class="px-2 py-0.5 bg-blue-100 text-indigo-700 rounded text-sm">今日外勤 20人</span></div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-1" onclick="openApplyFieldWork()"><iconify-icon icon="lucide:plus"></iconify-icon>申请外勤</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50"><iconify-icon class="text-slate-500" icon="lucide:bell"></iconify-icon></button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<!-- Stats -->
+<div class="grid grid-cols-4 gap-6">
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-400">今日外勤</p><h3 class="text-2xl font-bold text-indigo-600 mt-1">20 <span class="text-sm font-normal text-slate-400">人</span></h3></div><div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-indigo-600 text-xl"><iconify-icon icon="lucide:map-pin"></iconify-icon></div></div></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-400">出差中</p><h3 class="text-2xl font-bold text-purple-600 mt-1">8 <span class="text-sm font-normal text-slate-400">人</span></h3><p class="text-sm text-purple-500 mt-1">跨城市 5 人</p></div><div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 text-xl"><iconify-icon icon="lucide:plane"></iconify-icon></div></div></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-400">待审批</p><h3 class="text-2xl font-bold text-amber-600 mt-1">4</h3></div><div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 text-xl"><iconify-icon icon="lucide:file-clock"></iconify-icon></div></div></div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-400">本月外勤次数</p><h3 class="text-2xl font-bold text-green-600 mt-1">86 <span class="text-sm font-normal text-slate-400">次</span></h3></div><div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 text-xl"><iconify-icon icon="lucide:trending-up"></iconify-icon></div></div></div>
+</div>
+<!-- Data Table -->
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<select class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"><option>全部类型</option><option>外勤</option><option>出差</option></select>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm"><iconify-icon class="text-slate-400" icon="lucide:search"></iconify-icon><input class="bg-transparent outline-none" placeholder="搜索..."/></div>
+</div>
+</div>
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+<tr><th class="px-6 py-4 font-semibold text-center">姓名</th><th class="px-6 py-4 font-semibold text-center">工号</th><th class="px-6 py-4 font-semibold text-center">类型</th><th class="px-6 py-4 font-semibold text-center">目的地</th><th class="px-6 py-4 font-semibold text-center">开始时间</th><th class="px-6 py-4 font-semibold text-center">结束时间</th><th class="px-6 py-4 font-semibold text-center">状态</th><th class="px-6 py-4 font-semibold text-center">操作</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-center">张三</td><td class="px-6 py-4 text-slate-500 text-center">EMP001</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-blue-100 text-indigo-700 rounded text-sm">外勤</span></td><td class="px-6 py-4 text-slate-600 text-center">北京总部</td><td class="px-6 py-4 text-slate-600 text-center">08:30</td><td class="px-6 py-4 text-slate-600 text-center">17:30</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-sm">已签到</span></td><td class="px-6 py-4 text-center"><button class="text-indigo-600 hover:underline text-sm" onclick="openFieldTrackModal('张三')">轨迹</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-center">李四</td><td class="px-6 py-4 text-slate-500 text-center">EMP002</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-sm">出差</span></td><td class="px-6 py-4 text-slate-600 text-center">上海</td><td class="px-6 py-4 text-slate-600 text-center">2026-05-18</td><td class="px-6 py-4 text-slate-600 text-center">2026-05-20</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-blue-100 text-indigo-700 rounded text-sm">进行中</span></td><td class="px-6 py-4 text-center"><button class="text-indigo-600 hover:underline text-sm" onclick="openFieldTrackModal('李四')">轨迹</button></td></tr>
+<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-medium text-center">王五</td><td class="px-6 py-4 text-slate-500 text-center">EMP003</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-blue-100 text-indigo-700 rounded text-sm">外勤</span></td><td class="px-6 py-4 text-slate-600 text-center">广州办事处</td><td class="px-6 py-4 text-slate-600 text-center">09:00</td><td class="px-6 py-4 text-slate-600 text-center">—</td><td class="px-6 py-4 text-center"><span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-sm">待签到</span></td><td class="px-6 py-4 text-center"><button class="text-indigo-600 hover:underline text-sm" onclick="openFieldTrackModal('王五')">轨迹</button></td></tr>
+</tbody>
+</table>
+<div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+<p class="text-sm text-slate-500">共 86 条外勤记录</p>
+<div class="flex gap-1">
+<button class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400"><iconify-icon class="text-sm" icon="lucide:chevron-left"></iconify-icon></button>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-indigo-600 bg-indigo-600 text-white text-sm">1</button>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-600 text-sm">2</button>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400"><iconify-icon class="text-sm" icon="lucide:chevron-right"></iconify-icon></button>
+</div>
+</div>
+</div>
+<!-- Field Location Management -->
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-sm font-bold text-slate-900 flex items-center gap-2"><iconify-icon class="text-indigo-600" icon="lucide:map-pinned"></iconify-icon> 外勤点管理</h4>
+<button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2" onclick="openAddFieldLocation()"><iconify-icon icon="lucide:plus"></iconify-icon> 新增外勤点</button>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-2">
+<div class="p-4 border border-slate-200 rounded-xl min-w-[200px] hover:border-indigo-300 cursor-pointer transition-colors"><div class="flex items-center gap-2"><iconify-icon class="text-indigo-600" icon="lucide:building"></iconify-icon><span class="font-bold text-slate-900">北京总部</span></div><p class="text-sm text-slate-400 mt-1">朝阳区建国路88号</p><p class="text-sm text-green-600 mt-2">🟢 今日外勤 12 人</p></div>
+<div class="p-4 border border-slate-200 rounded-xl min-w-[200px] hover:border-indigo-300 cursor-pointer transition-colors"><div class="flex items-center gap-2"><iconify-icon class="text-purple-600" icon="lucide:warehouse"></iconify-icon><span class="font-bold text-slate-900">上海仓库</span></div><p class="text-sm text-slate-400 mt-1">浦东新区张江路200号</p><p class="text-sm text-green-600 mt-2">🟢 今日外勤 8 人</p></div>
+<div class="p-4 border border-slate-200 rounded-xl min-w-[200px] hover:border-indigo-300 cursor-pointer transition-colors"><div class="flex items-center gap-2"><iconify-icon class="text-amber-600" icon="lucide:store"></iconify-icon><span class="font-bold text-slate-900">广州办事处</span></div><p class="text-sm text-slate-400 mt-1">天河区天河路385号</p><p class="text-sm text-amber-600 mt-2">🟡 今日外勤 0 人</p></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+<div class="bg-white rounded-2xl shadow-2xl w-full mx-4" id="modalContent">
+<div class="flex items-center justify-between p-6 pb-0"><h3 class="text-lg font-bold text-slate-800" id="modalTitle">弹窗标题</h3><button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100" onclick="closeModal()"><iconify-icon class="text-slate-400" icon="lucide:x"></iconify-icon></button></div>
+<div class="p-6" id="modalBody"></div>
+<div class="px-6 pb-6 flex justify-end gap-3" id="modalFooter"></div>
+</div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+function openModal(t,b,f,s){document.getElementById('modalTitle').textContent=t||'';document.getElementById('modalBody').innerHTML=b||'';var ft=document.getElementById('modalFooter');ft.innerHTML=f||'<button onclick="closeModal()" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">关闭</button>';document.getElementById('modalOverlay').classList.add('open');document.getElementById('modalContent').className='bg-white rounded-2xl shadow-2xl w-full mx-4 '+(s||'max-w-lg');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function showToast(m,t){t=t||'info';var c=document.getElementById('toastContainer');var b={success:'bg-green-600',warning:'bg-amber-500',error:'bg-red-500',info:'bg-indigo-600'};var i={success:'lucide:check-circle',warning:'lucide:alert-triangle',error:'lucide:x-circle',info:'lucide:info'};var d=document.createElement('div');d.className='toast '+(b[t]||b.info);d.innerHTML='<iconify-icon icon="'+(i[t]||i.info)+'"></iconify-icon>'+m;c.appendChild(d);setTimeout(function(){d.remove();},3000);}
+function openApplyFieldWork(){openModal('申请外勤','<div class="space-y-4"><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">外勤类型</label><select class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"><option>外勤</option><option>出差</option></select></div><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">目的地</label><input class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none" placeholder="请输入目的地"></div><div class="grid grid-cols-2 gap-3"><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">开始时间</label><input type="datetime-local" value="2026-05-19T09:00" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"></div><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">结束时间</label><input type="datetime-local" value="2026-05-19T17:00" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"></div></div><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">外勤事由</label><textarea class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" rows="3" placeholder="请填写外勤原因..."></textarea></div></div>','<button onclick="closeModal();showToast(\'外勤申请已提交\',\'success\')" class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">提交</button><button onclick="closeModal()" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600">取消</button>','max-w-md');}
+function openAddFieldLocation(){openModal('新增外勤点','<div class="space-y-3"><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">外勤点名称</label><input class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"/></div><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">详细地址</label><input class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"/></div><div class="space-y-1.5"><label class="text-sm font-semibold text-slate-500">定位坐标</label><div class="grid grid-cols-2 gap-3"><input placeholder="纬度" class="px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"/><input placeholder="经度" class="px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none"/></div></div></div>','<button onclick="closeModal();showToast(\'外勤点已添加\',\'success\')" class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">保存</button><button onclick="closeModal()" class="px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600">取消</button>','max-w-md');}
+function openFieldTrackModal(name){openModal(name+' - 外勤轨迹','<div class="space-y-4"><div class="p-4 bg-slate-50 rounded-lg"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-indigo-600 font-bold">'+name[0]+'</div><div><p class="font-bold text-slate-900">'+name+'</p><p class="text-sm text-slate-500">外勤人员</p></div></div></div><div class="space-y-3"><h4 class="text-sm font-semibold text-slate-500">今日签到记录</h4><div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-green-500"></div><div class="w-0.5 h-10 bg-green-200"></div></div><div><p class="text-sm font-bold text-slate-900">08:30</p><p class="text-sm text-slate-500">到达北京总部 - 朝阳区建国路88号</p></div></div><div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-green-500"></div><div class="w-0.5 h-10 bg-green-200"></div></div><div><p class="text-sm font-bold text-slate-900">10:15</p><p class="text-sm text-slate-500">拜访客户 - 海淀区中关村大街1号</p></div></div><div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-green-500"></div><div class="w-0.5 h-10 bg-green-200"></div></div><div><p class="text-sm font-bold text-slate-900">14:00</p><p class="text-sm text-slate-500">返回北京总部</p></div></div><div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-green-500"></div><div></div></div><div><p class="text-sm font-bold text-slate-900">17:30</p><p class="text-sm text-slate-500">签退 - 北京总部</p></div></div></div></div>',null,'max-w-md');}
+</script>
+</body>
+</html>

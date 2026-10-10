@@ -1,0 +1,43 @@
+.bp-detail-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.bp-detail-summary-item {
+  min-width: 112px;
+  text-align: center;
+}
+
+.bp-detail-summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bp-detail-summary-label {
+  margin-top: 4px;
+  color: #999;
+  font-size: 12px;
+}
+
+.bp-detail-section-title {
+  margin-bottom: 12px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .bp-detail-summary {
+    gap: 16px;
+  }
+
+  .bp-detail-summary-item {
+    flex: 1 1 120px;
+  }
+}
